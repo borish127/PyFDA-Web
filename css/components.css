@@ -600,3 +600,20 @@
 .w-full { width: 100%; }
 .mt-md { margin-top: var(--space-md); }
 .mb-md { margin-bottom: var(--space-md); }
+
+/* ---------- Mobile Enhancements ---------- */
+@media (max-width: 600px) {
+  .md-segmented {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .md-segmented::-webkit-scrollbar {
+    display: none;
+  }
+  .md-segmented__btn {
+    flex-shrink: 0;
+  }
+}

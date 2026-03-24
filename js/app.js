@@ -214,6 +214,10 @@ async function designFilter() {
     bus.emit('filterDesigned', AppState.filter);
     showToast(`${result.method} filter designed (order ${result.order})`, 'info');
 
+    if (window.innerWidth <= 900 && AppState.ui.sidebarOpen) {
+      toggleSidebar();
+    }
+
     // Update order field with the computed value
     const orderInput = document.getElementById('inp-order');
     if (orderInput) {
@@ -358,4 +362,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Tab change → run analysis
   bus.on('tabChanged', (tabName) => runAnalysis(tabName));
+
+  // Plotly robust resize listener
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      document.querySelectorAll('.plot-panel.active .js-plotly-plot').forEach(el => {
+        if (typeof Plotly !== 'undefined' && Plotly.Plots && Plotly.Plots.resize) {
+          Plotly.Plots.resize(el);
+        }
+      });
+    }, 250);
+  });
 });

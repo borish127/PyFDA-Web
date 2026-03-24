@@ -19,6 +19,7 @@ body {
   color: var(--md-sys-color-on-surface);
   line-height: 1.5;
   min-height: 100vh;
+  max-width: 100vw;
   overflow-x: hidden;
 }
 
@@ -32,7 +33,9 @@ body {
     "sidebar main";
   height: 100vh;
   max-height: 100vh;
-  overflow: hidden;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-y: hidden;
   transition: grid-template-columns var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
 }
 
@@ -357,6 +360,10 @@ body {
       "main";
   }
 
+  .top-bar__actions {
+    gap: var(--space-xs);
+  }
+
   .menu-toggle { display: flex; }
 
   .sidebar {
@@ -393,4 +400,41 @@ body {
   .top-bar { padding: 0 var(--space-md); }
   .top-bar__title { font-size: var(--md-sys-typescale-title-medium); }
   .plot-tab { padding: var(--space-sm) var(--space-md); font-size: var(--md-sys-typescale-label-medium); }
+}
+
+@media (max-width: 600px) {
+  #btn-import span, #btn-export span {
+    display: none;
+  }
+  .top-bar {
+    padding: 0 var(--space-xs);
+    gap: var(--space-xs);
+  }
+  .plot-container, .main-content {
+    width: 100%;
+    min-width: 0;
+    padding: 0;
+  }
+  .top-bar__title { 
+    display: none; 
+  }
+  .specs-group {
+    grid-template-columns: 1fr !important;
+  }
+  #card-specs .row {
+    flex-wrap: wrap;
+  }
+  #card-specs .row > * {
+    flex: 1 1 100% !important;
+  }
+  .plot-tabs {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .plot-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .plot-tab {
+    flex-shrink: 0;
+  }
 }

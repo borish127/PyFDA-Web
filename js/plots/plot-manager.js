@@ -63,6 +63,7 @@ const PlotManager = (() => {
       showlegend: false,
       autosize: true,
       hovermode: 'x unified',
+      dragmode: 'pan',
     }, extraLayout);
   }
 
