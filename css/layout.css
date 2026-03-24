@@ -1,0 +1,347 @@
+/* ============================================================
+   PyFDA Web — Layout System
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--md-sys-typescale-body-font);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ---------- App Shell ---------- */
+.app-shell {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  grid-template-rows: 64px 1fr;
+  grid-template-areas:
+    "topbar topbar"
+    "sidebar main";
+  min-height: 100vh;
+}
+
+/* ---------- Top App Bar ---------- */
+.top-bar {
+  grid-area: topbar;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 0 var(--space-lg);
+  background: var(--md-sys-color-surface-container);
+  box-shadow: var(--md-sys-elevation-2);
+  z-index: 100;
+  position: sticky;
+  top: 0;
+}
+
+.top-bar__title {
+  font-family: var(--md-sys-typescale-display-font);
+  font-size: var(--md-sys-typescale-title-large);
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  letter-spacing: 0.01em;
+}
+
+.top-bar__logo {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--md-sys-shape-corner-small);
+  background: var(--md-sys-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-sys-color-on-primary);
+  font-weight: 700;
+  font-size: 14px;
+  font-family: var(--md-sys-typescale-display-font);
+}
+
+.top-bar__spacer { flex: 1; }
+
+.top-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  grid-area: sidebar;
+  background: var(--md-sys-color-surface-container-low);
+  border-right: 1px solid var(--md-sys-color-outline-variant);
+  overflow-y: auto;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-full);
+}
+
+/* ---------- Main Content ---------- */
+.main-content {
+  grid-area: main;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------- Plot Area ---------- */
+.plot-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--md-sys-color-surface-container);
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  overflow-x: auto;
+  padding: 0 var(--space-md);
+  flex-shrink: 0;
+}
+
+.plot-tabs::-webkit-scrollbar { height: 0; }
+
+.plot-tab {
+  position: relative;
+  padding: var(--space-md) var(--space-lg);
+  font-family: var(--md-sys-typescale-body-font);
+  font-size: var(--md-sys-typescale-label-large);
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  border: none;
+  background: none;
+  white-space: nowrap;
+  transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  letter-spacing: 0.02em;
+}
+
+.plot-tab:hover {
+  color: var(--md-sys-color-on-surface);
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.plot-tab.active {
+  color: var(--md-sys-color-primary);
+}
+
+.plot-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: var(--space-md);
+  right: var(--space-md);
+  height: 3px;
+  background: var(--md-sys-color-primary);
+  border-radius: 3px 3px 0 0;
+}
+
+.plot-container {
+  flex: 1;
+  padding: var(--space-md);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.plot-panel {
+  flex: 1;
+  min-height: 400px;
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container-lowest);
+  box-shadow: var(--md-sys-elevation-1);
+  overflow: hidden;
+  display: none;
+}
+
+.plot-panel.active {
+  display: block;
+}
+
+/* ---------- Loading Overlay ---------- */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  background: var(--md-sys-color-surface);
+  transition: opacity var(--md-sys-motion-duration-long) var(--md-sys-motion-easing-standard);
+}
+
+.loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-overlay__icon {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  background: var(--md-sys-color-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.loading-overlay__icon svg {
+  width: 40px;
+  height: 40px;
+  fill: var(--md-sys-color-on-primary-container);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+.loading-overlay__text {
+  font-family: var(--md-sys-typescale-display-font);
+  font-size: var(--md-sys-typescale-headline-small);
+  color: var(--md-sys-color-on-surface);
+}
+
+.loading-overlay__status {
+  font-size: var(--md-sys-typescale-body-medium);
+  color: var(--md-sys-color-on-surface-variant);
+  min-height: 20px;
+}
+
+.loading-bar {
+  width: 240px;
+  height: 4px;
+  background: var(--md-sys-color-surface-container-highest);
+  border-radius: var(--md-sys-shape-corner-full);
+  overflow: hidden;
+}
+
+.loading-bar__fill {
+  height: 100%;
+  background: var(--md-sys-color-primary);
+  border-radius: var(--md-sys-shape-corner-full);
+  width: 0%;
+  transition: width var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+}
+
+/* ---------- Mobile Hamburger ---------- */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-sm);
+  border-radius: var(--md-sys-shape-corner-full);
+  color: var(--md-sys-color-on-surface);
+}
+
+.menu-toggle:hover {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.4);
+  z-index: 199;
+}
+
+/* ---------- Toast / Snackbar ---------- */
+.toast-container {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--md-sys-shape-corner-small);
+  box-shadow: var(--md-sys-elevation-3);
+  font-size: var(--md-sys-typescale-body-medium);
+  pointer-events: auto;
+  animation: toastIn 300ms var(--md-sys-motion-easing-standard);
+  max-width: 480px;
+}
+
+.toast.error { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "topbar"
+      "main";
+  }
+
+  .menu-toggle { display: flex; }
+
+  .sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: 320px;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
+    border-right: none;
+    box-shadow: var(--md-sys-elevation-4);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop.open {
+    display: block;
+  }
+
+  .plot-container {
+    padding: var(--space-sm);
+  }
+
+  .plot-panel {
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-bar { padding: 0 var(--space-md); }
+  .top-bar__title { font-size: var(--md-sys-typescale-title-medium); }
+  .plot-tab { padding: var(--space-sm) var(--space-md); font-size: var(--md-sys-typescale-label-medium); }
+}
