@@ -18,7 +18,7 @@ PyFDA Web is a completely static application. All computations run locally in yo
 **Option 1: Local Execution**
 1. Clone this repository to your local machine:
    ```bash
-   git clone [https://github.com/yourusername/pyfda-web.git](https://github.com/yourusername/pyfda-web.git)
+   git clone https://github.com/borish127/PyFDA-Web.git
    
 2. Open the index.html file directly in any modern web browser.
 
