@@ -28,10 +28,10 @@ const FileIO = (() => {
   function generateFilename() {
     const s = AppState.specs;
     const f = AppState.filter;
-    const method = s.designMethod || 'filter';
+    const resp = s.responseType || 'filter';
+    const method = s.designMethod || 'unknown';
     const order = f.order != null ? f.order : 'auto';
-    const freq = Math.round(s.fpb);
-    return `${method}_${order}-${freq}`;
+    return `pyfda_${resp}_${method}_order${order}`;
   }
 
   /* ---------- Export Modal ---------- */

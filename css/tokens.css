@@ -107,6 +107,7 @@
 
 /* ---------- Dark Theme ---------- */
 [data-theme="dark"] {
+  color-scheme: dark;
   --md-sys-color-primary:            #adc6ff;
   --md-sys-color-on-primary:         #072d6f;
   --md-sys-color-primary-container:  #1f4490;
@@ -148,6 +149,7 @@
 /* Auto dark via system preference */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
+    color-scheme: dark;
     --md-sys-color-primary:            #adc6ff;
     --md-sys-color-on-primary:         #072d6f;
     --md-sys-color-primary-container:  #1f4490;

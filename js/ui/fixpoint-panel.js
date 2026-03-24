@@ -12,6 +12,12 @@ const FixpointPanel = (() => {
       const on = toggle.checked;
       AppState.fixpoint.enabled = on;
       if (fields) fields.style.display = on ? '' : 'none';
+
+      // Clear fixpoint data and redraw plots when disabled
+      if (!on) {
+        AppState.fixpoint.result = null;
+        bus.emit('fixpointCleared');
+      }
     });
 
     // Bind inputs

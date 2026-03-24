@@ -9,6 +9,7 @@ const InputSpecs = (() => {
     bindSegmented('seg-response', (val) => {
       AppState.specs.responseType = val;
       updateFieldVisibility();
+      updateLabels();
     });
 
     bindSegmented('seg-family', (val) => {
@@ -24,10 +25,37 @@ const InputSpecs = (() => {
       updateFieldVisibility();
     });
 
+    let prevUnit = AppState.specs.freqUnit;
+
     // Frequency & amplitude unit selectors
     document.getElementById('sel-freq-unit')?.addEventListener('change', (e) => {
-      AppState.specs.freqUnit = e.target.value;
+      const newUnit = e.target.value;
+      if (prevUnit !== 'normalized' && newUnit === 'normalized') {
+        AppState.specs.fpb = 0.1;
+        AppState.specs.fsb = 0.2;
+        AppState.specs.fpb2 = 0.3;
+        AppState.specs.fsb2 = 0.4;
+      } else if (prevUnit === 'normalized' && newUnit !== 'normalized') {
+        AppState.specs.fpb = 1000;
+        AppState.specs.fsb = 5000;
+        AppState.specs.fpb2 = 8000;
+        AppState.specs.fsb2 = 12000;
+      }
+      
+      const elFpb = document.getElementById('inp-fpb');
+      const elFsb = document.getElementById('inp-fsb');
+      const elFpb2 = document.getElementById('inp-fpb2');
+      const elFsb2 = document.getElementById('inp-fsb2');
+      
+      if (elFpb) elFpb.value = AppState.specs.fpb;
+      if (elFsb) elFsb.value = AppState.specs.fsb;
+      if (elFpb2) elFpb2.value = AppState.specs.fpb2;
+      if (elFsb2) elFsb2.value = AppState.specs.fsb2;
+
+      AppState.specs.freqUnit = newUnit;
+      prevUnit = newUnit;
       updateLabels();
+      updateFieldVisibility();
     });
 
     document.getElementById('sel-amp-unit')?.addEventListener('change', (e) => {
@@ -88,6 +116,7 @@ const InputSpecs = (() => {
       }
     });
 
+    updateMethodOptions();
     updateFieldVisibility();
     updateLabels();
   }
@@ -144,6 +173,9 @@ const InputSpecs = (() => {
     const isAllpass = (rt === 'allpass');
     const isFIR = AppState.specs.filterFamily === 'fir';
 
+    // Reorder DOM fields based on frequency mathematical rules
+    updateFieldOrder();
+
     // Band edges
     show('field-fpb', !isAllpass);
     show('field-fsb', !isAllpass);
@@ -160,14 +192,67 @@ const InputSpecs = (() => {
     show('field-window', dm === 'firwin' || dm === 'firwin2');
 
     // Freq unit toggle for normalized
-    show('field-fs', AppState.specs.freqUnit === 'hz');
+    show('field-fs', AppState.specs.freqUnit !== 'normalized');
+  }
+
+  /* Dynamically reorder frequency specifications chronologically */
+  function updateFieldOrder() {
+    const rt = AppState.specs.responseType;
+    let order = [];
+    
+    // Determine exact physical array order mathematically
+    if (rt === 'lowpass') order = ['field-fpb', 'field-fsb'];
+    else if (rt === 'highpass') order = ['field-fsb', 'field-fpb'];
+    else if (rt === 'bandpass') order = ['field-fsb', 'field-fpb', 'field-fpb2', 'field-fsb2'];
+    else if (rt === 'bandstop') order = ['field-fpb', 'field-fsb', 'field-fsb2', 'field-fpb2'];
+    else return; // Allpass has no edges
+
+    // Reorder by inserting each element right before the apb (Ripple) container
+    const refNode = document.getElementById('field-apb');
+    const parent = refNode ? refNode.parentNode : null;
+    if (!parent) return;
+
+    order.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        parent.insertBefore(el, refNode);
+      }
+    });
+  }
+
+  /* Get the multiplier to convert display units to Hz */
+  function getFreqMultiplier() {
+    const u = AppState.specs.freqUnit;
+    if (u === 'khz')  return 1e3;
+    if (u === 'mhz')  return 1e6;
+    if (u === 'ghz')  return 1e9;
+    return 1; // Hz
   }
 
   /* Update field labels based on units */
   function updateLabels() {
-    const fUnit = AppState.specs.freqUnit === 'hz' ? '(Hz)' : '(normalized)';
-    setLabel('lbl-fpb', `Passband Edge ${fUnit}`);
-    setLabel('lbl-fsb', `Stopband Edge ${fUnit}`);
+    const u = AppState.specs.freqUnit;
+    let fUnit = '(Hz)';
+    if (u === 'khz') fUnit = '(kHz)';
+    else if (u === 'mhz') fUnit = '(MHz)';
+    else if (u === 'ghz') fUnit = '(GHz)';
+    else if (u === 'normalized') fUnit = '(normalized)';
+
+    const isTwoSided = (AppState.specs.responseType === 'bandpass' || AppState.specs.responseType === 'bandstop');
+
+    setLabel('lbl-fs', `Sampling Freq ${fUnit}`);
+
+    if (isTwoSided) {
+        setLabel('lbl-fpb', `Passband Edge 1 ${fUnit}`);
+        setLabel('lbl-fsb', `Stopband Edge 1 ${fUnit}`);
+        setLabel('lbl-fpb2', `Passband Edge 2 ${fUnit}`);
+        setLabel('lbl-fsb2', `Stopband Edge 2 ${fUnit}`);
+    } else {
+        setLabel('lbl-fpb', `Passband Edge ${fUnit}`);
+        setLabel('lbl-fsb', `Stopband Edge ${fUnit}`);
+        setLabel('lbl-fpb2', `Passband Edge 2 ${fUnit}`);
+        setLabel('lbl-fsb2', `Stopband Edge 2 ${fUnit}`);
+    }
 
     const aUnit = AppState.specs.ampUnit === 'db' ? '(dB)' : AppState.specs.ampUnit === 'linear' ? '(V/V)' : '(W/W)';
     setLabel('lbl-apb', `Passband Ripple ${aUnit}`);
@@ -236,5 +321,5 @@ const InputSpecs = (() => {
     if (el) el.textContent = text;
   }
 
-  return { init };
+  return { init, getFreqMultiplier };
 })();

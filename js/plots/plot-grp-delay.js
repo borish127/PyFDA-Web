@@ -8,19 +8,32 @@
 
   function renderGroupDelay(data) {
     const c = PlotManager.getThemeColors();
+    const isNorm = AppState.specs.freqUnit === 'normalized';
+    let fMul = 1; let fLabel = 'Hz';
+    if (!isNorm) {
+      const u = AppState.specs.freqUnit;
+      if (u === 'khz') { fMul = 1e-3; fLabel = 'kHz'; }
+      else if (u === 'mhz') { fMul = 1e-6; fLabel = 'MHz'; }
+      else if (u === 'ghz') { fMul = 1e-9; fLabel = 'GHz'; }
+    } else {
+      fLabel = 'Normalized';
+    }
+
+    let freqX = isNorm ? data.freq.map(f => f / AppState.specs.fs) : data.freq.map(f => f * fMul);
+
     const traces = [{
-      x: data.freq,
+      x: freqX,
       y: data.group_delay,
       type: 'scatter',
       mode: 'lines',
       name: 'τg (samples)',
       line: { color: c.primary, width: 2.5 },
-      hovertemplate: '%{x:.1f} Hz<br>τg = %{y:.4f} samples<extra></extra>',
+      hovertemplate: `%{x:.4g} ${fLabel}<br>τg = %{y:.4f} samples<extra></extra>`,
     }];
 
     const layout = PlotManager.baseLayout(
       'Group Delay τg(f)',
-      'Frequency (Hz)',
+      `Frequency (${fLabel})`,
       'Group Delay (samples)',
       {
         showlegend: true,
@@ -33,19 +46,32 @@
 
   function renderPhaseDelay(data) {
     const c = PlotManager.getThemeColors();
+    const isNorm = AppState.specs.freqUnit === 'normalized';
+    let fMul = 1; let fLabel = 'Hz';
+    if (!isNorm) {
+      const u = AppState.specs.freqUnit;
+      if (u === 'khz') { fMul = 1e-3; fLabel = 'kHz'; }
+      else if (u === 'mhz') { fMul = 1e-6; fLabel = 'MHz'; }
+      else if (u === 'ghz') { fMul = 1e-9; fLabel = 'GHz'; }
+    } else {
+      fLabel = 'Normalized';
+    }
+
+    let freqX = isNorm ? data.freq.map(f => f / AppState.specs.fs) : data.freq.map(f => f * fMul);
+
     const traces = [{
-      x: data.freq,
+      x: freqX,
       y: data.phase_delay,
       type: 'scatter',
       mode: 'lines',
       name: 'Phase Delay (samples)',
       line: { color: c.tertiary, width: 2.5 },
-      hovertemplate: '%{x:.1f} Hz<br>PD = %{y:.4f} samples<extra></extra>',
+      hovertemplate: `%{x:.4g} ${fLabel}<br>PD = %{y:.4f} samples<extra></extra>`,
     }];
 
     const layout = PlotManager.baseLayout(
       'Phase Delay',
-      'Frequency (Hz)',
+      `Frequency (${fLabel})`,
       'Phase Delay (samples)',
       {
         showlegend: true,

@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PyFDA Web — Filter Design &amp; Analysis</title>
-  <meta name="description" content="Python Filter Design Analysis Tool — Design, analyze, and simulate digital IIR/FIR filters entirely in your browser.">
+  <meta name="description"
+    content="Python Filter Design Analysis Tool — Design, analyze, and simulate digital IIR/FIR filters entirely in your browser.">
   <meta name="theme-color" content="#3a5ba9">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap"
+    rel="stylesheet">
 
   <!-- Plotly.js -->
   <script src="https://cdn.plot.ly/plotly-2.27.0.min.js" defer></script>
@@ -21,428 +25,537 @@
   <link rel="stylesheet" href="css/components.css">
 
   <!-- Favicon (inline SVG) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%233a5ba9' rx='20' width='100' height='100'/><text x='50' y='68' font-size='48' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Fψ</text></svg>">
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%233a5ba9' rx='20' width='100' height='100'/><text x='50' y='68' font-size='48' font-weight='bold' fill='white' text-anchor='middle' font-family='sans-serif'>Fψ</text></svg>">
 </head>
+
 <body>
 
-<!-- ================= Loading Overlay ================= -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-overlay__icon">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
+  <!-- ================= Loading Overlay ================= -->
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-overlay__logo">F&psi;</div>
+    <div class="loading-overlay__text">PyFDA Web</div>
+    <div class="loading-bar">
+      <div class="loading-bar__fill" id="loading-bar-fill"></div>
+    </div>
+    <div class="loading-overlay__status" id="loading-status">Initializing…</div>
   </div>
-  <div class="loading-overlay__text">PyFDA Web</div>
-  <div class="loading-bar">
-    <div class="loading-bar__fill" id="loading-bar-fill"></div>
-  </div>
-  <div class="loading-overlay__status" id="loading-status">Initializing…</div>
-</div>
 
-<!-- ================= App Shell ================= -->
-<div class="app-shell">
+  <!-- ================= App Shell ================= -->
+  <div class="app-shell">
 
-  <!-- ---- Top App Bar ---- -->
-  <header class="top-bar">
-    <button class="menu-toggle md-btn--icon" id="btn-menu" aria-label="Toggle sidebar">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-    </button>
-    <div class="top-bar__logo">Fψ</div>
-    <span class="top-bar__title">PyFDA Web</span>
-    <div class="top-bar__spacer"></div>
-    <div class="top-bar__actions">
-      <button class="md-btn md-btn--outlined" id="btn-import" aria-label="Import filter">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <span>Import</span>
+    <!-- ---- Top App Bar ---- -->
+    <header class="top-bar">
+      <button class="menu-toggle md-btn--icon" id="btn-menu" aria-label="Toggle sidebar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
       </button>
-      <button class="md-btn md-btn--outlined" id="btn-export" aria-label="Export filter">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        <span>Export</span>
-      </button>
-      <button class="md-btn--icon" id="btn-theme" data-tooltip="Toggle Theme" aria-label="Toggle theme">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- ---- Mobile Backdrop ---- -->
-  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
-
-  <!-- ---- Sidebar ---- -->
-  <aside class="sidebar" id="sidebar">
-
-    <!-- Response Type -->
-    <div class="md-card">
-      <div class="md-card__title">
-        <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
-        Response Type
-        <span class="top-bar__spacer"></span>
-        <span id="lbl-response-text" style="font-family:var(--md-sys-typescale-body-font); font-size:var(--md-sys-typescale-body-medium); font-weight:500; color:var(--md-sys-color-primary); letter-spacing:0.02em;">Lowpass</span>
+      <div class="top-bar__logo">Fψ</div>
+      <span class="top-bar__title">PyFDA Web</span>
+      <div class="top-bar__spacer"></div>
+      <div class="top-bar__actions">
+        <button class="md-btn md-btn--outlined" id="btn-import" aria-label="Import filter">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="17 8 12 3 7 8" />
+            <line x1="12" y1="3" x2="12" y2="15" />
+          </svg>
+          <span>Import</span>
+        </button>
+        <button class="md-btn md-btn--outlined" id="btn-export" aria-label="Export filter">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          <span>Export</span>
+        </button>
+        <button class="md-btn--icon" id="btn-theme" data-tooltip="Toggle Theme" aria-label="Toggle theme">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+          </svg>
+        </button>
       </div>
-      <div class="md-segmented" id="seg-response">
-        <button class="md-segmented__btn active" data-value="lowpass">LP</button>
-        <button class="md-segmented__btn" data-value="highpass">HP</button>
-        <button class="md-segmented__btn" data-value="bandpass">BP</button>
-        <button class="md-segmented__btn" data-value="bandstop">BS</button>
-        <button class="md-segmented__btn" data-value="allpass">AP</button>
-      </div>
-    </div>
+    </header>
 
-    <!-- Filter Family + Method -->
-    <div class="md-card">
-      <div class="md-card__title">
-        <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-        Filter Design
-      </div>
-      <div class="md-segmented mb-md" id="seg-family">
-        <button class="md-segmented__btn active" data-value="iir">IIR</button>
-        <button class="md-segmented__btn" data-value="fir">FIR</button>
-      </div>
-      <div class="md-select">
-        <select class="md-select__input" id="sel-method">
-          <!-- IIR methods -->
-          <optgroup label="IIR Methods" id="optgroup-iir">
-            <option value="butter">Butterworth</option>
-            <option value="cheby1">Chebyshev Type I</option>
-            <option value="cheby2">Chebyshev Type II</option>
-            <option value="ellip">Elliptic (Cauer)</option>
-            <option value="bessel">Bessel / Thomson</option>
-          </optgroup>
-          <!-- FIR methods -->
-          <optgroup label="FIR Methods" id="optgroup-fir">
-            <option value="firwin">Windowed (firwin)</option>
-            <option value="firwin2">Arbitrary Shape (firwin2)</option>
-            <option value="remez">Equiripple (Remez)</option>
-            <option value="firls">Least-Squares (firls)</option>
-            <option value="mavg">Moving Average</option>
-          </optgroup>
-        </select>
-        <label class="md-select__label">Design Method</label>
-      </div>
-    </div>
+    <!-- ---- Mobile Backdrop ---- -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
 
-    <!-- Specifications -->
-    <div class="md-card" id="card-specs">
-      <div class="md-card__title">
-        <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H5V5h7v12zm2-6h5v2h-5v-2zm0 4h5v2h-5v-2zm0-8h5v2h-5V7z"/></svg>
-        Specifications
+    <!-- ---- Sidebar ---- -->
+    <aside class="sidebar" id="sidebar">
+
+      <!-- Response Type -->
+      <div class="md-card">
+        <div class="md-card__title">
+          <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z" />
+          </svg>
+          Response Type
+          <span class="top-bar__spacer"></span>
+          <span id="lbl-response-text"
+            style="font-family:var(--md-sys-typescale-body-font); font-size:var(--md-sys-typescale-body-medium); font-weight:500; color:var(--md-sys-color-primary); letter-spacing:0.02em;">Lowpass</span>
+        </div>
+        <div class="md-segmented" id="seg-response">
+          <button class="md-segmented__btn active" data-value="lowpass">LP</button>
+          <button class="md-segmented__btn" data-value="highpass">HP</button>
+          <button class="md-segmented__btn" data-value="bandpass">BP</button>
+          <button class="md-segmented__btn" data-value="bandstop">BS</button>
+          <button class="md-segmented__btn" data-value="allpass">AP</button>
+        </div>
       </div>
 
-      <!-- Units -->
-      <div class="row mb-md" style="gap: var(--space-md);">
-        <div class="md-select" style="flex:1">
-          <select class="md-select__input" id="sel-freq-unit">
-            <option value="hz">Hz</option>
-            <option value="normalized">Normalized (0–1)</option>
+      <!-- Filter Family + Method -->
+      <div class="md-card">
+        <div class="md-card__title">
+          <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+          </svg>
+          Filter Design
+        </div>
+        <div class="md-segmented mb-md" id="seg-family">
+          <button class="md-segmented__btn active" data-value="iir">IIR</button>
+          <button class="md-segmented__btn" data-value="fir">FIR</button>
+        </div>
+        <div class="md-select">
+          <select class="md-select__input" id="sel-method">
+            <!-- IIR methods -->
+            <optgroup label="IIR Methods" id="optgroup-iir">
+              <option value="butter">Butterworth</option>
+              <option value="cheby1">Chebyshev Type I</option>
+              <option value="cheby2">Chebyshev Type II</option>
+              <option value="ellip">Elliptic (Cauer)</option>
+              <option value="bessel">Bessel / Thomson</option>
+            </optgroup>
+            <!-- FIR methods -->
+            <optgroup label="FIR Methods" id="optgroup-fir">
+              <option value="firwin">Windowed (firwin)</option>
+              <option value="firwin2">Arbitrary Shape (firwin2)</option>
+              <option value="remez">Equiripple (Remez)</option>
+              <option value="firls">Least-Squares (firls)</option>
+              <option value="mavg">Moving Average</option>
+            </optgroup>
           </select>
-          <label class="md-select__label">Frequency Unit</label>
+          <label class="md-select__label">Design Method</label>
         </div>
-        <div class="md-select" style="flex:1">
-          <select class="md-select__input" id="sel-amp-unit">
-            <option value="db">dB</option>
-            <option value="linear">Linear (V/V)</option>
-            <option value="power">Power (W/W)</option>
+      </div>
+
+      <!-- Specifications -->
+      <div class="md-card" id="card-specs">
+        <div class="md-card__title">
+          <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H5V5h7v12zm2-6h5v2h-5v-2zm0 4h5v2h-5v-2zm0-8h5v2h-5V7z" />
+          </svg>
+          Specifications
+        </div>
+
+        <!-- Units -->
+        <div class="row mb-md" style="gap: var(--space-md);">
+          <div class="md-select" style="flex:1">
+            <select class="md-select__input" id="sel-freq-unit">
+              <option value="hz">Hz</option>
+              <option value="khz">kHz</option>
+              <option value="mhz">MHz</option>
+              <option value="ghz">GHz</option>
+              <option value="normalized">F_s</option>
+            </select>
+            <label class="md-select__label">Frequency Unit</label>
+          </div>
+          <div class="md-select" style="flex:1">
+            <select class="md-select__input" id="sel-amp-unit">
+              <option value="db">dB</option>
+              <option value="linear">Linear (V/V)</option>
+              <option value="power">Power (W/W)</option>
+            </select>
+            <label class="md-select__label">Amplitude Unit</label>
+          </div>
+        </div>
+
+        <!-- Sampling Frequency -->
+        <div class="md-field" id="field-fs">
+          <input class="md-field__input" type="number" id="inp-fs" value="48000" min="1" step="any">
+          <label class="md-field__label" id="lbl-fs">Sampling Freq (Hz)</label>
+        </div>
+
+        <!-- Stopband Edge 1 -->
+        <div class="md-field" id="field-fsb">
+          <input class="md-field__input" type="number" id="inp-fsb" value="5000" min="0" step="any">
+          <label class="md-field__label" id="lbl-fsb">Stopband Edge (Hz)</label>
+        </div>
+
+        <!-- Passband Edge 1 -->
+        <div class="md-field" id="field-fpb">
+          <input class="md-field__input" type="number" id="inp-fpb" value="1000" min="0" step="any">
+          <label class="md-field__label" id="lbl-fpb">Passband Edge (Hz)</label>
+        </div>
+
+        <!-- Passband Edge 2 -->
+        <div class="md-field" id="field-fpb2" style="display:none">
+          <input class="md-field__input" type="number" id="inp-fpb2" value="8000" min="0" step="any">
+          <label class="md-field__label" id="lbl-fpb2">Passband Edge 2 (Hz)</label>
+        </div>
+
+        <!-- Stopband Edge 2 -->
+        <div class="md-field" id="field-fsb2" style="display:none">
+          <input class="md-field__input" type="number" id="inp-fsb2" value="12000" min="0" step="any">
+          <label class="md-field__label" id="lbl-fsb2">Stopband Edge 2 (Hz)</label>
+        </div>
+
+        <!-- Passband Ripple -->
+        <div class="md-field" id="field-apb">
+          <input class="md-field__input" type="number" id="inp-apb" value="1" min="0" step="any">
+          <label class="md-field__label" id="lbl-apb">Passband Ripple (dB)</label>
+        </div>
+
+        <!-- Stopband Attenuation -->
+        <div class="md-field" id="field-asb">
+          <input class="md-field__input" type="number" id="inp-asb" value="60" min="0" step="any">
+          <label class="md-field__label" id="lbl-asb">Stopband Atten. (dB)</label>
+        </div>
+
+        <!-- Filter Order -->
+        <div class="row" style="gap:var(--space-md); align-items: flex-end;">
+          <div class="md-field" style="flex:1">
+            <input class="md-field__input" type="number" id="inp-order" placeholder="Auto" min="1" step="1" disabled>
+            <label class="md-field__label">Filter Order</label>
+          </div>
+          <label class="md-checkbox" style="padding-bottom: 12px;">
+            <input type="checkbox" id="chk-auto-order" checked>
+            <span class="md-checkbox__box">
+              <svg viewBox="0 0 16 16">
+                <polyline points="3 8 7 12 13 4" />
+              </svg>
+            </span>
+            Auto
+          </label>
+        </div>
+
+        <!-- Window (for firwin) -->
+        <div class="md-select" id="field-window" style="display:none; margin-top: var(--space-sm);">
+          <select class="md-select__input" id="sel-window">
+            <option value="hamming">Hamming</option>
+            <option value="hann">Hann</option>
+            <option value="blackman">Blackman</option>
+            <option value="bartlett">Bartlett</option>
+            <option value="kaiser">Kaiser (β=8)</option>
+            <option value="rectangular">Rectangular (Boxcar)</option>
+            <option value="flattop">Flat Top</option>
+            <option value="bohman">Bohman</option>
+            <option value="parzen">Parzen</option>
+            <option value="nuttall">Nuttall</option>
+            <option value="blackmanharris">Blackman-Harris</option>
+            <option value="cosine">Cosine</option>
+            <option value="exponential">Exponential</option>
+            <option value="tukey">Tukey (α=0.5)</option>
+            <option value="taylor">Taylor</option>
+            <option value="lanczos">Lanczos</option>
+            <option value="barthann">Barthann</option>
+            <option value="gaussian">Gaussian (σ=7)</option>
+            <option value="general_gaussian">Gen. Gaussian</option>
+            <option value="dpss">DPSS (Slepian)</option>
+            <option value="chebwin">Chebyshev Window</option>
           </select>
-          <label class="md-select__label">Amplitude Unit</label>
+          <label class="md-select__label">Window Type</label>
         </div>
       </div>
 
-      <!-- Sampling Frequency -->
-      <div class="md-field" id="field-fs">
-        <input class="md-field__input" type="number" id="inp-fs" value="48000" min="1" step="any">
-        <label class="md-field__label">Sampling Freq (Hz)</label>
-      </div>
+      <!-- Design Button -->
+      <button class="md-fab" id="btn-design">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>
+        Design Filter
+      </button>
 
-      <!-- Passband Edge(s) -->
-      <div class="md-field" id="field-fpb">
-        <input class="md-field__input" type="number" id="inp-fpb" value="1000" min="0" step="any">
-        <label class="md-field__label" id="lbl-fpb">Passband Edge (Hz)</label>
-      </div>
+      <hr class="md-divider">
 
-      <div class="md-field" id="field-fpb2" style="display:none">
-        <input class="md-field__input" type="number" id="inp-fpb2" value="8000" min="0" step="any">
-        <label class="md-field__label">Passband Edge 2 (Hz)</label>
-      </div>
-
-      <!-- Stopband Edge(s) -->
-      <div class="md-field" id="field-fsb">
-        <input class="md-field__input" type="number" id="inp-fsb" value="5000" min="0" step="any">
-        <label class="md-field__label" id="lbl-fsb">Stopband Edge (Hz)</label>
-      </div>
-
-      <div class="md-field" id="field-fsb2" style="display:none">
-        <input class="md-field__input" type="number" id="inp-fsb2" value="12000" min="0" step="any">
-        <label class="md-field__label">Stopband Edge 2 (Hz)</label>
-      </div>
-
-      <!-- Passband Ripple -->
-      <div class="md-field" id="field-apb">
-        <input class="md-field__input" type="number" id="inp-apb" value="1" min="0" step="any">
-        <label class="md-field__label" id="lbl-apb">Passband Ripple (dB)</label>
-      </div>
-
-      <!-- Stopband Attenuation -->
-      <div class="md-field" id="field-asb">
-        <input class="md-field__input" type="number" id="inp-asb" value="60" min="0" step="any">
-        <label class="md-field__label" id="lbl-asb">Stopband Atten. (dB)</label>
-      </div>
-
-      <!-- Filter Order -->
-      <div class="row" style="gap:var(--space-md); align-items: flex-end;">
-        <div class="md-field" style="flex:1">
-          <input class="md-field__input" type="number" id="inp-order" placeholder="Auto" min="1" step="1" disabled>
-          <label class="md-field__label">Filter Order</label>
+      <!-- Coefficients -->
+      <div class="md-card" id="card-coeffs">
+        <div class="md-card__title">
+          <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2z" />
+          </svg>
+          Coefficients
         </div>
-        <label class="md-checkbox" style="padding-bottom: 12px;">
-          <input type="checkbox" id="chk-auto-order" checked>
-          <span class="md-checkbox__box">
-            <svg viewBox="0 0 16 16"><polyline points="3 8 7 12 13 4"/></svg>
+        <div class="row mb-md" style="gap:var(--space-sm);">
+          <button class="md-btn md-btn--tonal" id="btn-copy-ba" data-tooltip="Copy to clipboard"
+            style="flex:1; font-size:12px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+            </svg>
+            Copy b,a
+          </button>
+          <button class="md-btn md-btn--outlined" id="btn-copy-sos" data-tooltip="Copy SOS"
+            style="flex:1; font-size:12px;">
+            Copy SOS
+          </button>
+        </div>
+        <div class="md-table-wrap" id="table-coeffs-wrap" style="max-height: 200px; overflow-y: auto;">
+          <table class="md-table" id="table-coeffs">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>b[n]</th>
+                <th>a[n]</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-coeffs">
+              <tr>
+                <td colspan="3"
+                  style="text-align:center; color:var(--md-sys-color-on-surface-variant); font-style:italic;">Design a
+                  filter to see coefficients</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Poles & Zeros -->
+      <div class="md-card" id="card-pz">
+        <div class="md-card__title">
+          <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
+          </svg>
+          Poles &amp; Zeros
+        </div>
+        <div class="row mb-md" style="gap:var(--space-sm);">
+          <button class="md-btn md-btn--tonal" id="btn-copy-pz" style="flex:1; font-size:12px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+            </svg>
+            Copy P/Z
+          </button>
+        </div>
+        <div class="md-table-wrap" id="table-pz-wrap" style="max-height: 200px; overflow-y: auto;">
+          <table class="md-table" id="table-pz">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Real</th>
+                <th>Imag</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-pz">
+              <tr>
+                <td colspan="3"
+                  style="text-align:center; color:var(--md-sys-color-on-surface-variant); font-style:italic;">Design a
+                  filter to see poles/zeros</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="md-field mt-md">
+          <input class="md-field__input" type="text" id="inp-gain" readonly value="—">
+          <label class="md-field__label">Gain (k)</label>
+        </div>
+      </div>
+
+      <hr class="md-divider">
+
+      <!-- Fixpoint Configuration -->
+      <div class="md-card" id="card-fixpoint">
+        <div class="md-card__title row--between">
+          <span class="row" style="gap:var(--space-sm);">
+            <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 2v11h3v9l7-12h-4l4-8z" />
+            </svg>
+            Fixpoint Simulation
           </span>
-          Auto
-        </label>
-      </div>
-
-      <!-- Window (for firwin) -->
-      <div class="md-select" id="field-window" style="display:none; margin-top: var(--space-sm);">
-        <select class="md-select__input" id="sel-window">
-          <option value="hamming">Hamming</option>
-          <option value="hann">Hann</option>
-          <option value="blackman">Blackman</option>
-          <option value="bartlett">Bartlett</option>
-          <option value="kaiser">Kaiser (β=8)</option>
-          <option value="rectangular">Rectangular (Boxcar)</option>
-          <option value="flattop">Flat Top</option>
-          <option value="bohman">Bohman</option>
-          <option value="parzen">Parzen</option>
-          <option value="nuttall">Nuttall</option>
-          <option value="blackmanharris">Blackman-Harris</option>
-          <option value="cosine">Cosine</option>
-          <option value="exponential">Exponential</option>
-          <option value="tukey">Tukey (α=0.5)</option>
-          <option value="taylor">Taylor</option>
-          <option value="lanczos">Lanczos</option>
-          <option value="barthann">Barthann</option>
-          <option value="gaussian">Gaussian (σ=7)</option>
-          <option value="general_gaussian">Gen. Gaussian</option>
-          <option value="dpss">DPSS (Slepian)</option>
-          <option value="chebwin">Chebyshev Window</option>
-        </select>
-        <label class="md-select__label">Window Type</label>
-      </div>
-    </div>
-
-    <!-- Design Button -->
-    <button class="md-fab" id="btn-design">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-      Design Filter
-    </button>
-
-    <hr class="md-divider">
-
-    <!-- Coefficients -->
-    <div class="md-card" id="card-coeffs">
-      <div class="md-card__title">
-        <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2z"/></svg>
-        Coefficients
-      </div>
-      <div class="row mb-md" style="gap:var(--space-sm);">
-        <button class="md-btn md-btn--tonal" id="btn-copy-ba" data-tooltip="Copy to clipboard" style="flex:1; font-size:12px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          Copy b,a
-        </button>
-        <button class="md-btn md-btn--outlined" id="btn-copy-sos" data-tooltip="Copy SOS" style="flex:1; font-size:12px;">
-          Copy SOS
-        </button>
-      </div>
-      <div class="md-table-wrap" id="table-coeffs-wrap" style="max-height: 200px; overflow-y: auto;">
-        <table class="md-table" id="table-coeffs">
-          <thead><tr><th>#</th><th>b[n]</th><th>a[n]</th></tr></thead>
-          <tbody id="tbody-coeffs">
-            <tr><td colspan="3" style="text-align:center; color:var(--md-sys-color-on-surface-variant); font-style:italic;">Design a filter to see coefficients</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Poles & Zeros -->
-    <div class="md-card" id="card-pz">
-      <div class="md-card__title">
-        <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
-        Poles &amp; Zeros
-      </div>
-      <div class="row mb-md" style="gap:var(--space-sm);">
-        <button class="md-btn md-btn--tonal" id="btn-copy-pz" style="flex:1; font-size:12px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          Copy P/Z
-        </button>
-      </div>
-      <div class="md-table-wrap" id="table-pz-wrap" style="max-height: 200px; overflow-y: auto;">
-        <table class="md-table" id="table-pz">
-          <thead><tr><th>Type</th><th>Real</th><th>Imag</th></tr></thead>
-          <tbody id="tbody-pz">
-            <tr><td colspan="3" style="text-align:center; color:var(--md-sys-color-on-surface-variant); font-style:italic;">Design a filter to see poles/zeros</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="md-field mt-md">
-        <input class="md-field__input" type="text" id="inp-gain" readonly value="—">
-        <label class="md-field__label">Gain (k)</label>
-      </div>
-    </div>
-
-    <hr class="md-divider">
-
-    <!-- Fixpoint Configuration -->
-    <div class="md-card" id="card-fixpoint">
-      <div class="md-card__title row--between">
-        <span class="row" style="gap:var(--space-sm);">
-          <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-          Fixpoint Simulation
-        </span>
-        <label class="md-switch">
-          <input type="checkbox" id="chk-fixpoint">
-          <span class="md-switch__track"><span class="md-switch__thumb"></span></span>
-        </label>
-      </div>
-      <div id="fixpoint-fields" style="display:none;" class="col gap-md mt-md">
-        <div class="md-section-label">Coefficient Quantization</div>
-        <div class="row" style="gap:var(--space-sm)">
-          <div class="md-field" style="flex:1">
-            <input class="md-field__input" type="number" id="inp-coeff-qi" value="1" min="0" step="1">
-            <label class="md-field__label">QI (int bits)</label>
-          </div>
-          <div class="md-field" style="flex:1">
-            <input class="md-field__input" type="number" id="inp-coeff-qf" value="15" min="0" step="1">
-            <label class="md-field__label">QF (frac bits)</label>
-          </div>
+          <label class="md-switch">
+            <input type="checkbox" id="chk-fixpoint">
+            <span class="md-switch__track"><span class="md-switch__thumb"></span></span>
+          </label>
         </div>
-        <div class="md-section-label">Signal Quantization</div>
-        <div class="row" style="gap:var(--space-sm)">
-          <div class="md-field" style="flex:1">
-            <input class="md-field__input" type="number" id="inp-sig-qi" value="1" min="0" step="1">
-            <label class="md-field__label">QI (int bits)</label>
+        <div id="fixpoint-fields" style="display:none;" class="col gap-md mt-md">
+          <div class="md-section-label">Coefficient Quantization</div>
+          <div class="row" style="gap:var(--space-sm)">
+            <div class="md-field" style="flex:1">
+              <input class="md-field__input" type="number" id="inp-coeff-qi" value="1" min="0" step="1">
+              <label class="md-field__label">QI (int bits)</label>
+            </div>
+            <div class="md-field" style="flex:1">
+              <input class="md-field__input" type="number" id="inp-coeff-qf" value="15" min="0" step="1">
+              <label class="md-field__label">QF (frac bits)</label>
+            </div>
           </div>
-          <div class="md-field" style="flex:1">
-            <input class="md-field__input" type="number" id="inp-sig-qf" value="15" min="0" step="1">
-            <label class="md-field__label">QF (frac bits)</label>
+          <div class="md-section-label">Signal Quantization</div>
+          <div class="row" style="gap:var(--space-sm)">
+            <div class="md-field" style="flex:1">
+              <input class="md-field__input" type="number" id="inp-sig-qi" value="1" min="0" step="1">
+              <label class="md-field__label">QI (int bits)</label>
+            </div>
+            <div class="md-field" style="flex:1">
+              <input class="md-field__input" type="number" id="inp-sig-qf" value="15" min="0" step="1">
+              <label class="md-field__label">QF (frac bits)</label>
+            </div>
           </div>
+          <div class="row" style="gap:var(--space-md)">
+            <div class="md-select" style="flex:1">
+              <select class="md-select__input" id="sel-overflow">
+                <option value="saturate">Saturate</option>
+                <option value="wrap">Wrap</option>
+              </select>
+              <label class="md-select__label">Overflow</label>
+            </div>
+            <div class="md-select" style="flex:1">
+              <select class="md-select__input" id="sel-quant">
+                <option value="round">Round</option>
+                <option value="truncate">Truncate</option>
+                <option value="floor">Floor</option>
+                <option value="ceil">Ceil</option>
+              </select>
+              <label class="md-select__label">Quantization</label>
+            </div>
+          </div>
+          <button class="md-btn md-btn--tonal w-full" id="btn-fixpoint-sim">
+            <span class="md-spinner" id="fixpoint-spinner" style="display:none;"></span>
+            Simulate Fixpoint
+          </button>
         </div>
-        <div class="row" style="gap:var(--space-md)">
-          <div class="md-select" style="flex:1">
-            <select class="md-select__input" id="sel-overflow">
-              <option value="saturate">Saturate</option>
-              <option value="wrap">Wrap</option>
-            </select>
-            <label class="md-select__label">Overflow</label>
-          </div>
-          <div class="md-select" style="flex:1">
-            <select class="md-select__input" id="sel-quant">
-              <option value="round">Round</option>
-              <option value="truncate">Truncate</option>
-              <option value="floor">Floor</option>
-              <option value="ceil">Ceil</option>
-            </select>
-            <label class="md-select__label">Quantization</label>
-          </div>
+      </div>
+
+    </aside>
+
+    <!-- ---- Main Content ---- -->
+    <main class="main-content">
+      <!-- Plot Toolbar -->
+      <div class="plot-toolbar">
+        <nav class="plot-tabs" role="tablist">
+          <button class="plot-tab active" data-tab="magnitude" role="tab">|H(f)| Magnitude</button>
+          <button class="plot-tab" data-tab="phase" role="tab">Phase</button>
+          <button class="plot-tab" data-tab="group-delay" role="tab">Group Delay</button>
+          <button class="plot-tab" data-tab="phase-delay" role="tab">Phase Delay</button>
+          <button class="plot-tab" data-tab="pz" role="tab">Poles / Zeros</button>
+          <button class="plot-tab" data-tab="impulse" role="tab">Impulse h[n]</button>
+          <button class="plot-tab" data-tab="step" role="tab">Step</button>
+          <button class="plot-tab" data-tab="stimulus" role="tab">Stimulus</button>
+          <button class="plot-tab" data-tab="3d" role="tab">3D |H(z)|</button>
+        </nav>
+        <div class="plot-toolbar__actions">
+          <label class="md-chip" title="Show Specs">
+            <input type="checkbox" id="chk-show-specs" checked style="display:none;">
+            <span>Specs</span>
+          </label>
+          <label class="md-chip" title="Two-sided spectrum">
+            <input type="checkbox" id="chk-two-sided" style="display:none;">
+            <span>± f</span>
+          </label>
         </div>
-        <button class="md-btn md-btn--tonal w-full" id="btn-fixpoint-sim">
-          <span class="md-spinner" id="fixpoint-spinner" style="display:none;"></span>
-          Simulate Fixpoint
+      </div>
+
+      <!-- Plot Panels -->
+      <div class="plot-container">
+        <div class="plot-panel active" id="plot-magnitude"></div>
+        <div class="plot-panel" id="plot-phase"></div>
+        <div class="plot-panel" id="plot-group-delay"></div>
+        <div class="plot-panel" id="plot-phase-delay"></div>
+        <div class="plot-panel" id="plot-pz"></div>
+        <div class="plot-panel" id="plot-impulse"></div>
+        <div class="plot-panel" id="plot-step"></div>
+        <div class="plot-panel" id="plot-stimulus">
+          <div style="padding: var(--space-md);">
+            <div class="md-field">
+              <input class="md-field__input" type="text" id="inp-stimulus" value="sin(2*pi*n*1000/fs)"
+                placeholder="e.g. sin(2*pi*n*1000/fs)">
+              <label class="md-field__label">Stimulus Expression</label>
+            </div>
+            <button class="md-btn md-btn--tonal mt-md" id="btn-stimulus-run">Run Stimulus</button>
+          </div>
+          <div id="plot-stimulus-chart" style="flex:1;"></div>
+        </div>
+        <div class="plot-panel" id="plot-3d"></div>
+      </div>
+    </main>
+
+  </div><!-- /app-shell -->
+
+  <!-- ================= Export Modal ================= -->
+  <div class="md-modal-backdrop" id="export-modal-backdrop">
+    <div class="md-modal" id="export-modal">
+      <div class="md-card__title" style="margin-bottom:var(--space-lg);">
+        <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+        </svg>
+        Export Filter
+      </div>
+      <div class="md-field mb-md">
+        <input class="md-field__input" type="text" id="export-filename" value="filter">
+        <label class="md-field__label">Filename</label>
+      </div>
+      <div class="md-section-label">Choose format</div>
+      <div class="col gap-md mt-md">
+        <button class="md-btn md-btn--tonal w-full" data-export-fmt="npz">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          NumPy (.npz)
+        </button>
+        <button class="md-btn md-btn--tonal w-full" data-export-fmt="csv">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          CSV (.csv)
+        </button>
+        <button class="md-btn md-btn--tonal w-full" data-export-fmt="mat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          MATLAB (.mat)
+        </button>
+        <button class="md-btn md-btn--tonal w-full" data-export-fmt="json">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          JSON (.json)
         </button>
       </div>
+      <button class="md-btn md-btn--text w-full mt-md" id="export-modal-close">Cancel</button>
     </div>
-
-  </aside>
-
-  <!-- ---- Main Content ---- -->
-  <main class="main-content">
-    <!-- Plot Tabs -->
-    <nav class="plot-tabs" role="tablist">
-      <button class="plot-tab active" data-tab="magnitude" role="tab">|H(f)| Magnitude</button>
-      <button class="plot-tab" data-tab="phase" role="tab">Phase</button>
-      <button class="plot-tab" data-tab="group-delay" role="tab">Group Delay</button>
-      <button class="plot-tab" data-tab="phase-delay" role="tab">Phase Delay</button>
-      <button class="plot-tab" data-tab="pz" role="tab">Poles / Zeros</button>
-      <button class="plot-tab" data-tab="impulse" role="tab">Impulse h[n]</button>
-      <button class="plot-tab" data-tab="step" role="tab">Step</button>
-      <button class="plot-tab" data-tab="stimulus" role="tab">Stimulus</button>
-      <button class="plot-tab" data-tab="3d" role="tab">3D |H(z)|</button>
-    </nav>
-
-    <!-- Plot Panels -->
-    <div class="plot-container">
-      <div class="plot-panel active" id="plot-magnitude"></div>
-      <div class="plot-panel" id="plot-phase"></div>
-      <div class="plot-panel" id="plot-group-delay"></div>
-      <div class="plot-panel" id="plot-phase-delay"></div>
-      <div class="plot-panel" id="plot-pz"></div>
-      <div class="plot-panel" id="plot-impulse"></div>
-      <div class="plot-panel" id="plot-step"></div>
-      <div class="plot-panel" id="plot-stimulus">
-        <div style="padding: var(--space-md);">
-          <div class="md-field">
-            <input class="md-field__input" type="text" id="inp-stimulus" value="sin(2*pi*n*1000/fs)" placeholder="e.g. sin(2*pi*n*1000/fs)">
-            <label class="md-field__label">Stimulus Expression</label>
-          </div>
-          <button class="md-btn md-btn--tonal mt-md" id="btn-stimulus-run">Run Stimulus</button>
-        </div>
-        <div id="plot-stimulus-chart" style="flex:1;"></div>
-      </div>
-      <div class="plot-panel" id="plot-3d"></div>
-    </div>
-  </main>
-
-</div><!-- /app-shell -->
-
-<!-- ================= Export Modal ================= -->
-<div class="md-modal-backdrop" id="export-modal-backdrop">
-  <div class="md-modal" id="export-modal">
-    <div class="md-card__title" style="margin-bottom:var(--space-lg);">
-      <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-      Export Filter
-    </div>
-    <div class="md-field mb-md">
-      <input class="md-field__input" type="text" id="export-filename" value="filter">
-      <label class="md-field__label">Filename</label>
-    </div>
-    <div class="md-section-label">Choose format</div>
-    <div class="col gap-md mt-md">
-      <button class="md-btn md-btn--tonal w-full" data-export-fmt="npz">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        NumPy (.npz)
-      </button>
-      <button class="md-btn md-btn--tonal w-full" data-export-fmt="csv">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        CSV (.csv)
-      </button>
-      <button class="md-btn md-btn--tonal w-full" data-export-fmt="mat">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        MATLAB (.mat)
-      </button>
-      <button class="md-btn md-btn--tonal w-full" data-export-fmt="json">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        JSON (.json)
-      </button>
-    </div>
-    <button class="md-btn md-btn--text w-full mt-md" id="export-modal-close">Cancel</button>
   </div>
-</div>
 
-<!-- Toast Container -->
-<div class="toast-container" id="toast-container"></div>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
 
-<!-- Scripts (order matters) -->
-<script src="js/pyodide-bridge.js"></script>
-<script src="js/app.js"></script>
-<script src="js/ui/input-specs.js"></script>
-<script src="js/ui/input-coeffs.js"></script>
-<script src="js/ui/input-pz.js"></script>
-<script src="js/ui/fixpoint-panel.js"></script>
-<script src="js/plots/plot-manager.js"></script>
-<script src="js/plots/plot-hf.js"></script>
-<script src="js/plots/plot-grp-delay.js"></script>
-<script src="js/plots/plot-pz.js"></script>
-<script src="js/plots/plot-transient.js"></script>
-<script src="js/plots/plot-3d.js"></script>
-<script src="js/file-io.js"></script>
+  <!-- Scripts (order matters) -->
+  <script src="js/pyodide-bridge.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ui/input-specs.js"></script>
+  <script src="js/ui/input-coeffs.js"></script>
+  <script src="js/ui/input-pz.js"></script>
+  <script src="js/ui/fixpoint-panel.js"></script>
+  <script src="js/plots/plot-manager.js"></script>
+  <script src="js/plots/plot-hf.js"></script>
+  <script src="js/plots/plot-grp-delay.js"></script>
+  <script src="js/plots/plot-pz.js"></script>
+  <script src="js/plots/plot-transient.js"></script>
+  <script src="js/plots/plot-3d.js"></script>
+  <script src="js/file-io.js"></script>
 
 </body>
+
 </html>

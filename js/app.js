@@ -174,6 +174,18 @@ async function designFilter() {
   try {
     // Validate specs
     const specs = { ...AppState.specs };
+
+    // Apply frequency unit multiplier (user enters kHz/MHz/GHz, DSP needs Hz)
+    const mul = (typeof InputSpecs !== 'undefined' && InputSpecs.getFreqMultiplier)
+      ? InputSpecs.getFreqMultiplier() : 1;
+    if (specs.freqUnit !== 'normalized') {
+      specs.fs   = specs.fs * mul;
+      specs.fpb  = specs.fpb * mul;
+      specs.fsb  = specs.fsb * mul;
+      specs.fpb2 = specs.fpb2 * mul;
+      specs.fsb2 = specs.fsb2 * mul;
+    }
+
     if (specs.fs <= 0) throw new Error('Sampling frequency must be > 0');
     if (specs.fpb <= 0) throw new Error('Passband frequency must be > 0');
     if (specs.fpb >= specs.fs / 2) throw new Error('Passband frequency must be < Fs/2');
@@ -335,6 +347,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Tab clicks
   document.querySelectorAll('.plot-tab').forEach(tab => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  // Chip toggle active state (for checkboxes inside chips)
+  document.querySelectorAll('.md-chip input[type="checkbox"]').forEach(cb => {
+    const chip = cb.closest('.md-chip');
+    if (cb.checked) chip?.classList.add('active');
+    cb.addEventListener('change', () => chip?.classList.toggle('active', cb.checked));
   });
 
   // Tab change → run analysis

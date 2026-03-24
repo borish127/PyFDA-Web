@@ -9,7 +9,7 @@ const PyodideBridge = (() => {
   const PYODIDE_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
 
   /* ----- Status Callback ----- */
-  let onStatus = () => {};
+  let onStatus = () => { };
   function setStatusCallback(cb) { onStatus = cb; }
 
   /* ----- Load Pyodide + Packages ----- */
@@ -74,15 +74,28 @@ const PyodideBridge = (() => {
   /* ----- Call a Python function and get JSON result ----- */
   async function callPython(funcName, argsJson) {
     if (!ready) throw new Error('Pyodide not initialized');
+    
+    // Attach to window to avoid fragile string interpolation in Python
+    window.__pyfda_args = argsJson;
+    
     const code = `
 import json
-_args = json.loads('${argsJson.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')
-_result = ${funcName}(**_args) if isinstance(_args, dict) else ${funcName}(*_args)
-json.dumps(_result, default=lambda o: o.tolist() if hasattr(o, 'tolist') else str(o))
+import js
+try:
+    _args = json.loads(js.window.__pyfda_args)
+    _res = ${funcName}(**_args) if isinstance(_args, dict) else ${funcName}(*_args)
+    _out = {"success": True, "data": _res}
+except Exception as e:
+    _out = {"success": False, "error": type(e).__name__ + ": " + str(e)}
+json.dumps(_out, default=lambda o: o.tolist() if hasattr(o, 'tolist') else str(o))
 `;
     try {
       const resultStr = await pyodide.runPythonAsync(code);
-      return JSON.parse(resultStr);
+      const parsed = JSON.parse(resultStr);
+      if (!parsed.success) {
+        throw new Error(parsed.error);
+      }
+      return parsed.data;
     } catch (err) {
       console.error(`Python call ${funcName} failed:`, err);
       throw err;
@@ -91,6 +104,8 @@ json.dumps(_result, default=lambda o: o.tolist() if hasattr(o, 'tolist') else st
 
   /* ----- Design filter ----- */
   async function designFilter(specs) {
+    // Pass the specs object directly so Python's **_args unrolls it 
+    // into responseType='...', fs=..., etc.
     return callPython('design_filter', JSON.stringify(specs));
   }
 
