@@ -49,11 +49,13 @@
     <span class="top-bar__title">PyFDA Web</span>
     <div class="top-bar__spacer"></div>
     <div class="top-bar__actions">
-      <button class="md-btn--icon" id="btn-import" data-tooltip="Import Filter" aria-label="Import filter">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <button class="md-btn md-btn--outlined" id="btn-import" aria-label="Import filter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Import</span>
       </button>
-      <button class="md-btn--icon" id="btn-export" data-tooltip="Export Filter" aria-label="Export filter">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <button class="md-btn md-btn--outlined" id="btn-export" aria-label="Export filter">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Export</span>
       </button>
       <button class="md-btn--icon" id="btn-theme" data-tooltip="Toggle Theme" aria-label="Toggle theme">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -72,6 +74,8 @@
       <div class="md-card__title">
         <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></svg>
         Response Type
+        <span class="top-bar__spacer"></span>
+        <span id="lbl-response-text" style="font-family:var(--md-sys-typescale-body-font); font-size:var(--md-sys-typescale-body-medium); font-weight:500; color:var(--md-sys-color-primary); letter-spacing:0.02em;">Lowpass</span>
       </div>
       <div class="md-segmented" id="seg-response">
         <button class="md-segmented__btn active" data-value="lowpass">LP</button>
@@ -184,7 +188,7 @@
       <!-- Filter Order -->
       <div class="row" style="gap:var(--space-md); align-items: flex-end;">
         <div class="md-field" style="flex:1">
-          <input class="md-field__input" type="number" id="inp-order" placeholder="Auto" min="1" step="1">
+          <input class="md-field__input" type="number" id="inp-order" placeholder="Auto" min="1" step="1" disabled>
           <label class="md-field__label">Filter Order</label>
         </div>
         <label class="md-checkbox" style="padding-bottom: 12px;">
@@ -387,6 +391,40 @@
   </main>
 
 </div><!-- /app-shell -->
+
+<!-- ================= Export Modal ================= -->
+<div class="md-modal-backdrop" id="export-modal-backdrop">
+  <div class="md-modal" id="export-modal">
+    <div class="md-card__title" style="margin-bottom:var(--space-lg);">
+      <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      Export Filter
+    </div>
+    <div class="md-field mb-md">
+      <input class="md-field__input" type="text" id="export-filename" value="filter">
+      <label class="md-field__label">Filename</label>
+    </div>
+    <div class="md-section-label">Choose format</div>
+    <div class="col gap-md mt-md">
+      <button class="md-btn md-btn--tonal w-full" data-export-fmt="npz">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        NumPy (.npz)
+      </button>
+      <button class="md-btn md-btn--tonal w-full" data-export-fmt="csv">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        CSV (.csv)
+      </button>
+      <button class="md-btn md-btn--tonal w-full" data-export-fmt="mat">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        MATLAB (.mat)
+      </button>
+      <button class="md-btn md-btn--tonal w-full" data-export-fmt="json">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        JSON (.json)
+      </button>
+    </div>
+    <button class="md-btn md-btn--text w-full mt-md" id="export-modal-close">Cancel</button>
+  </div>
+</div>
 
 <!-- Toast Container -->
 <div class="toast-container" id="toast-container"></div>

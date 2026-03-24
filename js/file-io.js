@@ -1,36 +1,64 @@
 /* ============================================================
    PyFDA Web — File I/O (Browser File API)
-   Export/Import filter designs via browser download/upload
+   Export via MD3 modal, Import via file picker
    ============================================================ */
 
 const FileIO = (() => {
 
   function init() {
-    document.getElementById('btn-export')?.addEventListener('click', showExportMenu);
+    document.getElementById('btn-export')?.addEventListener('click', openExportModal);
     document.getElementById('btn-import')?.addEventListener('click', triggerImport);
+
+    // Modal close
+    document.getElementById('export-modal-close')?.addEventListener('click', closeExportModal);
+    document.getElementById('export-modal-backdrop')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeExportModal();
+    });
+
+    // Format buttons inside modal
+    document.querySelectorAll('[data-export-fmt]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const fmt = btn.dataset.exportFmt;
+        executeExport(fmt);
+      });
+    });
   }
 
-  /* ---------- Export ---------- */
-  async function showExportMenu() {
+  /* ---------- Dynamic Filename ---------- */
+  function generateFilename() {
+    const s = AppState.specs;
+    const f = AppState.filter;
+    const method = s.designMethod || 'filter';
+    const order = f.order != null ? f.order : 'auto';
+    const freq = Math.round(s.fpb);
+    return `${method}_${order}-${freq}`;
+  }
+
+  /* ---------- Export Modal ---------- */
+  function openExportModal() {
     if (!AppState.filter.b) {
       showToast('Design a filter before exporting', 'error');
       return;
     }
 
-    // Simple format selection via prompt (could be replaced with a modal)
-    const format = prompt(
-      'Export format:\n\n' +
-      '1 — NumPy (.npz)\n' +
-      '2 — CSV (.csv)\n' +
-      '3 — MATLAB (.mat)\n' +
-      '4 — JSON (.json)\n\n' +
-      'Enter number:',
-      '1'
-    );
+    // Populate dynamic filename
+    const filenameInput = document.getElementById('export-filename');
+    if (filenameInput) filenameInput.value = generateFilename();
 
-    const formatMap = { '1': 'npz', '2': 'csv', '3': 'mat', '4': 'json' };
-    const fmt = formatMap[format];
-    if (!fmt) return;
+    document.getElementById('export-modal-backdrop')?.classList.add('open');
+  }
+
+  function closeExportModal() {
+    document.getElementById('export-modal-backdrop')?.classList.remove('open');
+  }
+
+  /* ---------- Execute Export ---------- */
+  async function executeExport(fmt) {
+    const filenameInput = document.getElementById('export-filename');
+    const baseName = filenameInput?.value.trim() || generateFilename();
+
+    // Close modal immediately for responsiveness
+    closeExportModal();
 
     try {
       const data = {
@@ -47,6 +75,9 @@ const FileIO = (() => {
 
       const result = await PyodideBridge.exportData(fmt, data);
 
+      // Override filename with the user-provided name + correct extension
+      const filename = `${baseName}.${fmt}`;
+
       // Convert base64 to blob and download
       const binaryStr = atob(result.data_b64);
       const bytes = new Uint8Array(binaryStr.length);
@@ -58,14 +89,14 @@ const FileIO = (() => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = result.filename;
+      link.download = filename;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      showToast(`Exported as ${result.filename}`);
+      showToast(`Exported as ${filename}`);
 
     } catch (err) {
       showToast(`Export failed: ${err.message}`, 'error');

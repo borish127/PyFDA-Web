@@ -50,8 +50,16 @@ const InputSpecs = (() => {
       const orderInput = document.getElementById('inp-order');
       if (e.target.checked) {
         AppState.specs.order = null;
-        if (orderInput) { orderInput.value = ''; orderInput.placeholder = 'Auto'; }
+        if (orderInput) {
+          orderInput.value = '';
+          orderInput.placeholder = 'Auto';
+          orderInput.disabled = true;
+        }
       } else {
+        if (orderInput) {
+          orderInput.disabled = false;
+          orderInput.value = orderInput.value || '10';
+        }
         AppState.specs.order = parseInt(orderInput?.value) || 10;
       }
     });
@@ -93,8 +101,21 @@ const InputSpecs = (() => {
         container.querySelectorAll('.md-segmented__btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         onChange(btn.dataset.value);
+        // Update the external label for response type
+        if (containerId === 'seg-response') updateResponseLabel(btn.dataset.value);
       });
     });
+  }
+
+  /* Map value to full name and update the label span */
+  const RESPONSE_NAMES = {
+    lowpass: 'Lowpass', highpass: 'Highpass',
+    bandpass: 'Bandpass', bandstop: 'Bandstop', allpass: 'Allpass',
+  };
+
+  function updateResponseLabel(value) {
+    const lbl = document.getElementById('lbl-response-text');
+    if (lbl) lbl.textContent = RESPONSE_NAMES[value] || value;
   }
 
   /* Bind a numeric input to state */

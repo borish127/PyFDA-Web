@@ -126,13 +126,28 @@ function toggleTheme() {
   bus.emit('replotAll');
 }
 
-/* ---------- Mobile Sidebar ---------- */
+/* ---------- Sidebar Toggle (Desktop + Mobile) ---------- */
 function toggleSidebar() {
-  const sidebar = document.querySelector('.sidebar');
-  const backdrop = document.querySelector('.sidebar-backdrop');
-  const open = sidebar.classList.toggle('open');
-  backdrop.classList.toggle('open', open);
-  AppState.ui.sidebarOpen = open;
+  const isMobile = window.innerWidth <= 900;
+
+  if (isMobile) {
+    const sidebar = document.querySelector('.sidebar');
+    const backdrop = document.querySelector('.sidebar-backdrop');
+    const open = sidebar.classList.toggle('open');
+    backdrop.classList.toggle('open', open);
+    AppState.ui.sidebarOpen = open;
+  } else {
+    const shell = document.querySelector('.app-shell');
+    const collapsed = shell.classList.toggle('sidebar-collapsed');
+    AppState.ui.sidebarOpen = !collapsed;
+
+    // Resize plots after transition completes
+    setTimeout(() => {
+      document.querySelectorAll('.plot-panel.active .js-plotly-plot').forEach(el => {
+        Plotly.Plots.resize(el);
+      });
+    }, 450);
+  }
 }
 
 /* ---------- Tab Switching ---------- */
@@ -186,6 +201,12 @@ async function designFilter() {
 
     bus.emit('filterDesigned', AppState.filter);
     showToast(`${result.method} filter designed (order ${result.order})`, 'info');
+
+    // Update order field with the computed value
+    const orderInput = document.getElementById('inp-order');
+    if (orderInput) {
+      orderInput.value = result.order;
+    }
 
     // Run analysis for current tab
     await runAnalysis(AppState.ui.activeTab);

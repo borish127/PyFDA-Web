@@ -30,7 +30,27 @@ body {
   grid-template-areas:
     "topbar topbar"
     "sidebar main";
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  transition: grid-template-columns var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
+}
+
+.app-shell.sidebar-collapsed {
+  grid-template-columns: 0px 1fr;
+}
+
+.app-shell.sidebar-collapsed .sidebar {
+  overflow: hidden;
+  padding: 0;
+  border-right: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+
+.sidebar {
+  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 
 /* ---------- Top App Bar ---------- */
@@ -83,10 +103,12 @@ body {
   background: var(--md-sys-color-surface-container-low);
   border-right: 1px solid var(--md-sys-color-outline-variant);
   overflow-y: auto;
+  overflow-x: hidden;
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  min-height: 0;
 }
 
 .sidebar::-webkit-scrollbar { width: 6px; }
@@ -102,6 +124,7 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ---------- Plot Area ---------- */
@@ -155,15 +178,17 @@ body {
 
 .plot-container {
   flex: 1;
+  min-height: 0;
   padding: var(--space-md);
-  overflow: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .plot-panel {
   flex: 1;
-  min-height: 400px;
+  min-height: 0;
   border-radius: var(--md-sys-shape-corner-large);
   background: var(--md-sys-color-surface-container-lowest);
   box-shadow: var(--md-sys-elevation-1);
@@ -172,7 +197,17 @@ body {
 }
 
 .plot-panel.active {
-  display: block;
+  display: flex;
+  flex-direction: column;
+}
+
+.plot-panel .js-plotly-plot,
+.plot-panel .plot-container-inner,
+.plot-panel .plotly {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
 }
 
 /* ---------- Loading Overlay ---------- */
@@ -244,9 +279,9 @@ body {
   transition: width var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
 }
 
-/* ---------- Mobile Hamburger ---------- */
+/* ---------- Sidebar Toggle ---------- */
 .menu-toggle {
-  display: none;
+  display: flex;
   background: none;
   border: none;
   cursor: pointer;

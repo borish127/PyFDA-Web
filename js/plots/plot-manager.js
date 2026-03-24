@@ -75,12 +75,13 @@ const PlotManager = (() => {
     };
   }
 
-  function plotToDiv(divId, traces, layoutOverrides = {}, configOverrides = {}) {
+  function plotToDiv(divId, traces, layout = {}, configOverrides = {}) {
     const el = document.getElementById(divId);
     if (!el) return;
-    const layout = Object.assign(baseLayout('', '', ''), layoutOverrides);
     const config = Object.assign(baseConfig(), configOverrides);
-    Plotly.react(el, traces, layout, config);
+    Plotly.react(el, traces, layout, config).then(() => {
+      Plotly.Plots.resize(el);
+    });
   }
 
   function replotAll() {
