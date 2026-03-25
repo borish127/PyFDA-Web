@@ -2,7 +2,9 @@
    PyFDA Web — Layout System
    ============================================================ */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -92,12 +94,29 @@ body {
   font-family: var(--md-sys-typescale-display-font);
 }
 
-.top-bar__spacer { flex: 1; }
+.top-bar__spacer {
+  flex: 1;
+}
 
 .top-bar__actions {
   display: flex;
   align-items: center;
   gap: var(--space-sm);
+}
+
+.top-bar [data-tooltip]::after {
+  bottom: auto !important;
+  font-size: 14px !important;
+  top: calc(100% + 8px) !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.top-bar [data-tooltip]::before {
+  bottom: auto !important;
+  top: 100% !important;
+  border-top-color: transparent !important;
+  border-bottom-color: var(--md-sys-color-inverse-surface, #313033) !important;
 }
 
 /* ---------- Sidebar ---------- */
@@ -114,8 +133,14 @@ body {
   min-height: 0;
 }
 
-.sidebar::-webkit-scrollbar { width: 6px; }
-.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .sidebar::-webkit-scrollbar-thumb {
   background: var(--md-sys-color-outline-variant);
   border-radius: var(--md-sys-shape-corner-full);
@@ -157,7 +182,9 @@ body {
   min-width: 0;
 }
 
-.plot-tabs::-webkit-scrollbar { height: 0; }
+.plot-tabs::-webkit-scrollbar {
+  height: 0;
+}
 
 .plot-tab {
   position: relative;
@@ -264,8 +291,17 @@ body {
 }
 
 @keyframes logoPulse {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.85; }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 0.85;
+  }
 }
 
 .loading-overlay__text {
@@ -315,7 +351,7 @@ body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.4);
+  background: rgba(0, 0, 0, .4);
   z-index: 199;
 }
 
@@ -344,11 +380,21 @@ body {
   max-width: 480px;
 }
 
-.toast.error { background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); }
+.toast.error {
+  background: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
 
 @keyframes toastIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ---------- Responsive ---------- */
@@ -364,7 +410,9 @@ body {
     gap: var(--space-xs);
   }
 
-  .menu-toggle { display: flex; }
+  .menu-toggle {
+    display: flex;
+  }
 
   .sidebar {
     position: fixed;
@@ -397,44 +445,71 @@ body {
 }
 
 @media (max-width: 480px) {
-  .top-bar { padding: 0 var(--space-md); }
-  .top-bar__title { font-size: var(--md-sys-typescale-title-medium); }
-  .plot-tab { padding: var(--space-sm) var(--space-md); font-size: var(--md-sys-typescale-label-medium); }
+  .top-bar {
+    padding: 0 var(--space-md);
+  }
+
+  .top-bar__title {
+    font-size: var(--md-sys-typescale-title-medium);
+  }
+
+  .plot-tab {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--md-sys-typescale-label-medium);
+  }
 }
 
 @media (max-width: 600px) {
-  #btn-import span, #btn-export span {
+
+  #btn-import span,
+  #btn-export span {
     display: none;
   }
+
   .top-bar {
     padding: 0 var(--space-xs);
     gap: var(--space-xs);
   }
-  .plot-container, .main-content {
+
+  .plot-container,
+  .main-content {
     width: 100%;
     min-width: 0;
     padding: 0;
   }
-  .top-bar__title { 
-    display: none; 
+
+  .top-bar__title {
+    display: none;
   }
+
   .specs-group {
     grid-template-columns: 1fr !important;
   }
+
   #card-specs .row {
     flex-wrap: wrap;
   }
-  #card-specs .row > * {
+
+  #card-specs .row>* {
     flex: 1 1 100% !important;
   }
+
   .plot-tabs {
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
+
   .plot-tabs::-webkit-scrollbar {
     display: none;
   }
+
   .plot-tab {
     flex-shrink: 0;
   }
+}
+
+.top-bar__actions>[data-tooltip]:last-child::after {
+  left: auto !important;
+  right: 0 !important;
+  transform: none !important;
 }
