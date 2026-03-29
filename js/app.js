@@ -179,9 +179,9 @@ async function designFilter() {
     const mul = (typeof InputSpecs !== 'undefined' && InputSpecs.getFreqMultiplier)
       ? InputSpecs.getFreqMultiplier() : 1;
     if (specs.freqUnit !== 'normalized') {
-      specs.fs   = specs.fs * mul;
-      specs.fpb  = specs.fpb * mul;
-      specs.fsb  = specs.fsb * mul;
+      specs.fs = specs.fs * mul;
+      specs.fpb = specs.fpb * mul;
+      specs.fsb = specs.fsb * mul;
       specs.fpb2 = specs.fpb2 * mul;
       specs.fsb2 = specs.fsb2 * mul;
     }
@@ -301,6 +301,7 @@ async function runAnalysis(tabName) {
   }
 }
 
+
 /* ---------- Bootstrap ---------- */
 const bus = new EventBus();
 
@@ -348,6 +349,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-menu')?.addEventListener('click', toggleSidebar);
   document.querySelector('.sidebar-backdrop')?.addEventListener('click', toggleSidebar);
 
+  // GitHub Link Mobile Intercept
+  document.getElementById('btn-github')?.addEventListener('click', (e) => {
+    if (window.innerWidth <= 600) {
+      if (!confirm('Visit the Github Repository?')) {
+        e.preventDefault();
+      }
+    }
+  });
   // Tab clicks
   document.querySelectorAll('.plot-tab').forEach(tab => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));

@@ -77,6 +77,9 @@ const PlotManager = (() => {
   }
 
   function plotToDiv(divId, traces, layout = {}, configOverrides = {}) {
+    const emptyState = document.getElementById('plot-empty-state');
+    if (emptyState) emptyState.classList.add('hidden');
+
     const el = document.getElementById(divId);
     if (!el) return;
     const config = Object.assign(baseConfig(), configOverrides);

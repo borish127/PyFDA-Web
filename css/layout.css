@@ -174,7 +174,7 @@ body {
 
 .plot-tabs {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 0;
   overflow-x: auto;
   padding: 0 var(--space-md);
@@ -188,6 +188,9 @@ body {
 
 .plot-tab {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: var(--space-md) var(--space-lg);
   font-family: var(--md-sys-typescale-body-font);
   font-size: var(--md-sys-typescale-label-large);
@@ -201,9 +204,11 @@ body {
   letter-spacing: 0.02em;
 }
 
-.plot-tab:hover {
-  color: var(--md-sys-color-on-surface);
-  background: var(--md-sys-color-surface-container-high);
+@media (hover: hover) {
+  .plot-tab:hover {
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-high);
+  }
 }
 
 .plot-tab.active {
@@ -253,6 +258,51 @@ body {
   min-height: 0;
   width: 100%;
   height: 100%;
+}
+
+/* ---------- Plot Empty State ---------- */
+.plot-empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  background: var(--md-sys-color-surface-container-lowest);
+  z-index: 10;
+  padding: var(--space-xl);
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: opacity var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+  pointer-events: auto;
+}
+
+.plot-empty-state.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.plot-empty-state__icon {
+  width: 64px;
+  height: 64px;
+  color: var(--md-sys-color-surface-container-highest);
+  stroke-width: 1.5;
+  margin-bottom: var(--space-sm);
+}
+
+.plot-empty-state__text-desktop {
+  font-family: var(--md-sys-typescale-body-font);
+  font-size: var(--md-sys-typescale-body-large);
+  font-weight: 500;
+  display: block;
+}
+
+.plot-empty-state__text-mobile {
+  font-family: var(--md-sys-typescale-body-font);
+  font-size: var(--md-sys-typescale-body-large);
+  font-weight: 500;
+  display: none;
 }
 
 /* ---------- Loading Overlay ---------- */
@@ -343,8 +393,10 @@ body {
   color: var(--md-sys-color-on-surface);
 }
 
-.menu-toggle:hover {
-  background: var(--md-sys-color-surface-container-high);
+@media (hover: hover) {
+  .menu-toggle:hover {
+    background: var(--md-sys-color-surface-container-high);
+  }
 }
 
 .sidebar-backdrop {
@@ -416,7 +468,7 @@ body {
 
   .sidebar {
     position: fixed;
-    top: 64px;
+    top: 0;
     left: 0;
     bottom: 0;
     width: 320px;
@@ -425,6 +477,7 @@ body {
     transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
     border-right: none;
     box-shadow: var(--md-sys-elevation-4);
+    padding-top: max(var(--space-md), env(safe-area-inset-top, 24px));
   }
 
   .sidebar.open {
@@ -441,6 +494,14 @@ body {
 
   .plot-panel {
     min-height: 300px;
+  }
+
+  .plot-empty-state__text-desktop {
+    display: none;
+  }
+
+  .plot-empty-state__text-mobile {
+    display: block;
   }
 }
 
@@ -459,11 +520,27 @@ body {
   }
 }
 
+.mobile-text-only {
+  display: none;
+}
+
 @media (max-width: 600px) {
 
-  #btn-import span,
-  #btn-export span {
-    display: none;
+  .mobile-text-only {
+    display: inline;
+  }
+
+  #btn-import,
+  #btn-export {
+    padding: 8px 8px;
+    font-size: var(--md-sys-typescale-label-medium);
+    gap: var(--space-xs);
+  }
+
+  #btn-import svg,
+  #btn-export svg {
+    width: 22px;
+    height: 22px;
   }
 
   .top-bar {
@@ -476,6 +553,10 @@ body {
     width: 100%;
     min-width: 0;
     padding: 0;
+  }
+
+  .plot-panel {
+    border-radius: 0px;
   }
 
   .top-bar__title {
@@ -505,6 +586,14 @@ body {
 
   .plot-tab {
     flex-shrink: 0;
+  }
+
+  .plot-toolbar__actions {
+    position: relative;
+    z-index: 10;
+    background: var(--md-sys-color-surface-container);
+    box-shadow: -10px 0 16px -8px rgba(0, 0, 0, 0.15);
+    padding: var(--space-xs) var(--space-sm) var(--space-xs) var(--space-sm);
   }
 }
 

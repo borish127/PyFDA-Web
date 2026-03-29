@@ -74,7 +74,7 @@
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
-          <!-- <span>Import</span> -->
+          <span class="mobile-text-only">Load Filter</span>
         </button>
         <button class="md-btn md-btn--outlined" id="btn-export" data-tooltip="Save filter" aria-label="Save filter">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -83,7 +83,7 @@
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <!-- <span>Export</span> -->
+          <span class="mobile-text-only">Save Filter</span>
         </button>
         <button class="md-btn--icon" id="btn-theme" data-tooltip="Toggle Theme" aria-label="Toggle theme">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -100,7 +100,7 @@
           </svg>
         </button>
         <a href="https://github.com/borish127/PyFDA-Web" target="_blank" rel="noopener noreferrer"
-          class="md-btn md-btn--icon" aria-label="GitHub Repository" data-tooltip="GitHub Repository">
+          id="btn-github" class="md-btn md-btn--icon" aria-label="GitHub Repository" data-tooltip="GitHub Repository">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path
@@ -484,6 +484,18 @@
 
       <!-- Plot Panels -->
       <div class="plot-container">
+        <!-- Empty State -->
+        <div id="plot-empty-state" class="plot-empty-state">
+          <svg class="plot-empty-state__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <span class="plot-empty-state__text-desktop">Configure specifications and click Design Filter to show
+            graphics.</span>
+          <span class="plot-empty-state__text-mobile">Configure specifications and design a filter to show the graphics.
+            <br>Tap the menu icon (&equiv;) to expand the left panel.</span>
+        </div>
+
         <div class="plot-panel active" id="plot-magnitude"></div>
         <div class="plot-panel" id="plot-phase"></div>
         <div class="plot-panel" id="plot-group-delay"></div>
