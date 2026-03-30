@@ -24,14 +24,14 @@ const PlotManager = (() => {
   function getThemeColors() {
     const style = getComputedStyle(document.documentElement);
     return {
-      bg:         style.getPropertyValue('--md-sys-color-surface-container-lowest').trim() || '#ffffff',
-      paper:      style.getPropertyValue('--md-sys-color-surface-container-lowest').trim() || '#ffffff',
-      text:       style.getPropertyValue('--md-sys-color-on-surface').trim() || '#1a1b20',
-      grid:       style.getPropertyValue('--md-sys-color-outline-variant').trim() || '#c4c6d0',
-      primary:    style.getPropertyValue('--md-sys-color-primary').trim() || '#3a5ba9',
-      secondary:  style.getPropertyValue('--md-sys-color-secondary').trim() || '#565e71',
-      tertiary:   style.getPropertyValue('--md-sys-color-tertiary').trim() || '#705574',
-      error:      style.getPropertyValue('--md-sys-color-error').trim() || '#ba1a1a',
+      bg: style.getPropertyValue('--md-sys-color-surface-container-lowest').trim() || '#ffffff',
+      paper: style.getPropertyValue('--md-sys-color-surface-container-lowest').trim() || '#ffffff',
+      text: style.getPropertyValue('--md-sys-color-on-surface').trim() || '#1a1b20',
+      grid: style.getPropertyValue('--md-sys-color-outline-variant').trim() || '#c4c6d0',
+      primary: style.getPropertyValue('--md-sys-color-primary').trim() || '#3a5ba9',
+      secondary: style.getPropertyValue('--md-sys-color-secondary').trim() || '#565e71',
+      tertiary: style.getPropertyValue('--md-sys-color-tertiary').trim() || '#705574',
+      error: style.getPropertyValue('--md-sys-color-error').trim() || '#ba1a1a',
       primaryCtr: style.getPropertyValue('--md-sys-color-primary-container').trim() || '#d8e2ff',
     };
   }
@@ -73,6 +73,7 @@ const PlotManager = (() => {
       displayModeBar: true,
       displaylogo: false,
       modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+      scrollZoom: true,
     };
   }
 
@@ -85,7 +86,25 @@ const PlotManager = (() => {
     const config = Object.assign(baseConfig(), configOverrides);
     Plotly.react(el, traces, layout, config).then(() => {
       Plotly.Plots.resize(el);
+      setupPlotInteractions(el);
     });
+  }
+
+  function setupPlotInteractions(el) {
+    if (el._hasInteractionListeners) return;
+
+    // Desktop "Ctrl + Mouse Wheel" Zoom
+    el.addEventListener('wheel', (e) => {
+      if (!e.ctrlKey && !e.metaKey) {
+        // Stop Plotly from zooming, allow normal page scroll
+        e.stopPropagation();
+      } else {
+        // Prevent default browser zoom so Plotly can zoom
+        e.preventDefault();
+      }
+    }, { capture: true, passive: false });
+
+    el._hasInteractionListeners = true;
   }
 
   function replotAll() {

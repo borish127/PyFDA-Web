@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PyFDA Web - Digital Signal Processing Filter Design</title>
   <meta name="description"
     content="A free, serverless web application for DSP filter design and analysis. Ported from the Python PyFDA project to the browser using Pyodide.">
@@ -74,7 +74,7 @@
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
-          <span class="mobile-text-only">Load Filter</span>
+          <span class="mobile-text-only">Load<br>Filter</span>
         </button>
         <button class="md-btn md-btn--outlined" id="btn-export" data-tooltip="Save filter" aria-label="Save filter">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -83,7 +83,7 @@
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
-          <span class="mobile-text-only">Save Filter</span>
+          <span class="mobile-text-only">Save<br>Filter</span>
         </button>
         <button class="md-btn--icon" id="btn-theme" data-tooltip="Toggle Theme" aria-label="Toggle theme">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -99,8 +99,8 @@
             <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
           </svg>
         </button>
-        <a href="https://github.com/borish127/PyFDA-Web" target="_blank" rel="noopener noreferrer"
-          id="btn-github" class="md-btn md-btn--icon" aria-label="GitHub Repository" data-tooltip="GitHub Repository">
+        <a href="https://github.com/borish127/PyFDA-Web" target="_blank" rel="noopener noreferrer" id="btn-github"
+          class="md-btn md-btn--icon" aria-label="GitHub Repository" data-tooltip="GitHub Repository">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path
@@ -493,7 +493,14 @@
           <span class="plot-empty-state__text-desktop">Configure specifications and click Design Filter to show
             graphics.</span>
           <span class="plot-empty-state__text-mobile">Configure specifications and design a filter to show the graphics.
-            <br>Tap the menu icon (&equiv;) to expand the left panel.</span>
+            <br>Tap the menu icon (&equiv;) to expand the left panel.<span class="mobile-micro-only">
+            <br>Tap the Load Filter button (<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>) to load a filter from a file.</span></span>
         </div>
 
         <div class="plot-panel active" id="plot-magnitude"></div>
