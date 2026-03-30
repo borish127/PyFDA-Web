@@ -6,16 +6,19 @@
 const PyodideBridge = (() => {
   let pyodide = null;
   let ready = false;
+  window.pyodideEngineReady = false;
   const PYODIDE_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
 
   /* ----- Status Callback ----- */
-  let onStatus = () => { };
-  function setStatusCallback(cb) { onStatus = cb; }
+  function updateLoadingStatus(msg, percent) {
+    const mlStatus = document.getElementById('mini-loader-status');
+    if (mlStatus) mlStatus.textContent = msg;
+  }
 
   /* ----- Load Pyodide + Packages ----- */
   async function init() {
     try {
-      onStatus('Loading Pyodide runtime…', 10);
+      updateLoadingStatus('Loading Pyodide runtime…', 10);
 
       // Dynamically load the Pyodide script if not already present
       if (!window.loadPyodide) {
@@ -28,18 +31,18 @@ const PyodideBridge = (() => {
         });
       }
 
-      onStatus('Initializing Python interpreter…', 25);
+      updateLoadingStatus('Initializing Python interpreter…', 25);
       pyodide = await window.loadPyodide({
         indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
       });
 
-      onStatus('Installing NumPy…', 40);
+      updateLoadingStatus('Installing NumPy…', 40);
       await pyodide.loadPackage('numpy');
 
-      onStatus('Installing SciPy…', 60);
+      updateLoadingStatus('Installing SciPy…', 60);
       await pyodide.loadPackage('scipy');
 
-      onStatus('Loading DSP modules…', 80);
+      updateLoadingStatus('Loading DSP modules…', 80);
       // Load our Python modules
       const modules = ['filter_design', 'filter_analysis', 'fixpoint', 'io_utils'];
       for (const mod of modules) {
@@ -50,11 +53,14 @@ const PyodideBridge = (() => {
         }
       }
 
-      onStatus('Ready!', 100);
+      updateLoadingStatus('Ready!', 100);
       ready = true;
+      window.pyodideEngineReady = true;
+      const ml = document.getElementById('mini-loader');
+      if (ml) ml.classList.add('hidden');
       return true;
     } catch (err) {
-      onStatus(`Error: ${err.message}`, 0);
+      updateLoadingStatus(`Error: ${err.message}`, 0);
       console.error('Pyodide init failed:', err);
       throw err;
     }
@@ -161,7 +167,7 @@ json.dumps(_out, default=lambda o: o.tolist() if hasattr(o, 'tolist') else str(o
   function isReady() { return ready; }
 
   return {
-    init, runPython, callPython, setStatusCallback, isReady,
+    init, runPython, callPython, isReady,
     designFilter, freqResponse, groupDelay, phaseDelay,
     impulseResponse, stepResponse, stimulusResponse,
     pzData, surface3D, fixpointSim, exportData, importData

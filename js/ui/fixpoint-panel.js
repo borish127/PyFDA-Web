@@ -45,6 +45,11 @@ const FixpointPanel = (() => {
   }
 
   async function runFixpointSim() {
+    if (!window.pyodideEngineReady) {
+      showToast("Please wait, initializing math engine...");
+      return;
+    }
+
     if (!AppState.filter.b) {
       showToast('Design a filter first', 'error');
       return;

@@ -167,6 +167,10 @@ function switchTab(tabName) {
 
 /* ---------- Design Filter Action ---------- */
 async function designFilter() {
+  if (!window.pyodideEngineReady) {
+    showToast("Please wait, initializing math engine...");
+    return;
+  }
   if (AppState.ui.isDesigning) return;
   AppState.ui.isDesigning = true;
   bus.emit('designStart');
@@ -310,39 +314,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Loading overlay
   const overlay = document.getElementById('loading-overlay');
-  const statusEl = document.getElementById('loading-status');
-  const barFill = document.getElementById('loading-bar-fill');
 
-  PyodideBridge.setStatusCallback((msg, pct) => {
-    if (statusEl) statusEl.textContent = msg;
-    if (barFill) barFill.style.width = `${pct}%`;
-  });
-
-  try {
-    await PyodideBridge.init();
-    AppState.ui.isLoading = false;
-
-    // Small delay for the "Ready" message to be visible
-    await new Promise(r => setTimeout(r, 600));
-
+  // Hide full-screen overlay after a short delay to show the logo
+  setTimeout(() => {
     if (overlay) overlay.classList.add('hidden');
+  }, 800);
 
-    // Initialize UI modules
+  // Initialize UI modules immediately so they are visible/interactive
+  if (typeof InputSpecs !== 'undefined') InputSpecs.init();
+  if (typeof InputCoeffs !== 'undefined') InputCoeffs.init();
+  if (typeof InputPZ !== 'undefined') InputPZ.init();
+  if (typeof FixpointPanel !== 'undefined') FixpointPanel.init();
+  if (typeof FileIO !== 'undefined') FileIO.init();
+  if (typeof PlotManager !== 'undefined') PlotManager.init();
+
+  // Load Pyodide in the background
+  PyodideBridge.init().then(() => {
+    AppState.ui.isLoading = false;
     bus.emit('pyodideReady');
-
-    // Initialize input panels
-    if (typeof InputSpecs !== 'undefined') InputSpecs.init();
-    if (typeof InputCoeffs !== 'undefined') InputCoeffs.init();
-    if (typeof InputPZ !== 'undefined') InputPZ.init();
-    if (typeof FixpointPanel !== 'undefined') FixpointPanel.init();
-    if (typeof FileIO !== 'undefined') FileIO.init();
-
-    // Initialize plot modules
-    if (typeof PlotManager !== 'undefined') PlotManager.init();
-
-  } catch (err) {
+  }).catch(err => {
     showToast('Failed to initialize Python environment', 'error', 10000);
-  }
+  });
 
   // Event listeners
   document.getElementById('btn-theme')?.addEventListener('click', toggleTheme);

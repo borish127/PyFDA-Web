@@ -43,7 +43,10 @@
   <!-- ================= Loading Overlay ================= -->
   <div class="loading-overlay" id="loading-overlay">
     <div class="loading-overlay__logo">F&psi;</div>
-    <div class="loading-overlay__text">PyFDA Web</div>
+    <div style="text-align: center;">
+      <div class="loading-overlay__text">PyFDA Web</div>
+      <div class="loading-overlay__author">by borish127</div>
+    </div>
     <div class="loading-bar">
       <div class="loading-bar__fill" id="loading-bar-fill"></div>
     </div>
@@ -494,13 +497,13 @@
             graphics.</span>
           <span class="plot-empty-state__text-mobile">Configure specifications and design a filter to show the graphics.
             <br>Tap the menu icon (&equiv;) to expand the left panel.<span class="mobile-micro-only">
-            <br>Tap the Load Filter button (<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-              <polyline points="17 8 12 3 7 8" />
-              <line x1="12" y1="3" x2="12" y2="15" />
-            </svg>) to load a filter from a file.</span></span>
+              <br>Tap the Load Filter button (<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>) to load a filter from a file.</span></span>
         </div>
 
         <div class="plot-panel active" id="plot-magnitude"></div>
@@ -577,6 +580,12 @@
 
   <!-- Toast Container -->
   <div class="toast-container" id="toast-container"></div>
+
+  <!-- Mini Loader -->
+  <div id="mini-loader" class="mini-loader">
+    <span class="md-spinner"></span>
+    <span id="mini-loader-status">Initializing…</span>
+  </div>
 
   <!-- Scripts (order matters) -->
   <script src="js/pyodide-bridge.js"></script>
