@@ -1,121 +1,119 @@
 /* ============================================================
    PyFDA Web — Pyodide Bridge
    Manages Pyodide lifecycle, package loading, and Python execution
+   via a Background Web Worker
    ============================================================ */
 
 const PyodideBridge = (() => {
-  let pyodide = null;
+  let worker = null;
   let ready = false;
+  let msgCounter = 0;
+  const pendingRequests = new Map();
+
   window.pyodideEngineReady = false;
-  const PYODIDE_CDN = 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js';
 
   /* ----- Status Callback ----- */
   function updateLoadingStatus(msg, percent) {
     const mlStatus = document.getElementById('mini-loader-status');
     if (mlStatus) mlStatus.textContent = msg;
+    
+    // Optionally update progress bar if you have one
+    const mlBar = document.getElementById('loading-bar-fill');
+    if (mlBar) mlBar.style.width = percent + '%';
+  }
+
+  /* ----- Worker Message Router ----- */
+  function handleWorkerMessage(e) {
+    const data = e.data;
+    if (data.type === 'status') {
+      updateLoadingStatus(data.msg, data.percent);
+      if (data.msg === 'Ready!') {
+        window.pyodideEngineReady = true;
+        const ml = document.getElementById('mini-loader');
+        if (ml) ml.classList.add('hidden');
+        
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.classList.add('hidden');
+      }
+    } else if (data.type === 'response') {
+      const { msgId, success, data: resultData, error } = data;
+      const promiseObj = pendingRequests.get(msgId);
+      if (promiseObj) {
+        pendingRequests.delete(msgId);
+        if (success) {
+          promiseObj.resolve(resultData);
+        } else {
+          promiseObj.reject(new Error(error));
+        }
+      }
+    }
+  }
+
+  /* ----- Dispatch helper ----- */
+  function dispatchToWorker(type, payload = {}, timeoutMs = 30000) {
+    return new Promise((resolve, reject) => {
+      const msgId = msgCounter++;
+      
+      // Optionally add a timeout fallback for freezing Python computations
+      let timeoutId = null;
+      if (timeoutMs > 0 && type !== 'init') {
+          timeoutId = setTimeout(() => {
+              if (pendingRequests.has(msgId)) {
+                  pendingRequests.delete(msgId);
+                  reject(new Error(`Worker execution timed out after ${timeoutMs}ms for function: ${payload?.funcName || 'unknown'}`));
+              }
+          }, timeoutMs);
+      }
+
+      pendingRequests.set(msgId, {
+          resolve: (res) => {
+              if (timeoutId) clearTimeout(timeoutId);
+              resolve(res);
+          },
+          reject: (err) => {
+              if (timeoutId) clearTimeout(timeoutId);
+              reject(err);
+          }
+      });
+      
+      worker.postMessage({ type, msgId, payload });
+    });
   }
 
   /* ----- Load Pyodide + Packages ----- */
   async function init() {
+    updateLoadingStatus('Starting Web Worker…', 0);
+    worker = new Worker('js/pyodide-worker.js');
+    worker.onmessage = handleWorkerMessage;
+    
     try {
-      updateLoadingStatus('Loading Pyodide runtime…', 10);
-
-      // Dynamically load the Pyodide script if not already present
-      if (!window.loadPyodide) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = PYODIDE_CDN;
-          s.onload = resolve;
-          s.onerror = () => reject(new Error('Failed to load Pyodide CDN'));
-          document.head.appendChild(s);
-        });
-      }
-
-      updateLoadingStatus('Initializing Python interpreter…', 25);
-      pyodide = await window.loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.24.1/full/'
-      });
-
-      updateLoadingStatus('Installing NumPy…', 40);
-      await pyodide.loadPackage('numpy');
-
-      updateLoadingStatus('Installing SciPy…', 60);
-      await pyodide.loadPackage('scipy');
-
-      updateLoadingStatus('Loading DSP modules…', 80);
-      // Load our Python modules
-      const modules = ['filter_design', 'filter_analysis', 'fixpoint', 'io_utils'];
-      for (const mod of modules) {
-        const resp = await fetch(`python/${mod}.py`);
-        if (resp.ok) {
-          const code = await resp.text();
-          await pyodide.runPythonAsync(code);
-        }
-      }
-
-      updateLoadingStatus('Ready!', 100);
-      ready = true;
-      window.pyodideEngineReady = true;
-      const ml = document.getElementById('mini-loader');
-      if (ml) ml.classList.add('hidden');
-      return true;
+        await dispatchToWorker('init', {}, 0); // no timeout for initialization
+        ready = true;
+        return true;
     } catch (err) {
-      updateLoadingStatus(`Error: ${err.message}`, 0);
-      console.error('Pyodide init failed:', err);
-      throw err;
+        updateLoadingStatus(`Error: ${err.message}`, 0);
+        console.error('Worker init failed:', err);
+        throw err;
     }
   }
 
   /* ----- Run arbitrary Python code ----- */
   async function runPython(code) {
-    if (!ready) throw new Error('Pyodide not initialized');
-    try {
-      return await pyodide.runPythonAsync(code);
-    } catch (err) {
-      console.error('Python error:', err);
-      throw err;
-    }
+    if (!ready) throw new Error('Pyodide Worker not initialized');
+    return dispatchToWorker('run_python', { code }, 0); // No timeout for arbitrary scripts
   }
 
   /* ----- Call a Python function and get JSON result ----- */
   async function callPython(funcName, argsJson) {
-    if (!ready) throw new Error('Pyodide not initialized');
-    
-    // Attach to window to avoid fragile string interpolation in Python
-    window.__pyfda_args = argsJson;
-    
-    const code = `
-import json
-import js
-try:
-    _args = json.loads(js.window.__pyfda_args)
-    _res = ${funcName}(**_args) if isinstance(_args, dict) else ${funcName}(*_args)
-    _out = {"success": True, "data": _res}
-except Exception as e:
-    _out = {"success": False, "error": type(e).__name__ + ": " + str(e)}
-json.dumps(_out, default=lambda o: o.tolist() if hasattr(o, 'tolist') else str(o))
-`;
-    try {
-      const resultStr = await pyodide.runPythonAsync(code);
-      const parsed = JSON.parse(resultStr);
-      if (!parsed.success) {
-        throw new Error(parsed.error);
-      }
-      return parsed.data;
-    } catch (err) {
-      console.error(`Python call ${funcName} failed:`, err);
-      throw err;
-    }
+    if (!ready) throw new Error('Pyodide Worker not initialized');
+    return dispatchToWorker('call_python', { funcName, argsJson }, 30000); // 30 sec timeout
   }
 
-  /* ----- Design filter ----- */
+  /* ----- Specific endpoints wrapping callPython ----- */
   async function designFilter(specs) {
-    // Pass the specs object directly so Python's **_args unrolls it 
-    // into responseType='...', fs=..., etc.
     return callPython('design_filter', JSON.stringify(specs));
   }
 
-  /* ----- Analysis functions ----- */
   async function freqResponse(b, a, fs, nPoints) {
     return callPython('freq_response', JSON.stringify({ b, a, fs, n_points: nPoints }));
   }

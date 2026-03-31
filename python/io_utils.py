@@ -127,24 +127,73 @@ def import_filter(format='npz', data_b64='', **kwargs):
 
     if format == 'npz':
         buf = io.BytesIO(raw)
-        data = np.load(buf, allow_pickle=False)
+        
+        # 1. Enable allow_pickle=True (100% safe inside the Pyodide browser sandbox)
+        data = np.load(buf, allow_pickle=True)
         result = {}
-        if 'b' in data:
-            result['b'] = data['b'].tolist()
-        if 'a' in data:
-            result['a'] = data['a'].tolist()
-        if 'zeros' in data:
-            z = data['zeros']
-            result['zeros'] = z.tolist()
-        if 'poles' in data:
-            p = data['poles']
-            result['poles'] = p.tolist()
-        if 'gain' in data:
-            result['gain'] = float(data['gain'].flat[0])
-        if 'sos' in data:
-            result['sos'] = data['sos'].tolist()
-        if 'order' in data:
-            result['order'] = int(data['order'].flat[0])
+
+        def _to_list(val):
+            # safely convert to Python list, handling 0D scalars gracefully
+            v = np.asarray(val)
+            if v.size == 0:
+                return []
+            if v.ndim == 0:
+                return [v.tolist()]
+            return v.tolist()
+            
+        def _to_scalar(val, dtype=float, default=1.0):
+            # safely convert to scalar by grabbing the first element (works for any shape)
+            try:
+                v = np.asarray(val)
+                return dtype(v.flat[0]) if v.size > 0 else default
+            except Exception:
+                return default
+        
+        # 2. Check for Desktop PyFDA's nested dictionary architecture ('fil_dict')
+        if 'fil_dict' in data:
+            try:
+                fd = data['fil_dict'].item()
+                if 'ba' in fd:
+                    result['b'] = _to_list(fd['ba'][0])
+                    result['a'] = _to_list(fd['ba'][1])
+                if 'zpk' in fd:
+                    result['zeros'] = _to_list(fd['zpk'][0])
+                    result['poles'] = _to_list(fd['zpk'][1])
+                    result['gain'] = _to_scalar(fd['zpk'][2], float, 1.0)
+                if 'sos' in fd:
+                    result['sos'] = _to_list(fd['sos'])
+            except Exception as e:
+                pass # Fallback to flat scanning if extraction fails
+
+        # 3. Check for grouped array exports (Some desktop versions export 'ba' directly)
+        if 'ba' in data and 'b' not in result:
+            ba = data['ba']
+            if len(ba) >= 2:
+                result['b'] = _to_list(ba[0])
+                result['a'] = _to_list(ba[1])
+        if 'zpk' in data and 'zeros' not in result:
+            zpk = data['zpk']
+            if len(zpk) >= 3:
+                result['zeros'] = _to_list(zpk[0])
+                result['poles'] = _to_list(zpk[1])
+                result['gain'] = _to_scalar(zpk[2], float, 1.0)
+
+        # 4. Standard Flat Arrays (Native PyFDA Web format)
+        if 'b' in data and 'b' not in result:
+            result['b'] = _to_list(data['b'])
+        if 'a' in data and 'a' not in result:
+            result['a'] = _to_list(data['a'])
+        if 'zeros' in data and 'zeros' not in result:
+            result['zeros'] = _to_list(data['zeros'])
+        if 'poles' in data and 'poles' not in result:
+            result['poles'] = _to_list(data['poles'])
+        if 'gain' in data and 'gain' not in result:
+            result['gain'] = _to_scalar(data['gain'], float, 1.0)
+        if 'sos' in data and 'sos' not in result:
+            result['sos'] = _to_list(data['sos'])
+        if 'order' in data and 'order' not in result:
+            result['order'] = _to_scalar(data['order'], int, 0)
+            
         return result
 
     elif format == 'csv':

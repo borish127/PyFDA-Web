@@ -175,6 +175,34 @@
           </select>
           <label class="md-select__label">Design Method</label>
         </div>
+
+        <!-- Window (for firwin) -->
+        <div class="md-select" id="field-window" style="display:none; margin-top: var(--space-sm);">
+          <select class="md-select__input" id="sel-window">
+            <option value="hamming">Hamming</option>
+            <option value="hann">Hann</option>
+            <option value="blackman">Blackman</option>
+            <option value="bartlett">Bartlett</option>
+            <option value="kaiser">Kaiser (β=8)</option>
+            <option value="rectangular">Rectangular (Boxcar)</option>
+            <option value="flattop">Flat Top</option>
+            <option value="bohman">Bohman</option>
+            <option value="parzen">Parzen</option>
+            <option value="nuttall">Nuttall</option>
+            <option value="blackmanharris">Blackman-Harris</option>
+            <option value="cosine">Cosine</option>
+            <option value="exponential">Exponential</option>
+            <option value="tukey">Tukey (α=0.5)</option>
+            <option value="taylor">Taylor</option>
+            <option value="lanczos">Lanczos</option>
+            <option value="barthann">Barthann</option>
+            <option value="gaussian">Gaussian (σ=7)</option>
+            <option value="general_gaussian">Gen. Gaussian</option>
+            <option value="dpss">DPSS (Slepian)</option>
+            <option value="chebwin">Chebyshev Window</option>
+          </select>
+          <label class="md-select__label">Window Type</label>
+        </div>
       </div>
 
       <!-- Specifications -->
@@ -268,33 +296,6 @@
           </label>
         </div>
 
-        <!-- Window (for firwin) -->
-        <div class="md-select" id="field-window" style="display:none; margin-top: var(--space-sm);">
-          <select class="md-select__input" id="sel-window">
-            <option value="hamming">Hamming</option>
-            <option value="hann">Hann</option>
-            <option value="blackman">Blackman</option>
-            <option value="bartlett">Bartlett</option>
-            <option value="kaiser">Kaiser (β=8)</option>
-            <option value="rectangular">Rectangular (Boxcar)</option>
-            <option value="flattop">Flat Top</option>
-            <option value="bohman">Bohman</option>
-            <option value="parzen">Parzen</option>
-            <option value="nuttall">Nuttall</option>
-            <option value="blackmanharris">Blackman-Harris</option>
-            <option value="cosine">Cosine</option>
-            <option value="exponential">Exponential</option>
-            <option value="tukey">Tukey (α=0.5)</option>
-            <option value="taylor">Taylor</option>
-            <option value="lanczos">Lanczos</option>
-            <option value="barthann">Barthann</option>
-            <option value="gaussian">Gaussian (σ=7)</option>
-            <option value="general_gaussian">Gen. Gaussian</option>
-            <option value="dpss">DPSS (Slepian)</option>
-            <option value="chebwin">Chebyshev Window</option>
-          </select>
-          <label class="md-select__label">Window Type</label>
-        </div>
       </div>
 
       <!-- Design Button -->
