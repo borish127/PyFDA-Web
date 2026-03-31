@@ -8,6 +8,81 @@ import base64
 import io
 
 
+def estimate_specs(b, a, fs=1.0):
+    from scipy.signal import freqz
+    b = np.atleast_1d(b)
+    a = np.atleast_1d(a)
+    
+    specs = {}
+    
+    # 1. Filter Family
+    if len(a) == 1 or np.all(a[1:] == 0):
+        specs['filterFamily'] = 'fir'
+    else:
+        specs['filterFamily'] = 'iir'
+        
+    # 2. Order
+    specs['order'] = max(len(b), len(a)) - 1
+    
+    # 3. Response Type
+    w, h = freqz(b, a, worN=1024)
+    mag = np.abs(h)
+    max_mag = np.max(mag) if np.max(mag) > 0 else 1.0
+    mag_norm = mag / max_mag
+    
+    dc = mag_norm[0]
+    nyq = mag_norm[-1]
+    mid = mag_norm[len(mag_norm)//2]
+    
+    rt = 'lowpass'
+    if dc > 0.5 and nyq < 0.5:
+        rt = 'lowpass'
+    elif dc < 0.5 and nyq > 0.5:
+        rt = 'highpass'
+    elif dc < 0.5 and nyq < 0.5 and mid > 0.5:
+        rt = 'bandpass'
+    elif dc > 0.5 and nyq > 0.5 and mid < 0.5:
+        rt = 'bandstop'
+        
+    specs['responseType'] = rt
+    
+    # 4. Cutoff Frequencies (-3dB)
+    mag_shift = mag_norm - (1.0 / np.sqrt(2))
+    crossings_idx = np.where(np.diff(np.sign(mag_shift)))[0]
+    freqs = w[crossings_idx] * fs / (2 * np.pi)
+    
+    if len(freqs) > 0:
+        if rt == 'lowpass':
+            specs['fpb'] = float(freqs[0])
+            specs['fsb'] = float(min(freqs[0] * 1.2, fs/2))
+        elif rt == 'highpass':
+            specs['fpb'] = float(freqs[0])
+            specs['fsb'] = float(freqs[0] * 0.8)
+        elif rt in ['bandpass', 'bandstop'] and len(freqs) >= 2:
+            specs['fpb'] = float(freqs[0])
+            specs['fpb2'] = float(freqs[1])
+            if rt == 'bandpass':
+                specs['fsb'] = float(freqs[0] * 0.8)
+                specs['fsb2'] = float(min(freqs[1] * 1.2, fs/2))
+            else:
+                specs['fsb'] = float(min(freqs[0] * 1.2, fs/2))
+                specs['fsb2'] = float(freqs[1] * 0.8)
+    else:
+        specs['fpb'] = 0.25 * fs
+        specs['fsb'] = 0.3 * fs
+        
+    specs['freqUnit'] = 'normalized' if fs == 1.0 else 'hz'
+    specs['fs'] = float(fs)
+    specs['apb'] = 1.0
+    specs['asb'] = 60.0
+    
+    # Default Method
+    specs['designMethod'] = 'equiripple' if specs['filterFamily'] == 'fir' else 'butter'
+    specs['method'] = specs['designMethod']
+    
+    return specs
+
+
 def export_filter(format='npz', b=None, a=None, zeros=None, poles=None,
                   gain=None, sos=None, order=None, method=None,
                   specs=None, **kwargs):
@@ -162,6 +237,36 @@ def import_filter(format='npz', data_b64='', **kwargs):
                     result['gain'] = _to_scalar(fd['zpk'][2], float, 1.0)
                 if 'sos' in fd:
                     result['sos'] = _to_list(fd['sos'])
+                
+                # Attempt to extract UI specs from desktop PyFDA
+                specs_map = {}
+                if 'rt' in fd:
+                    rt_map = {'LP': 'lowpass', 'HP': 'highpass', 'BP': 'bandpass', 'BS': 'bandstop', 'AP': 'allpass'}
+                    rt_val = _to_scalar(fd['rt'], str, '')
+                    if rt_val in rt_map:
+                        specs_map['responseType'] = rt_map[rt_val]
+                        result['rt'] = rt_map[rt_val]
+                if 'fc' in fd:
+                    specs_map['filterFamily'] = _to_scalar(fd['fc'], str, '').lower()
+                    result['fc'] = specs_map['filterFamily']
+                if 'f_S' in fd:
+                    specs_map['fs'] = _to_scalar(fd['f_S'], float, 48000.0)
+                if 'F_PB' in fd:
+                    specs_map['fpb'] = _to_scalar(fd['F_PB'], float, 0.0)
+                if 'F_SB' in fd:
+                    specs_map['fsb'] = _to_scalar(fd['F_SB'], float, 0.0)
+                if 'F_PB2' in fd:
+                    specs_map['fpb2'] = _to_scalar(fd['F_PB2'], float, 0.0)
+                if 'F_SB2' in fd:
+                    specs_map['fsb2'] = _to_scalar(fd['F_SB2'], float, 0.0)
+                if 'A_PB' in fd:
+                    specs_map['apb'] = _to_scalar(fd['A_PB'], float, 1.0)
+                if 'A_SB' in fd:
+                    specs_map['asb'] = _to_scalar(fd['A_SB'], float, 60.0)
+                if 'N' in fd:
+                    specs_map['order'] = _to_scalar(fd['N'], int, 10)
+                if specs_map:
+                    result['specs'] = specs_map
             except Exception as e:
                 pass # Fallback to flat scanning if extraction fails
 
@@ -191,10 +296,7 @@ def import_filter(format='npz', data_b64='', **kwargs):
             result['gain'] = _to_scalar(data['gain'], float, 1.0)
         if 'sos' in data and 'sos' not in result:
             result['sos'] = _to_list(data['sos'])
-        if 'order' in data and 'order' not in result:
-            result['order'] = _to_scalar(data['order'], int, 0)
-            
-        return result
+        # Fall through to specs validation
 
     elif format == 'csv':
         text = raw.decode('utf-8')
@@ -231,10 +333,13 @@ def import_filter(format='npz', data_b64='', **kwargs):
                 parts = line.split(',')
                 result['poles'].append(complex(float(parts[0]), float(parts[1]) if len(parts) > 1 else 0))
 
-        return result
+        # Fall through
 
     elif format == 'json':
-        return json.loads(raw.decode('utf-8'))
+        result = json.loads(raw.decode('utf-8'))
+        if 'specs' in result and 'responseType' in result['specs']:
+            result['rt'] = result['specs']['responseType']
+        # Fall through
 
     elif format == 'mat':
         try:
@@ -254,9 +359,21 @@ def import_filter(format='npz', data_b64='', **kwargs):
                 result['gain'] = float(np.squeeze(data['gain']))
             if 'sos' in data:
                 result['sos'] = data['sos'].tolist()
-            return result
+            # Fall through
         except ImportError:
             raise RuntimeError("scipy.io.loadmat not available for .mat import")
 
     else:
         raise ValueError(f"Unsupported import format: {format}")
+
+    # Unified spec estimation fallback
+    if 'specs' not in result or not result['specs']:
+        # If any essential coefficient is somehow missing we default to [1.0] for safe estimation
+        b_array = result.get('b', [1.0])
+        a_array = result.get('a', [1.0])
+        result['specs'] = estimate_specs(b_array, a_array, fs=1.0)
+        result['rt'] = result['specs'].get('responseType', 'lowpass')
+        result['fc'] = result['specs'].get('filterFamily', 'fir')
+        result['method'] = result['specs'].get('designMethod', 'equiripple')
+
+    return result

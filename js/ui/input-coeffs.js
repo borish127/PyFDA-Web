@@ -6,6 +6,7 @@ const InputCoeffs = (() => {
 
   function init() {
     bus.on('filterDesigned', updateTable);
+    bus.on('filterLoaded', syncTables);
 
     // Copy b,a
     document.getElementById('btn-copy-ba')?.addEventListener('click', () => {
@@ -86,6 +87,14 @@ const InputCoeffs = (() => {
       return val.toExponential(8);
     }
     return val.toPrecision(10).replace(/0+$/, '').replace(/\.$/, '');
+  }
+
+  function syncTables(data) {
+    if (data.b && data.a) {
+      AppState.filter.b = data.b;
+      AppState.filter.a = data.a;
+      updateTable(AppState.filter);
+    }
   }
 
   return { init };

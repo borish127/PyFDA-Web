@@ -129,7 +129,12 @@ const FileIO = (() => {
 
         // Import via Python
         const result = await PyodideBridge.importData(format, dataB64);
+        bus.emit('filterLoaded', result);
 
+        if (result.specs) {
+          Object.assign(AppState.specs, result.specs);
+          bus.emit('specsImported', AppState.specs);
+        }
         // Update app state
         if (result.b) AppState.filter.b = result.b;
         if (result.a) AppState.filter.a = result.a;
@@ -138,6 +143,7 @@ const FileIO = (() => {
         if (result.gain !== undefined) AppState.filter.gain = result.gain;
         if (result.sos) AppState.filter.sos = result.sos;
         if (result.order) AppState.filter.order = result.order;
+        if (result.method) AppState.filter.method = result.method;
 
         // Clear cached analysis
         AppState.analysis = {

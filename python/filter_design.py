@@ -100,6 +100,9 @@ def design_filter(responseType='lowpass', filterFamily='iir', designMethod='butt
                 actual_order = int(order)
 
             numtaps = actual_order + 1
+            if responseType in ('highpass', 'bandstop') and numtaps % 2 == 0:
+                numtaps += 1
+
             if responseType in ('bandpass', 'bandstop'):
                 cutoff = wp if isinstance(wp, list) else [wp]
             else:
@@ -154,6 +157,9 @@ def design_filter(responseType='lowpass', filterFamily='iir', designMethod='butt
             numtaps = actual_order + 1
             if numtaps < 3:
                 numtaps = 3
+
+            if responseType in ('highpass', 'bandstop') and numtaps % 2 == 0:
+                numtaps += 1
 
             # Build frequency bands and desired response
             if responseType == 'lowpass':

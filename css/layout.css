@@ -49,11 +49,11 @@ body {
 
 .app-shell.sidebar-collapsed .sidebar {
   overflow: hidden;
-  padding: 0;
-  border-right: none;
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+  transform: translateX(-360px);
+  transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized),
+              opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 
 .sidebar {
@@ -133,6 +133,9 @@ body {
   flex-direction: column;
   gap: var(--space-md);
   min-height: 0;
+  width: 360px; /* <--- ADD THIS to prevent content squishing */
+  transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized),
+              opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 
 .sidebar::-webkit-scrollbar {
@@ -262,6 +265,14 @@ body {
   height: 100%;
   touch-action: none;
 }
+
+.plot-panel .svg-container,
+.plot-panel .main-svg {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+
 
 /* ---------- Plot Empty State ---------- */
 .plot-empty-state {

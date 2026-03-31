@@ -7,6 +7,7 @@ const InputPZ = (() => {
   function init() {
     bus.on('filterDesigned', updateFromFilter);
     bus.on('plotPZ', updateTable);
+    bus.on('filterLoaded', syncTables);
 
     // Copy P/Z
     document.getElementById('btn-copy-pz')?.addEventListener('click', () => {
@@ -99,6 +100,15 @@ const InputPZ = (() => {
       return `${r.toPrecision(6)} ${sign} ${Math.abs(i).toPrecision(6)}j`;
     }
     return String(pair);
+  }
+
+  function syncTables(data) {
+    if (data.zeros && data.poles) {
+      AppState.filter.zeros = data.zeros;
+      AppState.filter.poles = data.poles;
+      if (data.gain !== undefined) AppState.filter.gain = data.gain;
+      updateFromFilter(AppState.filter);
+    }
   }
 
   return { init };

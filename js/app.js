@@ -141,12 +141,40 @@ function toggleSidebar() {
     const collapsed = shell.classList.toggle('sidebar-collapsed');
     AppState.ui.sidebarOpen = !collapsed;
 
-    // Resize plots after transition completes
-    setTimeout(() => {
-      document.querySelectorAll('.plot-panel.active .js-plotly-plot').forEach(el => {
-        Plotly.Plots.resize(el);
-      });
-    }, 450);
+    // Use requestAnimationFrame with sub-pixel precision to sync with CSS grid transition
+    const duration = 400; // <--- Polished to exactly match --md-sys-motion-duration-medium
+    const startTime = performance.now();
+
+    // Target the active panel
+    const activePanel = document.querySelector('.plot-panel.active');
+    const activePlot = activePanel ? (activePanel.querySelector('.js-plotly-plot') || activePanel) : null;
+
+    if (activePlot) {
+      // Disable pointer events during animation to stop hover calculations and stutter
+      activePlot.style.pointerEvents = 'none';
+
+      function smoothResize(currentTime) {
+        if (typeof Plotly !== 'undefined' && activePlot && activePanel) {
+          // getBoundingClientRect() provides fractional pixels, eliminating 1px text jitter
+          const rect = activePanel.getBoundingClientRect();
+          Plotly.relayout(activePlot, {
+            width: rect.width,
+            height: rect.height
+          });
+        }
+
+        if (currentTime - startTime < duration) {
+          requestAnimationFrame(smoothResize);
+        } else if (typeof Plotly !== 'undefined' && activePlot) {
+          // Animation complete: restore state
+          activePlot.style.pointerEvents = '';
+          Plotly.relayout(activePlot, { width: null, height: null, autosize: true });
+          Plotly.Plots.resize(activePlot);
+        }
+      }
+
+      requestAnimationFrame(smoothResize);
+    }
   }
 }
 
