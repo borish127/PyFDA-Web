@@ -56,7 +56,7 @@ body {
   opacity: 0;
   transform: translateX(-360px);
   transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized),
-              opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+    opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 
 .sidebar {
@@ -132,14 +132,14 @@ body {
   background: var(--md-sys-color-surface-container-low);
   border-right: 1px solid var(--md-sys-color-outline-variant);
   /* Update overflow and padding to allow fixed header/footer */
-  overflow: hidden; 
-  padding: 0; 
+  overflow: hidden;
+  padding: 0;
   display: flex;
   flex-direction: column;
   min-height: 0;
   width: 360px;
   transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized),
-              opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+    opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 
 /* New Sidebar Layout Classes */
@@ -181,7 +181,25 @@ body {
   touch-action: pan-y;
 }
 
-.sidebar-footer {
+#side-pane-design {
+  padding: 0;
+  overflow: hidden;
+  gap: 0;
+}
+
+.sidebar-pane-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  touch-action: pan-y;
+}
+
+.sidebar-footer-inner {
   flex-shrink: 0;
   padding: var(--space-md);
   background: var(--md-sys-color-surface-container-low);
@@ -460,8 +478,13 @@ body {
 }
 
 @keyframes fakeProgress {
-  0% { width: 0%; }
-  100% { width: 100%; }
+  0% {
+    width: 0%;
+  }
+
+  100% {
+    width: 100%;
+  }
 }
 
 /* ---------- Sidebar Toggle ---------- */
@@ -715,8 +738,8 @@ body {
   }
 }
 
-.top-bar__actions > [data-tooltip]:last-child::after,
-.plot-toolbar__actions > [data-tooltip-bottom]:last-child::after {
+.top-bar__actions>[data-tooltip]:last-child::after,
+.plot-toolbar__actions>[data-tooltip-bottom]:last-child::after {
   left: auto !important;
   right: 0 !important;
   transform: none !important;

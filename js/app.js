@@ -377,12 +377,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       sidebarTrack.style.transition = '';
       sidebarTrack.style.transform = `translateX(-${idx * 100}%)`;
     }
-
-    // Toggle floating Design footer visibility
-    const footer = document.querySelector('.sidebar-footer');
-    if (footer) {
-      footer.style.display = target === 'design' ? '' : 'none';
-    }
   }
 
   // Bind clicks structurally
