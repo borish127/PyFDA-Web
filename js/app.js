@@ -83,7 +83,7 @@ const AppState = {
   /* UI state */
   ui: {
     activeTab: 'magnitude',
-    sidebarOpen: false,
+    sidebarOpen: window.innerWidth > 900,
     theme: 'system',           // light, dark, system
     isDesigning: false,
     isLoading: true,
@@ -141,40 +141,17 @@ function toggleSidebar() {
     const collapsed = shell.classList.toggle('sidebar-collapsed');
     AppState.ui.sidebarOpen = !collapsed;
 
-    // Use requestAnimationFrame with sub-pixel precision to sync with CSS grid transition
-    const duration = 400; // <--- Polished to exactly match --md-sys-motion-duration-medium
-    const startTime = performance.now();
-
-    // Target the active panel
-    const activePanel = document.querySelector('.plot-panel.active');
-    const activePlot = activePanel ? (activePanel.querySelector('.js-plotly-plot') || activePanel) : null;
-
-    if (activePlot) {
-      // Disable pointer events during animation to stop hover calculations and stutter
-      activePlot.style.pointerEvents = 'none';
-
-      function smoothResize(currentTime) {
-        if (typeof Plotly !== 'undefined' && activePlot && activePanel) {
-          // getBoundingClientRect() provides fractional pixels, eliminating 1px text jitter
-          const rect = activePanel.getBoundingClientRect();
-          Plotly.relayout(activePlot, {
-            width: rect.width,
-            height: rect.height
-          });
-        }
-
-        if (currentTime - startTime < duration) {
-          requestAnimationFrame(smoothResize);
-        } else if (typeof Plotly !== 'undefined' && activePlot) {
-          // Animation complete: restore state
-          activePlot.style.pointerEvents = '';
-          Plotly.relayout(activePlot, { width: null, height: null, autosize: true });
+    // GPU Compositor automatically stretches the .main-svg mechanically via CSS.
+    // We defer heavy mathematical SVG computation entirely until the animation finishes.
+    setTimeout(() => {
+      if (typeof Plotly !== 'undefined') {
+        const activePlot = document.querySelector('.plot-panel.active');
+        if (activePlot && activePlot.classList.contains('js-plotly-plot')) {
+          Plotly.relayout(activePlot, { autosize: true });
           Plotly.Plots.resize(activePlot);
         }
       }
-
-      requestAnimationFrame(smoothResize);
-    }
+    }, 400);
   }
 }
 
@@ -182,7 +159,7 @@ function toggleSidebar() {
 function switchTab(tabName) {
   AppState.ui.activeTab = tabName;
 
-  document.querySelectorAll('.plot-tab').forEach(t => {
+  document.querySelectorAll('.plot-tab[data-tab]').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === tabName);
   });
 
@@ -369,16 +346,160 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-menu')?.addEventListener('click', toggleSidebar);
   document.querySelector('.sidebar-backdrop')?.addEventListener('click', toggleSidebar);
 
-  // GitHub Link Mobile Intercept
-  document.getElementById('btn-github')?.addEventListener('click', (e) => {
-    if (window.innerWidth <= 600) {
-      if (!confirm('Visit the Github Repository?')) {
-        e.preventDefault();
-      }
+  // Topbar Logo Click to open About Tab
+  const openAboutPane = () => {
+    if (!AppState.ui.sidebarOpen) toggleSidebar();
+    const aboutTab = document.querySelector('[data-side-tab="about"]');
+    if (aboutTab) aboutTab.click();
+  };
+  document.querySelector('.top-bar__logo')?.addEventListener('click', openAboutPane);
+  document.querySelector('.top-bar__title')?.addEventListener('click', openAboutPane);
+
+  // Sidebar tab sliding logic
+  const sideTabsArray = ['design', 'analysis', 'about'];
+  let currentSideTabIdx = 0;
+  const sidebarTrack = document.getElementById('sidebar-track');
+  const sidebarViewport = document.querySelector('.sidebar-viewport');
+
+  function gotoSideTab(idx) {
+    if (idx < 0) idx = 0;
+    if (idx > 2) idx = 2;
+    currentSideTabIdx = idx;
+    const target = sideTabsArray[idx];
+
+    // Update active tab styling
+    document.querySelectorAll('.sidebar-tabs [data-side-tab]').forEach(t => {
+      t.classList.toggle('active', t.dataset.sideTab === target);
+    });
+
+    // Translate the track horizontally (apply standard CSS transition)
+    if (sidebarTrack) {
+      sidebarTrack.style.transition = '';
+      sidebarTrack.style.transform = `translateX(-${idx * 100}%)`;
     }
+
+    // Toggle floating Design footer visibility
+    const footer = document.querySelector('.sidebar-footer');
+    if (footer) {
+      footer.style.display = target === 'design' ? '' : 'none';
+    }
+  }
+
+  // Bind clicks structurally
+  document.querySelectorAll('.sidebar-tabs [data-side-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      gotoSideTab(sideTabsArray.indexOf(tab.dataset.sideTab));
+    });
   });
-  // Tab clicks
-  document.querySelectorAll('.plot-tab').forEach(tab => {
+
+  // Mobile swipe gestures: slide tabs OR slide to close
+  const sidebarEl = document.querySelector('.sidebar');
+  if (sidebarViewport && sidebarTrack && sidebarEl) {
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let isSwipingTabs = false;
+    let isClosingSidebar = false;
+    let isScrolling = false;
+    let intendedAction = null; // 'tabs' or 'close'
+
+    sidebarEl.addEventListener('touchstart', (e) => {
+      if (window.innerWidth > 900) return; // Disable finger swipe tracking on desktop
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      currentX = startX;
+      isSwipingTabs = false;
+      isClosingSidebar = false;
+      isScrolling = false;
+
+      // Determine intent margin (rightmost 50px of sidebar)
+      const rect = sidebarEl.getBoundingClientRect();
+      if (startX > rect.right - 50) {
+        intendedAction = 'close';
+      } else {
+        intendedAction = 'tabs';
+      }
+
+      sidebarTrack.style.transition = 'none'; // Strip CSS transition to natively follow finger for tabs
+      sidebarEl.style.transition = 'none'; // Strip CSS transition to natively follow finger for closing
+    }, { passive: true });
+
+    sidebarEl.addEventListener('touchmove', (e) => {
+      if (window.innerWidth > 900) return;
+      if (isScrolling) return;
+
+      const x = e.touches[0].clientX;
+      const y = e.touches[0].clientY;
+      const deltaX = x - startX;
+      const deltaY = y - startY;
+
+      if (!isSwipingTabs && !isClosingSidebar && !isScrolling) {
+        // Did they gesture vertically (slope > 1) or horizontally?
+        if (Math.abs(deltaY) > Math.abs(deltaX)) {
+          isScrolling = true;
+          return; // Let standard CSS vertical scroll take over
+        } else if (Math.abs(deltaX) > 10) {
+          if (intendedAction === 'close' && deltaX < 0) {
+            isClosingSidebar = true;
+          } else {
+            isSwipingTabs = true;
+          }
+        }
+      }
+
+      if (isSwipingTabs) {
+        if (e.cancelable) e.preventDefault(); // Stop native browser horizontal drag
+        
+        let newX = -(currentSideTabIdx * sidebarViewport.clientWidth) + deltaX;
+        
+        // Add rubber-banding physics if swiping past the array bounds
+        if (newX > 0) newX = newX * 0.3;
+        const maxOffset = -((sideTabsArray.length - 1) * sidebarViewport.clientWidth);
+        if (newX < maxOffset) newX = maxOffset + (newX - maxOffset) * 0.3;
+
+        sidebarTrack.style.transform = `translateX(${newX}px)`;
+        currentX = x;
+      } else if (isClosingSidebar) {
+        if (e.cancelable) e.preventDefault();
+        
+        // Drag sidebar to the left. Disallow dragging further right than 0.
+        let newX = Math.min(0, deltaX);
+        sidebarEl.style.transform = `translateX(${newX}px)`;
+        currentX = x;
+      }
+    }, { passive: false });
+
+    sidebarEl.addEventListener('touchend', (e) => {
+      if (window.innerWidth > 900) return;
+      sidebarTrack.style.transition = ''; // Restore smooth CSS physics
+      sidebarEl.style.transition = '';
+      
+      if (isSwipingTabs) {
+        const deltaX = currentX - startX;
+        const width = sidebarViewport.clientWidth;
+        
+        // Snap logic: over 20% traversal or fast flick commits the tab change
+        if (deltaX < -(width * 0.2)) {
+          gotoSideTab(currentSideTabIdx + 1);
+        } else if (deltaX > (width * 0.2)) {
+          gotoSideTab(currentSideTabIdx - 1);
+        } else {
+          // Snap back
+          gotoSideTab(currentSideTabIdx);
+        }
+      } else if (isClosingSidebar) {
+        const deltaX = currentX - startX;
+        sidebarEl.style.transform = ''; // Clear inline transform so toggleSidebar CSS class logic takes over
+        
+        if (deltaX < -50) {
+          if (AppState.ui.sidebarOpen) toggleSidebar();
+        }
+      }
+    }, { passive: true });
+  }
+
+  // Plot Tab clicks
+  document.querySelectorAll('.plot-tab[data-tab]').forEach(tab => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));
   });
 

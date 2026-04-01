@@ -55,4 +55,8 @@ How to contribute:
 For major changes or feature proposals, please open an issue first to discuss what you would like to change.
 
 ## License
-This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details. PyFDA Web is a web-based adaptation of the original pyfda project.
+This project is licensed under the GNU General Public License v3.0 - View [LICENSE.md](LICENSE.md) for details.
+
+## Credits
+**Original PyFDA Tool**
+PyFDA Web is a web-based adaptation inspired by the visual workflow and interface of the original [PyFDA](https://github.com/chipmuenk/pyfda) by Christian Münker, with backend DSP algorithms powered directly by [SciPy](https://scipy.org/) and [NumPy](https://numpy.org/).

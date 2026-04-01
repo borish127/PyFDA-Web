@@ -60,10 +60,20 @@ const InputCoeffs = (() => {
   function handleEdit(td) {
     const type = td.dataset.type;
     const idx = parseInt(td.dataset.idx);
-    const val = parseFloat(td.textContent);
+    
+    // Retrieve original value to prevent precision loss if unchanged visually
+    const originalVal = type === 'b' ? AppState.filter.b[idx] : AppState.filter.a[idx];
+    const currentText = td.textContent.trim();
+    const originalText = formatCoeff(originalVal).trim();
+    
+    if (currentText === originalText) {
+      return; // No change made, preserve original high-precision float
+    }
+
+    const val = parseFloat(currentText);
 
     if (isNaN(val)) {
-      td.textContent = formatCoeff(type === 'b' ? AppState.filter.b[idx] : AppState.filter.a[idx]);
+      td.textContent = originalText;
       showToast('Invalid number', 'error');
       return;
     }
@@ -84,9 +94,9 @@ const InputCoeffs = (() => {
     if (val === undefined || val === null) return '—';
     if (Math.abs(val) < 1e-15) return '0';
     if (Math.abs(val) >= 1e4 || (Math.abs(val) < 1e-4 && val !== 0)) {
-      return val.toExponential(8);
+      return val.toExponential(4);
     }
-    return val.toPrecision(10).replace(/0+$/, '').replace(/\.$/, '');
+    return val.toPrecision(6).replace(/0+$/, '').replace(/\.$/, '');
   }
 
   function syncTables(data) {

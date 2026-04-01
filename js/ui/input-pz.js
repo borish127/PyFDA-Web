@@ -5,9 +5,9 @@
 const InputPZ = (() => {
 
   function init() {
-    bus.on('filterDesigned', updateFromFilter);
+    bus.on('filterDesigned', updateTable);
     bus.on('plotPZ', updateTable);
-    bus.on('filterLoaded', syncTables);
+    bus.on('filterLoaded', updateTable);
 
     // Copy P/Z
     document.getElementById('btn-copy-pz')?.addEventListener('click', () => {
@@ -24,48 +24,34 @@ const InputPZ = (() => {
     });
   }
 
-  async function updateFromFilter(filter) {
-    // Request P/Z analysis if not cached
-    if (!AppState.analysis.pzData && filter.b) {
-      try {
-        AppState.analysis.pzData = await PyodideBridge.pzData(filter.b, filter.a);
-      } catch (e) {
-        console.error('P/Z analysis failed:', e);
-        return;
-      }
-    }
-    if (AppState.analysis.pzData) {
-      updateTable(AppState.analysis.pzData);
-    }
-  }
-
-  function updateTable(pzData) {
+  function updateTable() {
     const tbody = document.getElementById('tbody-pz');
     const gainInput = document.getElementById('inp-gain');
-    if (!tbody || !pzData) return;
+    const filter = AppState.filter;
+
+    if (!tbody || !filter.b) return;
 
     let html = '';
 
+    const zeros = filter.zeros || [];
+    const poles = filter.poles || [];
+
     // Zeros
-    if (pzData.zeros_real) {
-      for (let i = 0; i < pzData.zeros_real.length; i++) {
+    for (let i = 0; i < zeros.length; i++) {
         html += `<tr>
           <td><span style="color:var(--md-sys-color-primary); font-weight:600;">○ Zero</span></td>
-          <td contenteditable="true" data-type="zero" data-idx="${i}" data-part="real">${formatNum(pzData.zeros_real[i])}</td>
-          <td contenteditable="true" data-type="zero" data-idx="${i}" data-part="imag">${formatNum(pzData.zeros_imag[i])}</td>
+          <td contenteditable="true" data-type="zero" data-idx="${i}" data-part="real">${formatNum(zeros[i][0])}</td>
+          <td contenteditable="true" data-type="zero" data-idx="${i}" data-part="imag">${formatNum(zeros[i][1])}</td>
         </tr>`;
-      }
     }
 
     // Poles
-    if (pzData.poles_real) {
-      for (let i = 0; i < pzData.poles_real.length; i++) {
+    for (let i = 0; i < poles.length; i++) {
         html += `<tr>
           <td><span style="color:var(--md-sys-color-error); font-weight:600;">× Pole</span></td>
-          <td contenteditable="true" data-type="pole" data-idx="${i}" data-part="real">${formatNum(pzData.poles_real[i])}</td>
-          <td contenteditable="true" data-type="pole" data-idx="${i}" data-part="imag">${formatNum(pzData.poles_imag[i])}</td>
+          <td contenteditable="true" data-type="pole" data-idx="${i}" data-part="real">${formatNum(poles[i][0])}</td>
+          <td contenteditable="true" data-type="pole" data-idx="${i}" data-part="imag">${formatNum(poles[i][1])}</td>
         </tr>`;
-      }
     }
 
     if (!html) {
@@ -74,22 +60,16 @@ const InputPZ = (() => {
 
     tbody.innerHTML = html;
 
-    if (gainInput && pzData.gain !== undefined) {
-      gainInput.value = typeof pzData.gain === 'number' ? pzData.gain.toPrecision(8) : pzData.gain;
-    }
-
-    // Store in AppState
-    if (pzData.zeros_real) {
-      AppState.filter.zeros = pzData.zeros_real.map((r, i) => [r, pzData.zeros_imag[i]]);
-      AppState.filter.poles = pzData.poles_real.map((r, i) => [r, pzData.poles_imag[i]]);
-      AppState.filter.gain = pzData.gain;
+    if (gainInput && filter.gain !== undefined && filter.gain !== null) {
+      gainInput.value = typeof filter.gain === 'number' ? filter.gain.toPrecision(8) : filter.gain;
     }
   }
 
   function formatNum(val) {
     if (val === undefined || val === null) return '—';
-    if (Math.abs(val) < 1e-14) return '0';
-    return val.toPrecision(6);
+    if (Math.abs(val) < 1e-15) return '0';
+    if (Math.abs(val) >= 1e4 || (Math.abs(val) < 1e-4 && val !== 0)) return val.toExponential(4);
+    return val.toPrecision(6).replace(/0+$/, '').replace(/\.$/, '');
   }
 
   function formatComplex(pair) {
@@ -100,15 +80,6 @@ const InputPZ = (() => {
       return `${r.toPrecision(6)} ${sign} ${Math.abs(i).toPrecision(6)}j`;
     }
     return String(pair);
-  }
-
-  function syncTables(data) {
-    if (data.zeros && data.poles) {
-      AppState.filter.zeros = data.zeros;
-      AppState.filter.poles = data.poles;
-      if (data.gain !== undefined) AppState.filter.gain = data.gain;
-      updateFromFilter(AppState.filter);
-    }
   }
 
   return { init };

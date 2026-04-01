@@ -248,8 +248,8 @@ def design_filter(responseType='lowpass', filterFamily='iir', designMethod='butt
         result = {
             'b': b.tolist() if b is not None else [],
             'a': a.tolist() if a is not None else [1.0],
-            'zeros': zpk_out[0].tolist() if zpk_out else [],
-            'poles': zpk_out[1].tolist() if zpk_out else [],
+            'zeros': [[float(z.real), float(z.imag)] for z in zpk_out[0]] if zpk_out else [],
+            'poles': [[float(p.real), float(p.imag)] for p in zpk_out[1]] if zpk_out else [],
             'gain': float(np.real(zpk_out[2])) if zpk_out else 1.0,
             'sos': sos_list,
             'order': int(actual_order),
