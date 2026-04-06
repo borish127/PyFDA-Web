@@ -2,6 +2,12 @@
 
 A static, client-side web application for Digital Signal Processing (DSP) filter design and analysis. This tool brings the core logic of the Python `pyfda` application to the browser using WebAssembly and Pyodide, eliminating the need for a backend server.
 
+## Usage
+
+PyFDA Web runs entirely in your browser. You can access and use the live application directly here:
+
+[**https://borish127.github.io/PyFDA-Web/**](https://borish127.github.io/PyFDA-Web/)
+
 ## Features
 
 * **Filter Design:** Design Lowpass, Highpass, Bandpass, Bandstop, and Allpass filters.
@@ -10,13 +16,6 @@ A static, client-side web application for Digital Signal Processing (DSP) filter
 * **Fixpoint Simulation:** Simulate quantization effects with configurable word lengths and overflow/rounding behaviors.
 * **File I/O:** Import and export filter designs locally in `.npz`, `.csv`, `.mat`, and `.json` formats.
 * **Responsive Design:** Optimized for both desktop and mobile web browsers.
-
-## Usage
-
-PyFDA Web runs entirely in your browser. You can access and use the live application directly here:
-
-[**https://borish127.github.io/PyFDA-Web/**](https://borish127.github.io/PyFDA-Web/)
-
 
 ## Technology Stack
 
