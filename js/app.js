@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Hide full-screen overlay after a short delay to show the logo
   setTimeout(() => {
     if (overlay) overlay.classList.add('hidden');
-  }, 800);
+  }, 400);
 
   // Initialize UI modules immediately so they are visible/interactive
   if (typeof InputSpecs !== 'undefined') InputSpecs.init();
@@ -443,9 +443,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (isSwipingTabs) {
         if (e.cancelable) e.preventDefault(); // Stop native browser horizontal drag
-        
+
         let newX = -(currentSideTabIdx * sidebarViewport.clientWidth) + deltaX;
-        
+
         // Add rubber-banding physics if swiping past the array bounds
         if (newX > 0) newX = newX * 0.3;
         const maxOffset = -((sideTabsArray.length - 1) * sidebarViewport.clientWidth);
@@ -455,7 +455,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentX = x;
       } else if (isClosingSidebar) {
         if (e.cancelable) e.preventDefault();
-        
+
         // Drag sidebar to the left. Disallow dragging further right than 0.
         let newX = Math.min(0, deltaX);
         sidebarEl.style.transform = `translateX(${newX}px)`;
@@ -467,11 +467,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (window.innerWidth > 900) return;
       sidebarTrack.style.transition = ''; // Restore smooth CSS physics
       sidebarEl.style.transition = '';
-      
+
       if (isSwipingTabs) {
         const deltaX = currentX - startX;
         const width = sidebarViewport.clientWidth;
-        
+
         // Snap logic: over 20% traversal or fast flick commits the tab change
         if (deltaX < -(width * 0.2)) {
           gotoSideTab(currentSideTabIdx + 1);
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } else if (isClosingSidebar) {
         const deltaX = currentX - startX;
         sidebarEl.style.transform = ''; // Clear inline transform so toggleSidebar CSS class logic takes over
-        
+
         if (deltaX < -50) {
           if (AppState.ui.sidebarOpen) toggleSidebar();
         }

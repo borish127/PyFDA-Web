@@ -5,15 +5,17 @@
   <meta charset="UTF-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PyFDA Web - Digital Signal Processing Filter Design</title>
+  <title>PyFDA Web - Online Python Filter Design Analysis Tool</title>
   <meta name="description"
-    content="A free, serverless web application for DSP filter design and analysis. Ported from the Python PyFDA project to the browser using Pyodide.">
-  <meta name="keywords" content="pyfda, dsp, filter design, digital signal processing, IIR, FIR, pyodide, webassembly">
+    content="Design, analyze, and simulate digital filters directly in your browser. PyFDA Web is a free, installation-free online version of the Python Filter Design Analysis tool.">
+  <meta name="keywords"
+    content="pyfda, pyfda web, pyfda online, python filter design, digital signal processing, DSP, pyodide, filter analysis, IIR, FIR">
   <meta name="author" content="borish127">
   <meta name="google-site-verification" content="15qvqhuJ5HEHBLOo4qWFQz5urpe-9W_KBReNpsyk9SY" />
 
-  <meta property="og:title" content="PyFDA Web - DSP Filter Design">
-  <meta property="og:description" content="Design and analyze digital filters directly in your browser.">
+  <meta property="og:title" content="PyFDA Web - Online Python Filter Design Analysis Tool">
+  <meta property="og:description"
+    content="Design, analyze, and simulate digital filters directly in your browser. PyFDA Web is a free, installation-free online version of the Python Filter Design Analysis tool.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://borish127.github.io/PyFDA-Web/">
 
@@ -40,6 +42,84 @@
 </head>
 
 <body>
+
+  <!-- ================= SEO: Static Content for Crawlers ================= -->
+  <noscript>
+    <div style="max-width: 800px; margin: 0 auto; padding: 40px 20px; font-family: sans-serif; color: #1a1a2e; line-height: 1.7;">
+      <h1>PyFDA Web &mdash; Online Python Filter Design Analysis Tool</h1>
+      <p>
+        <strong>PyFDA Web</strong> is a free, open-source web application that brings the power of
+        <strong>Python filter design</strong> directly to your browser. It is the online version of
+        <a href="https://github.com/chipmuenk/pyfda">PyFDA</a> (Python Filter Design Analysis),
+        requiring no installation, no server, and no account. All signal processing runs locally
+        in your browser via <strong>Pyodide</strong> (CPython compiled to WebAssembly), with
+        computations powered by <strong>SciPy</strong> and <strong>NumPy</strong>.
+      </p>
+
+      <h2>Design IIR and FIR Digital Filters Online</h2>
+      <p>
+        Choose from a comprehensive set of filter design methods including
+        <strong>Butterworth</strong>, <strong>Chebyshev&nbsp;I/II</strong>,
+        <strong>Elliptic&nbsp;(Cauer)</strong>, and <strong>Bessel</strong> for <strong>IIR filters</strong>,
+        or <strong>Windowed&nbsp;(firwin)</strong>, <strong>Equiripple&nbsp;(Remez)</strong>,
+        <strong>Least-Squares&nbsp;(firls)</strong>, and <strong>Moving&nbsp;Average</strong> for
+        <strong>FIR filters</strong>. Design lowpass, highpass, bandpass, bandstop, and allpass
+        responses with full control over passband ripple, stopband attenuation, and filter order.
+      </p>
+
+      <h2>Interactive Analysis &amp; Visualization</h2>
+      <p>
+        Once your filter is designed, <strong>PyFDA Web</strong> provides interactive plots for:
+      </p>
+      <ul>
+        <li><strong>Magnitude response</strong> &mdash; |H(f)| in dB, linear, or power units</li>
+        <li><strong>Phase response</strong> &mdash; continuous and wrapped phase</li>
+        <li><strong>Group delay</strong> and <strong>phase delay</strong></li>
+        <li><strong>Pole-zero plot</strong> &mdash; visualize filter stability on the z-plane</li>
+        <li><strong>Impulse response</strong> h[n] and <strong>step response</strong></li>
+        <li><strong>Custom stimulus simulation</strong> &mdash; apply arbitrary input signals</li>
+        <li><strong>3D surface |H(z)|</strong> &mdash; view the transfer function over the entire z-plane</li>
+      </ul>
+
+      <h2>Fixpoint Simulation</h2>
+      <p>
+        Simulate the effects of <strong>fixed-point quantization</strong> on your filter.
+        Configure integer and fractional bit widths for both coefficients and signals,
+        select overflow behavior (saturate or wrap) and quantization mode (round, truncate,
+        floor, ceil), and compare the quantized response against the ideal floating-point design.
+      </p>
+
+      <h2>Export Your Filters</h2>
+      <p>
+        Export designed filters in multiple formats for use in your own projects:
+        <strong>NumPy&nbsp;(.npz)</strong>, <strong>CSV&nbsp;(.csv)</strong>,
+        <strong>MATLAB&nbsp;(.mat)</strong>, and <strong>JSON&nbsp;(.json)</strong>.
+        Copy coefficients (b, a), second-order sections (SOS), or poles and zeros
+        directly to your clipboard.
+      </p>
+
+      <h2>Why Use PyFDA Online?</h2>
+      <ul>
+        <li>100% client-side &mdash; no data leaves your browser</li>
+        <li>No installation required &mdash; works on any modern browser</li>
+        <li>Powered by real Python (SciPy, NumPy) via Pyodide/WebAssembly</li>
+        <li>Open source under GPLv3</li>
+        <li>Dark and light theme support</li>
+        <li>Mobile-friendly responsive interface</li>
+      </ul>
+
+      <p>
+        <strong>PyFDA Web</strong> is ideal for students, engineers, and researchers who
+        need a quick, accessible <strong>digital signal processing</strong> (DSP) tool for
+        <strong>python filter design</strong> without setting up a local Python environment.
+      </p>
+
+      <p style="margin-top: 32px; font-size: 14px; color: #666;">
+        This application requires JavaScript to run. Please enable JavaScript in your browser
+        to use <strong>PyFDA Web</strong>.
+      </p>
+    </div>
+  </noscript>
 
   <!-- ================= Loading Overlay ================= -->
   <div class="loading-overlay" id="loading-overlay">
