@@ -13,17 +13,9 @@ A static, client-side web application for Digital Signal Processing (DSP) filter
 
 ## Usage
 
-PyFDA Web is a completely static application. All computations run locally in your browser.
+PyFDA Web runs entirely in your browser. You can access and use the live application directly here:
 
-**Option 1: Local Execution**
-1. Clone this repository to your local machine:
-   ```bash
-   git clone https://github.com/borish127/PyFDA-Web.git
-   
-2. Open the index.html file directly in any modern web browser.
-
-**Option 2: Web Hosting**
-Upload the repository files to any static hosting service (e.g., GitHub Pages, Vercel, Netlify) to make the tool accessible online.
+[**https://borish127.github.io/PyFDA-Web/**](https://borish127.github.io/PyFDA-Web/)
 
 
 ## Technology Stack
