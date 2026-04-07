@@ -5,12 +5,113 @@
 
 const InputSpecs = (() => {
 
+  /* Predefined filter examples */
+  const EXAMPLES = {
+    // Medical / Bio
+    ecg_notch: {
+      responseType: 'bandstop', filterFamily: 'iir', designMethod: 'butter',
+      freqUnit: 'hz', ampUnit: 'db', fs: 1000,
+      fpb: 45, fsb: 49, fsb2: 51, fpb2: 55, apb: 1, asb: 40, order: null
+    },
+    ecg_notch_60: {
+      responseType: 'bandstop', filterFamily: 'iir', designMethod: 'butter',
+      freqUnit: 'hz', ampUnit: 'db', fs: 1000,
+      fpb: 55, fsb: 58, fsb2: 62, fpb2: 65, apb: 1, asb: 40, order: null
+    },
+    ecg_artifact: {
+      responseType: 'highpass', filterFamily: 'iir', designMethod: 'butter',
+      freqUnit: 'hz', ampUnit: 'db', fs: 500,
+      fsb: 0.1, fpb: 0.5, apb: 1, asb: 30, order: 4
+    },
+    eeg_alpha: {
+      responseType: 'bandpass', filterFamily: 'fir', designMethod: 'firwin', window: 'hamming',
+      freqUnit: 'hz', ampUnit: 'db', fs: 250,
+      fsb: 6, fpb: 8, fpb2: 12, fsb2: 14, apb: 0.5, asb: 50, order: null
+    },
+    eeg_theta: {
+      responseType: 'bandpass', filterFamily: 'fir', designMethod: 'firwin', window: 'blackman',
+      freqUnit: 'hz', ampUnit: 'db', fs: 250,
+      fsb: 2, fpb: 4, fpb2: 8, fsb2: 10, apb: 0.1, asb: 60, order: null
+    },
+
+    // Audio / Acoustic
+    audio_subwoofer: {
+      responseType: 'lowpass', filterFamily: 'iir', designMethod: 'butter',
+      freqUnit: 'hz', ampUnit: 'db', fs: 48000,
+      fpb: 80, fsb: 120, apb: 1, asb: 24, order: null
+    },
+    audio_aa: {
+      responseType: 'lowpass', filterFamily: 'fir', designMethod: 'remez',
+      freqUnit: 'hz', ampUnit: 'db', fs: 48000,
+      fpb: 20000, fsb: 22050, apb: 0.1, asb: 80, order: null
+    },
+    recording_voice: {
+      responseType: 'bandpass', filterFamily: 'fir', designMethod: 'remez',
+      freqUnit: 'hz', ampUnit: 'db', fs: 48000,
+      fsb: 40, fpb: 80, fpb2: 12000, fsb2: 14000, apb: 0.5, asb: 50, order: null
+    },
+    dc_blocker: {
+      responseType: 'highpass', filterFamily: 'iir', designMethod: 'butter',
+      freqUnit: 'hz', ampUnit: 'db', fs: 44100,
+      fsb: 10, fpb: 20, apb: 1, asb: 40, order: 4
+    },
+    guitar_cab: {
+      responseType: 'bandpass', filterFamily: 'iir', designMethod: 'cheby2',
+      freqUnit: 'hz', ampUnit: 'db', fs: 48000,
+      fsb: 50, fpb: 80, fpb2: 5000, fsb2: 7000, apb: 1, asb: 40, order: null
+    },
+
+    // RF & Telecom
+    fm_radio_if: {
+      responseType: 'bandpass', filterFamily: 'fir', designMethod: 'remez',
+      freqUnit: 'mhz', ampUnit: 'db', fs: 40,
+      fsb: 10.5, fpb: 10.6, fpb2: 10.8, fsb2: 10.9, apb: 0.5, asb: 60, order: 120
+    },
+    wifi_baseband: {
+      responseType: 'lowpass', filterFamily: 'fir', designMethod: 'firwin', window: 'hamming',
+      freqUnit: 'mhz', ampUnit: 'db', fs: 40,
+      fpb: 9, fsb: 11, apb: 0.5, asb: 50, order: null
+    },
+    gsm_baseband: {
+      responseType: 'lowpass', filterFamily: 'fir', designMethod: 'firwin', window: 'hamming',
+      freqUnit: 'khz', ampUnit: 'db', fs: 1000,
+      fpb: 100, fsb: 135, apb: 1, asb: 60, order: null
+    },
+    telecom_voice: {
+      responseType: 'bandpass', filterFamily: 'iir', designMethod: 'ellip',
+      freqUnit: 'hz', ampUnit: 'db', fs: 8000,
+      fsb: 200, fpb: 300, fpb2: 3400, fsb2: 3600, apb: 1, asb: 40, order: null
+    },
+    am_radio: {
+      responseType: 'bandpass', filterFamily: 'iir', designMethod: 'cheby1',
+      freqUnit: 'khz', ampUnit: 'db', fs: 2000,
+      fsb: 440, fpb: 450, fpb2: 460, fsb2: 470, apb: 0.5, asb: 60, order: null
+    },
+    bt_le: {
+      responseType: 'lowpass', filterFamily: 'fir', designMethod: 'firwin', window: 'hamming',
+      freqUnit: 'mhz', ampUnit: 'db', fs: 10,
+      fpb: 0.5, fsb: 1.0, apb: 1, asb: 50, order: null
+    },
+
+    // Misc
+    ultrasound: {
+      responseType: 'bandpass', filterFamily: 'iir', designMethod: 'cheby1',
+      freqUnit: 'mhz', ampUnit: 'db', fs: 40,
+      fsb: 1.5, fpb: 2.0, fpb2: 10.0, fsb2: 12.0, apb: 1, asb: 60, order: null
+    },
+    seismic: {
+      responseType: 'lowpass', filterFamily: 'fir', designMethod: 'remez',
+      freqUnit: 'hz', ampUnit: 'db', fs: 100,
+      fpb: 10, fsb: 15, apb: 0.1, asb: 60, order: null
+    }
+  };
+
   /* Enforces valid chronological frequencies when switching response types */
   function enforceValidFrequencies() {
     const rt = AppState.specs.responseType;
     const isNorm = AppState.specs.freqUnit === 'normalized';
     const fs = AppState.specs.fs || 48000;
-    
+
     // Define 4 safe, chronologically ordered points to guarantee successful design.
     // For normalized, Nyquist is 0.5. We use 0.1, 0.2, 0.3, 0.4.
     // For absolute, Nyquist is fs / 2. We use 10%, 20%, 30%, 40% of fs.
@@ -48,7 +149,7 @@ const InputSpecs = (() => {
       const el = document.getElementById(id);
       if (el) el.value = val !== null && val !== undefined ? val : '';
     };
-    
+
     syncVal('inp-fpb', AppState.specs.fpb);
     syncVal('inp-fsb', AppState.specs.fsb);
     syncVal('inp-fpb2', AppState.specs.fpb2);
@@ -92,12 +193,12 @@ const InputSpecs = (() => {
         AppState.specs.fpb2 = 8000;
         AppState.specs.fsb2 = 12000;
       }
-      
+
       const elFpb = document.getElementById('inp-fpb');
       const elFsb = document.getElementById('inp-fsb');
       const elFpb2 = document.getElementById('inp-fpb2');
       const elFsb2 = document.getElementById('inp-fsb2');
-      
+
       if (elFpb) elFpb.value = AppState.specs.fpb;
       if (elFsb) elFsb.value = AppState.specs.fsb;
       if (elFpb2) elFpb2.value = AppState.specs.fpb2;
@@ -115,13 +216,13 @@ const InputSpecs = (() => {
     });
 
     // Numeric inputs
-    bindNumericInput('inp-fs',    'fs');
-    bindNumericInput('inp-fpb',   'fpb');
-    bindNumericInput('inp-fpb2',  'fpb2');
-    bindNumericInput('inp-fsb',   'fsb');
-    bindNumericInput('inp-fsb2',  'fsb2');
-    bindNumericInput('inp-apb',   'apb');
-    bindNumericInput('inp-asb',   'asb');
+    bindNumericInput('inp-fs', 'fs');
+    bindNumericInput('inp-fpb', 'fpb');
+    bindNumericInput('inp-fpb2', 'fpb2');
+    bindNumericInput('inp-fsb', 'fsb');
+    bindNumericInput('inp-fsb2', 'fsb2');
+    bindNumericInput('inp-apb', 'apb');
+    bindNumericInput('inp-asb', 'asb');
     bindNumericInput('inp-order', 'order', true);
 
     // Auto order checkbox
@@ -152,6 +253,20 @@ const InputSpecs = (() => {
     document.getElementById('btn-design')?.addEventListener('click', () => {
       if (validate()) designFilter();
     });
+
+    // Examples select
+    const selExample = document.getElementById('sel-example');
+    if (selExample) {
+      selExample.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val && EXAMPLES[val]) {
+          Object.assign(AppState.specs, EXAMPLES[val]);
+          loadFromState();
+
+          if (validate()) designFilter();
+        }
+      });
+    }
 
     // Designing state feedback
     bus.on('designStart', () => {
@@ -253,7 +368,7 @@ const InputSpecs = (() => {
   function updateFieldOrder() {
     const rt = AppState.specs.responseType;
     let order = [];
-    
+
     // Determine exact physical array order mathematically
     if (rt === 'lowpass') order = ['field-fpb', 'field-fsb'];
     else if (rt === 'highpass') order = ['field-fsb', 'field-fpb'];
@@ -277,9 +392,9 @@ const InputSpecs = (() => {
   /* Get the multiplier to convert display units to Hz */
   function getFreqMultiplier() {
     const u = AppState.specs.freqUnit;
-    if (u === 'khz')  return 1e3;
-    if (u === 'mhz')  return 1e6;
-    if (u === 'ghz')  return 1e9;
+    if (u === 'khz') return 1e3;
+    if (u === 'mhz') return 1e6;
+    if (u === 'ghz') return 1e9;
     return 1; // Hz
   }
 
@@ -297,15 +412,15 @@ const InputSpecs = (() => {
     setLabel('lbl-fs', `Sampling Freq ${fUnit}`);
 
     if (isTwoSided) {
-        setLabel('lbl-fpb', `Passband Edge 1 ${fUnit}`);
-        setLabel('lbl-fsb', `Stopband Edge 1 ${fUnit}`);
-        setLabel('lbl-fpb2', `Passband Edge 2 ${fUnit}`);
-        setLabel('lbl-fsb2', `Stopband Edge 2 ${fUnit}`);
+      setLabel('lbl-fpb', `Passband Edge 1 ${fUnit}`);
+      setLabel('lbl-fsb', `Stopband Edge 1 ${fUnit}`);
+      setLabel('lbl-fpb2', `Passband Edge 2 ${fUnit}`);
+      setLabel('lbl-fsb2', `Stopband Edge 2 ${fUnit}`);
     } else {
-        setLabel('lbl-fpb', `Passband Edge ${fUnit}`);
-        setLabel('lbl-fsb', `Stopband Edge ${fUnit}`);
-        setLabel('lbl-fpb2', `Passband Edge 2 ${fUnit}`);
-        setLabel('lbl-fsb2', `Stopband Edge 2 ${fUnit}`);
+      setLabel('lbl-fpb', `Passband Edge ${fUnit}`);
+      setLabel('lbl-fsb', `Stopband Edge ${fUnit}`);
+      setLabel('lbl-fpb2', `Passband Edge 2 ${fUnit}`);
+      setLabel('lbl-fsb2', `Stopband Edge 2 ${fUnit}`);
     }
 
     const aUnit = AppState.specs.ampUnit === 'db' ? '(dB)' : AppState.specs.ampUnit === 'linear' ? '(V/V)' : '(W/W)';
@@ -423,7 +538,7 @@ const InputSpecs = (() => {
     setVal('inp-fsb2', s.fsb2);
     setVal('inp-apb', s.apb);
     setVal('inp-asb', s.asb);
-    
+
     const chkAuto = document.getElementById('chk-auto-order');
     if (chkAuto) {
       chkAuto.checked = (s.order === null || s.order === undefined);
@@ -457,9 +572,9 @@ const InputSpecs = (() => {
     if (data.rt) AppState.specs.responseType = data.rt;
     if (data.fc) AppState.specs.filterFamily = data.fc;
     if (data.method || data.fc) {
-        AppState.specs.designMethod = data.method || data.fc;
+      AppState.specs.designMethod = data.method || data.fc;
     }
-    
+
     if (data.specs) {
       Object.assign(AppState.specs, data.specs);
     }

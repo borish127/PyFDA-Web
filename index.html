@@ -383,6 +383,54 @@
             </div>
 
           </div>
+
+          <!-- Examples -->
+          <div class="md-card" id="card-examples">
+            <div class="md-card__title">
+              <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                fill="currentColor">
+                <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3zm0 2.18l6 2.25v4.66c0 3.99-2.3 7.68-6 8.78-3.7-1.1-6-4.79-6-8.78V6.43l6-2.25z"/>
+              </svg>
+              Examples
+            </div>
+            <div class="md-select" style="margin-top: var(--space-sm);">
+              <select class="md-select__input" id="sel-example">
+                <option value="" disabled selected>Select an example filter...</option>
+                
+                <optgroup label="Audio & Acoustic">
+                  <option value="recording_voice">Recording Voice Band (80-12000 Hz)</option>
+                  <option value="audio_subwoofer">Audio Subwoofer Crossover (80 Hz LP)</option>
+                  <option value="audio_aa">Audio Anti-aliasing (20 kHz LP)</option>
+                  <option value="guitar_cab">Guitar Cab Simulator (80-5000 Hz)</option>
+                  <option value="dc_blocker">DC Blocker / Rumble (20 Hz HP)</option>
+                </optgroup>
+                
+                <optgroup label="Biomedical (DSP)">
+                  <option value="ecg_notch">ECG 50 Hz Powerline Notch</option>
+                  <option value="ecg_notch_60">ECG 60 Hz Powerline Notch</option>
+                  <option value="ecg_artifact">ECG Baseline Artifact (0.5 Hz HP)</option>
+                  <option value="eeg_alpha">EEG Alpha Band (8-12 Hz BP)</option>
+                  <option value="eeg_theta">EEG Theta Band (4-8 Hz BP)</option>
+                </optgroup>
+                
+                <optgroup label="RF & Communications">
+                  <option value="fm_radio_if">FM Radio IF Filter (10.7 MHz BP)</option>
+                  <option value="am_radio">AM Radio IF Filter (455 kHz BP)</option>
+                  <option value="wifi_baseband">Wi-Fi Baseband (10 MHz LP)</option>
+                  <option value="gsm_baseband">GSM Channel (100 kHz LP)</option>
+                  <option value="bt_le">Bluetooth LE Channel (1 MHz LP)</option>
+                  <option value="telecom_voice">Telecom Voice Band (300-3400 Hz)</option>
+                </optgroup>
+                
+                <optgroup label="Misc Signals">
+                  <option value="ultrasound">Ultrasound Imaging (2-10 MHz BP)</option>
+                  <option value="seismic">Seismic P-Wave (10 Hz LP)</option>
+                </optgroup>
+              </select>
+              <label class="md-select__label">Presets</label>
+            </div>
+          </div>
+
           </div>
 
           <div class="sidebar-footer-inner">

@@ -18,7 +18,7 @@ def design_filter(responseType='lowpass', filterFamily='iir', designMethod='butt
         nyq = fs / 2.0
 
         # --- Normalize frequencies ---
-        if freqUnit == 'hz':
+        if freqUnit != 'normalized':
             wp = fpb / nyq
             ws = fsb / nyq
             if responseType in ('bandpass', 'bandstop'):
