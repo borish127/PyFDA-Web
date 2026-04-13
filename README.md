@@ -2,6 +2,21 @@
 
 A static, client-side web application for Digital Signal Processing (DSP) filter design and analysis. This tool brings the core logic of the Python `pyfda` application to the browser using WebAssembly and Pyodide, eliminating the need for a backend server.
 
+![Screenshot](/source/screenshots/screenshot-main-page.png)
+
+<table>
+    <tr>
+        <td><img src = "source/screenshots/screenshot-dark-mode.png" alt="Screenshot pyfda, specifications and 3d surface plot" width=400px></td>
+        <td><img src = "source/screenshots/screenshot-analysis.png" alt="Screenshot pyfda, specs and transient response" width=400px></td>
+        <td><img src = "source/screenshots/screenshot-poles-zeros.png" alt="Screenshot pyfda, coefficients and transient response" width=400px></td>
+   </tr>
+    <tr>
+        <td><img src = "source/screenshots/screenshot-fixpoint.png" alt="Screenshot pyfda, poles / zeros and 3D contour plot" width=400px></td>
+        <td><img src = "source/screenshots/screenshot-impulse-response.png" alt="Screenshot pyfda, coefficients and pole-zero-plot" width=400px></td>
+        <td><img src = "source/screenshots/screenshot-3D.png" alt="Screenshot pyfda, infos and pole-zero-plot with embedded amplitude magnitude" width=400px></td>
+    </tr>
+</table>
+
 ## Usage
 
 PyFDA Web runs entirely in your browser. You can access and use the live application directly here:
