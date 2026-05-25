@@ -104,7 +104,84 @@ const PlotManager = (() => {
       }
     }, { capture: true, passive: false });
 
+    // Custom Legend Click / Double Click Handler to improve Trackpad & Mobile usability
+    let clickTimeout = null;
+    let lastClickedCurve = null;
+    let lastClickTime = 0;
+
+    el.on('plotly_legendclick', (data) => {
+      const curveNumber = data.curveNumber;
+      const currentTime = Date.now();
+      const timeDiff = currentTime - lastClickTime;
+
+      // Double-click threshold: 450ms is friendly for trackpads and touch
+      if (lastClickedCurve === curveNumber && timeDiff < 450) {
+        if (clickTimeout) clearTimeout(clickTimeout);
+        clickTimeout = null;
+        lastClickTime = 0; // Reset
+        lastClickedCurve = null;
+        
+        handleLegendDoubleClick(el, curveNumber);
+      } else {
+        lastClickedCurve = curveNumber;
+        lastClickTime = currentTime;
+        
+        if (clickTimeout) clearTimeout(clickTimeout);
+        clickTimeout = setTimeout(() => {
+          handleLegendSingleClick(el, curveNumber);
+          clickTimeout = null;
+        }, 280); // 280ms window for double-click
+      }
+
+      return false; // Prevent Plotly's default legend toggle/isolate behavior
+    });
+
+    // Also disable double click event default behavior
+    el.on('plotly_legenddoubleclick', () => {
+      return false;
+    });
+
     el._hasInteractionListeners = true;
+  }
+
+  function handleLegendSingleClick(el, curveNumber) {
+    if (!el.data || !el.data[curveNumber]) return;
+    const trace = el.data[curveNumber];
+    const currentVisibility = (trace.visible === undefined) ? true : trace.visible;
+    const nextVisibility = (currentVisibility === true) ? 'legendonly' : true;
+    
+    Plotly.restyle(el, { visible: nextVisibility }, [curveNumber]);
+  }
+
+  function handleLegendDoubleClick(el, curveNumber) {
+    if (!el.data) return;
+    const totalTraces = el.data.length;
+    
+    // Check if the clicked trace is already the ONLY visible trace
+    let otherTracesVisible = false;
+    for (let i = 0; i < totalTraces; i++) {
+      if (i !== curveNumber) {
+        const visibility = (el.data[i].visible === undefined) ? true : el.data[i].visible;
+        if (visibility === true) {
+          otherTracesVisible = true;
+          break;
+        }
+      }
+    }
+
+    const nextVisibilities = [];
+    for (let i = 0; i < totalTraces; i++) {
+      if (otherTracesVisible) {
+        // Isolate: clicked trace is true, all others are 'legendonly'
+        nextVisibilities.push(i === curveNumber ? true : 'legendonly');
+      } else {
+        // Restore all: all traces are set to true
+        nextVisibilities.push(true);
+      }
+    }
+
+    // Apply restyle to all traces
+    Plotly.restyle(el, { visible: nextVisibilities });
   }
 
   function replotAll() {
@@ -130,6 +207,9 @@ const PlotManager = (() => {
     }
     if (AppState.analysis.surface3d && tab === '3d') {
       bus.emit('plot3D', AppState.analysis.surface3d);
+    }
+    if (AppState.stimulus.x && tab === 'stimulus') {
+      bus.emit('plotStimulus');
     }
   }
 

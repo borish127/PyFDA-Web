@@ -16,6 +16,9 @@ const PyodideBridge = (() => {
   function updateLoadingStatus(msg, percent) {
     const mlStatus = document.getElementById('mini-loader-status');
     if (mlStatus) mlStatus.textContent = msg;
+
+    const overlayStatus = document.getElementById('loading-status');
+    if (overlayStatus) overlayStatus.textContent = msg;
     
     // Optionally update progress bar if you have one
     const mlBar = document.getElementById('loading-bar-fill');
@@ -29,11 +32,6 @@ const PyodideBridge = (() => {
       updateLoadingStatus(data.msg, data.percent);
       if (data.msg === 'Ready!') {
         window.pyodideEngineReady = true;
-        const ml = document.getElementById('mini-loader');
-        if (ml) ml.classList.add('hidden');
-        
-        const overlay = document.getElementById('loading-overlay');
-        if (overlay) overlay.classList.add('hidden');
       }
     } else if (data.type === 'response') {
       const { msgId, success, data: resultData, error } = data;
@@ -149,8 +147,8 @@ const PyodideBridge = (() => {
   }
 
   /* ----- Fixpoint simulation ----- */
-  async function fixpointSim(b, a, x, config) {
-    return callPython('fixpoint_filter', JSON.stringify({ b, a, x, ...config }));
+  async function fixpointSim(b, a, x, config, sos) {
+    return callPython('fixpoint_filter', JSON.stringify({ b, a, x, sos, ...config }));
   }
 
   /* ----- File I/O ----- */

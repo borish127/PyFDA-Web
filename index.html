@@ -549,7 +549,7 @@
 
           <!-- Fixpoint Configuration -->
           <div class="md-card" id="card-fixpoint">
-            <div class="md-card__title row--between">
+            <div class="md-card__title">
               <span class="row" style="gap:var(--space-sm);">
                 <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                   fill="currentColor">
@@ -557,38 +557,34 @@
                 </svg>
                 Fixpoint Simulation
               </span>
-              <label class="md-switch">
-                <input type="checkbox" id="chk-fixpoint">
-                <span class="md-switch__track"><span class="md-switch__thumb"></span></span>
-              </label>
             </div>
-            <div id="fixpoint-fields" style="display:none;" class="col gap-md mt-md">
+            <div id="fixpoint-fields" class="col gap-md mt-md">
               <div class="md-section-label">Coefficient Quantization</div>
               <div class="row" style="gap:var(--space-sm)">
                 <div class="md-field" style="flex:1">
-                  <input class="md-field__input" type="number" id="inp-coeff-qi" value="1" min="0" step="1">
+                  <input class="md-field__input" type="number" id="inp-coeff-qi" value="2" min="0" step="1">
                   <label class="md-field__label">QI (int bits)</label>
                 </div>
                 <div class="md-field" style="flex:1">
-                  <input class="md-field__input" type="number" id="inp-coeff-qf" value="15" min="0" step="1">
+                  <input class="md-field__input" type="number" id="inp-coeff-qf" value="13" min="0" step="1">
                   <label class="md-field__label">QF (frac bits)</label>
                 </div>
               </div>
               <div class="md-section-label">Signal Quantization</div>
               <div class="row" style="gap:var(--space-sm)">
                 <div class="md-field" style="flex:1">
-                  <input class="md-field__input" type="number" id="inp-sig-qi" value="1" min="0" step="1">
+                  <input class="md-field__input" type="number" id="inp-sig-qi" value="2" min="0" step="1">
                   <label class="md-field__label">QI (int bits)</label>
                 </div>
                 <div class="md-field" style="flex:1">
-                  <input class="md-field__input" type="number" id="inp-sig-qf" value="15" min="0" step="1">
+                  <input class="md-field__input" type="number" id="inp-sig-qf" value="13" min="0" step="1">
                   <label class="md-field__label">QF (frac bits)</label>
                 </div>
               </div>
               <div class="row" style="gap:var(--space-md)">
                 <div class="md-select" style="flex:1">
                   <select class="md-select__input" id="sel-overflow">
-                    <option value="saturate">Saturate</option>
+                    <option value="sat">Saturate</option>
                     <option value="wrap">Wrap</option>
                   </select>
                   <label class="md-select__label">Overflow</label>
@@ -596,9 +592,10 @@
                 <div class="md-select" style="flex:1">
                   <select class="md-select__input" id="sel-quant">
                     <option value="round">Round</option>
-                    <option value="truncate">Truncate</option>
                     <option value="floor">Floor</option>
+                    <option value="fix">Fix (toward zero)</option>
                     <option value="ceil">Ceil</option>
+                    <option value="rint">Rint</option>
                   </select>
                   <label class="md-select__label">Quantization</label>
                 </div>
@@ -607,6 +604,7 @@
                 <span class="md-spinner" id="fixpoint-spinner" style="display:none;"></span>
                 Simulate Fixpoint
               </button>
+              <button class="md-btn md-btn--text w-full mt-sm" id="btn-fixpoint-clear">Clear</button>
             </div>
           </div>
         </div>
@@ -692,11 +690,52 @@
           <button class="plot-tab" data-tab="3d" role="tab">3D |H(z)|</button>
         </nav>
         <div class="plot-toolbar__actions">
-          <label class="md-chip" data-tooltip-bottom="Show Specs">
+          <!-- Magnitude Scale Selector -->
+          <div class="md-select md-select--small" id="select-mag-scale-container" style="display:none;" data-tooltip-bottom="Magnitude Scale">
+            <select class="md-select__input" id="sel-mag-scale">
+              <option value="db">dB</option>
+              <option value="linear">Linear (V)</option>
+              <option value="power">Power (W)</option>
+            </select>
+          </div>
+
+          <!-- Phase Unit Selector -->
+          <div class="md-select md-select--small" id="select-phase-unit-container" style="display:none;" data-tooltip-bottom="Phase Unit">
+            <select class="md-select__input" id="sel-phase-unit">
+              <option value="deg">Degrees (°)</option>
+              <option value="rad">Radians (rad)</option>
+            </select>
+          </div>
+
+          <!-- Phase Wrap Selector -->
+          <div class="md-select md-select--small" id="select-phase-wrap-container" style="display:none;" data-tooltip-bottom="Phase Wrapping">
+            <select class="md-select__input" id="sel-phase-wrap">
+              <option value="unwrap">Unwrapped</option>
+              <option value="wrap">Wrapped</option>
+            </select>
+          </div>
+
+          <!-- Delay Unit Selector -->
+          <div class="md-select md-select--small" id="select-delay-unit-container" style="display:none;" data-tooltip-bottom="Delay Unit">
+            <select class="md-select__input" id="sel-delay-unit">
+              <option value="samples">Samples</option>
+              <option value="time">Time (ms)</option>
+            </select>
+          </div>
+
+          <!-- 3D Scale Selector -->
+          <div class="md-select md-select--small" id="select-3d-scale-container" style="display:none;" data-tooltip-bottom="3D Z-Axis Scale">
+            <select class="md-select__input" id="sel-3d-scale">
+              <option value="linear">Linear</option>
+              <option value="db">dB</option>
+            </select>
+          </div>
+
+          <label class="md-chip" id="chip-show-specs-container" data-tooltip-bottom="Show Specs">
             <input type="checkbox" id="chk-show-specs" checked style="display:none;">
             <span>Specs</span>
           </label>
-          <label class="md-chip" data-tooltip-bottom="Two-sided spectrum">
+          <label class="md-chip" id="chip-two-sided-container" data-tooltip-bottom="Two-sided spectrum">
             <input type="checkbox" id="chk-two-sided" style="display:none;">
             <span>± f</span>
           </label>
@@ -800,9 +839,14 @@
   <div class="toast-container" id="toast-container"></div>
 
   <!-- Mini Loader -->
-  <div id="mini-loader" class="mini-loader">
-    <span class="md-spinner"></span>
-    <span id="mini-loader-status">Initializing…</span>
+  <div id="mini-loader" class="mini-loader hidden">
+    <div class="mini-loader__icon">
+      <span class="md-spinner"></span>
+      <svg class="mini-loader__success-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <span id="mini-loader-status" class="mini-loader-status">Initializing…</span>
   </div>
 
   <!-- Scripts (order matters) -->

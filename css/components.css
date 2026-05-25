@@ -693,6 +693,30 @@
   margin-bottom: var(--space-md);
 }
 
+/* ---------- Small Select (Toolbar) ---------- */
+.md-select--small {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.md-select--small .md-select__input {
+  padding: 6px 28px 6px 10px;
+  font-size: var(--md-sys-typescale-body-medium);
+  font-weight: 500;
+  height: 32px;
+  background-position: right 6px center;
+  background-size: 14px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-small);
+}
+
+.md-select--small .md-select__input:focus {
+  border-color: var(--md-sys-color-primary);
+  border-width: 1.5px;
+  padding: 6px 27px 6px 9px;
+}
+
 /* ---------- Mobile Enhancements ---------- */
 @media (max-width: 600px) {
   .md-segmented {
@@ -709,5 +733,16 @@
 
   .md-segmented__btn {
     flex-shrink: 0;
+  }
+
+  .md-select--small .md-select__input {
+    height: 30px;
+    font-size: 12px;
+    padding: 4px 24px 4px 8px;
+    background-position: right 4px center;
+    background-size: 12px;
+  }
+  .md-select--small .md-select__input:focus {
+    padding: 4px 23px 4px 7px;
   }
 }

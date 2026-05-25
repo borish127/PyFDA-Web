@@ -5,6 +5,17 @@
 (function () {
   bus.on('plotImpulse', renderImpulse);
   bus.on('plotStep', renderStep);
+  bus.on('plotStimulus', renderStimulus);
+  bus.on('fixpointResult', () => {
+    if (AppState.analysis.impulseResponse) renderImpulse(AppState.analysis.impulseResponse);
+    if (AppState.analysis.stepResponse) renderStep(AppState.analysis.stepResponse);
+    if (AppState.stimulus.x) renderStimulus();
+  });
+  bus.on('fixpointCleared', () => {
+    if (AppState.analysis.impulseResponse) renderImpulse(AppState.analysis.impulseResponse);
+    if (AppState.analysis.stepResponse) renderStep(AppState.analysis.stepResponse);
+    if (AppState.stimulus.x) renderStimulus();
+  });
 
   // Stimulus button
   document.addEventListener('DOMContentLoaded', () => {
@@ -53,23 +64,26 @@
     // Fixpoint overlay
     if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
       const fx = AppState.fixpoint.result;
-      for (let i = 0; i < fx.n.length; i++) {
+      const y_fx = fx.y_fix_imp;
+      if (y_fx) {
+        for (let i = 0; i < fx.n.length; i++) {
+          traces.push({
+            x: [fx.n[i], fx.n[i]],
+            y: [0, y_fx[i]],
+            type: 'scatter', mode: 'lines',
+            line: { color: c.error, width: 1, dash: 'dot' },
+            showlegend: false, hoverinfo: 'skip',
+          });
+        }
         traces.push({
-          x: [fx.n[i], fx.n[i]],
-          y: [0, fx.y_fix[i]],
-          type: 'scatter', mode: 'lines',
-          line: { color: c.error, width: 1, dash: 'dot' },
-          showlegend: false, hoverinfo: 'skip',
+          x: fx.n,
+          y: y_fx,
+          type: 'scatter', mode: 'markers',
+          name: `Fixpoint (${fx.total_bits}-bit)`,
+          marker: { color: c.error, size: 5, symbol: 'diamond' },
+          hovertemplate: 'n = %{x}<br>h_fx[n] = %{y:.6e}<extra></extra>',
         });
       }
-      traces.push({
-        x: fx.n,
-        y: fx.y_fix,
-        type: 'scatter', mode: 'markers',
-        name: `Fixpoint (${fx.total_bits}-bit)`,
-        marker: { color: c.error, size: 5, symbol: 'diamond' },
-        hovertemplate: 'n = %{x}<br>h_fx[n] = %{y:.6e}<extra></extra>',
-      });
     }
 
     const layout = PlotManager.baseLayout(
@@ -99,6 +113,24 @@
       hovertemplate: 'n = %{x}<br>s[n] = %{y:.6f}<extra></extra>',
     }];
 
+    // Overlay Fixpoint simulation data if available
+    if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
+      const fx = AppState.fixpoint.result;
+      const y_fx_step = fx.y_fix_step;
+      if (y_fx_step) {
+        traces.push({
+          x: fx.n,
+          y: y_fx_step,
+          type: 'scatter',
+          mode: 'lines+markers',
+          name: `Fixpoint (${fx.total_bits}-bit)`,
+          line: { color: c.error, width: 1.5, dash: 'dash' },
+          marker: { color: c.error, size: 4, symbol: 'diamond' },
+          hovertemplate: 'n = %{x}<br>s_fx[n] = %{y:.6f}<extra></extra>',
+        });
+      }
+    }
+
     const layout = PlotManager.baseLayout(
       'Step Response',
       'Sample n',
@@ -110,6 +142,53 @@
     );
 
     PlotManager.plotToDiv('plot-step', traces, layout);
+  }
+
+  function renderStimulus() {
+    if (!AppState.stimulus.x) return;
+    const c = PlotManager.getThemeColors();
+    const n = AppState.stimulus.n || Array.from({length: AppState.stimulus.x.length}, (_, i) => i);
+    const traces = [
+      {
+        x: n, y: AppState.stimulus.x,
+        type: 'scatter', mode: 'lines',
+        name: 'Input x[n]',
+        line: { color: c.secondary, width: 1.5 },
+      },
+      {
+        x: n, y: AppState.stimulus.y,
+        type: 'scatter', mode: 'lines',
+        name: 'Output y[n]',
+        line: { color: c.primary, width: 2.5 },
+      },
+    ];
+
+    // Overlay Fixpoint simulation data if available
+    if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
+      const fx = AppState.fixpoint.result;
+      if (fx.y_fix_stim) {
+        traces.push({
+          x: fx.n.slice(0, fx.y_fix_stim.length),
+          y: fx.y_fix_stim,
+          type: 'scatter',
+          mode: 'lines',
+          name: `Fixpoint (${fx.total_bits}-bit)`,
+          line: { color: c.error, width: 2, dash: 'dash' },
+        });
+      }
+    }
+
+    const layout = PlotManager.baseLayout(
+      'Stimulus Response',
+      'Sample n',
+      'Amplitude',
+      {
+        showlegend: true,
+        legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
+      }
+    );
+
+    PlotManager.plotToDiv('plot-stimulus-chart', traces, layout);
   }
 
   async function runStimulus() {
@@ -126,33 +205,12 @@
         AppState.filter.b, AppState.filter.a, expr, AppState.specs.fs, 512
       );
 
-      const c = PlotManager.getThemeColors();
-      const traces = [
-        {
-          x: result.n, y: result.x,
-          type: 'scatter', mode: 'lines',
-          name: 'Input x[n]',
-          line: { color: c.secondary, width: 1.5 },
-        },
-        {
-          x: result.n, y: result.y,
-          type: 'scatter', mode: 'lines',
-          name: 'Output y[n]',
-          line: { color: c.primary, width: 2.5 },
-        },
-      ];
+      // Persist stimulus data so fixpoint sim can use the same input signal
+      AppState.stimulus.n = result.n;
+      AppState.stimulus.x = result.x;
+      AppState.stimulus.y = result.y;
 
-      const layout = PlotManager.baseLayout(
-        'Stimulus Response',
-        'Sample n',
-        'Amplitude',
-        {
-          showlegend: true,
-          legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
-        }
-      );
-
-      PlotManager.plotToDiv('plot-stimulus-chart', traces, layout);
+      renderStimulus();
 
     } catch (err) {
       showToast(`Stimulus error: ${err.message}`, 'error');

@@ -70,14 +70,20 @@ const AppState = {
 
   /* Fixpoint configuration */
   fixpoint: {
-    enabled: false,
-    coeffQI: 1,
-    coeffQF: 15,
-    signalQI: 1,
-    signalQF: 15,
-    overflow: 'saturate',    // wrap, saturate
-    quantMode: 'round',      // round, truncate
+    enabled: true,
+    coeffQI: 2,
+    coeffQF: 13,
+    signalQI: 2,
+    signalQF: 13,
+    overflow: 'sat',         // sat, wrap
+    quantMode: 'round',      // round, floor, fix, ceil, rint
     result: null,
+  },
+
+  /* Last stimulus run (persisted so fixpoint sim can use the signal) */
+  stimulus: {
+    x: null,
+    y: null,
   },
 
   /* UI state */
@@ -303,6 +309,10 @@ async function runAnalysis(tabName) {
         bus.emit('plot3D', AppState.analysis.surface3d);
         break;
       }
+      case 'stimulus': {
+        bus.emit('plotStimulus');
+        break;
+      }
     }
   } catch (err) {
     showToast(`Analysis error: ${err.message}`, 'error');
@@ -317,13 +327,20 @@ const bus = new EventBus();
 document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
 
-  // Loading overlay
+  // Ensure loading overlay stays visible for at least 1.2 seconds to prevent flashing
+  const startTime = Date.now();
+  const MIN_SPLASH_TIME = 1200;
   const overlay = document.getElementById('loading-overlay');
+  const ml = document.getElementById('mini-loader');
 
-  // Hide full-screen overlay after a short delay to show the logo
   setTimeout(() => {
     if (overlay) overlay.classList.add('hidden');
-  }, 400);
+    
+    // If Pyodide is not ready yet, show the mini-loader status pill
+    if (!window.pyodideEngineReady && ml) {
+      ml.classList.remove('hidden');
+    }
+  }, MIN_SPLASH_TIME);
 
   // Initialize UI modules immediately so they are visible/interactive
   if (typeof InputSpecs !== 'undefined') InputSpecs.init();
@@ -337,8 +354,25 @@ document.addEventListener('DOMContentLoaded', async () => {
   PyodideBridge.init().then(() => {
     AppState.ui.isLoading = false;
     bus.emit('pyodideReady');
+
+    const elapsed = Date.now() - startTime;
+    if (elapsed >= MIN_SPLASH_TIME && ml) {
+      // The status pill is visible on the main page, transition it to success state
+      ml.classList.add('success');
+      const mlStatus = document.getElementById('mini-loader-status');
+      if (mlStatus) mlStatus.textContent = 'Ready!';
+      
+      setTimeout(() => {
+        ml.classList.add('hidden');
+        setTimeout(() => {
+          ml.classList.remove('success');
+        }, 500); // matches transition duration
+      }, 1500); // show "Ready!" for 1.5s
+    }
   }).catch(err => {
     showToast('Failed to initialize Python environment', 'error', 10000);
+    const mlStatus = document.getElementById('mini-loader-status');
+    if (mlStatus) mlStatus.textContent = 'Initialization failed';
   });
 
   // Event listeners
@@ -505,7 +539,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Tab change → run analysis
-  bus.on('tabChanged', (tabName) => runAnalysis(tabName));
+  function updateToolbarActionsVisibility(tabName) {
+    const show = (id, visible) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = visible ? '' : 'none';
+    };
+
+    show('select-mag-scale-container', tabName === 'magnitude');
+    show('select-phase-unit-container', tabName === 'phase');
+    show('select-phase-wrap-container', tabName === 'phase');
+    show('select-delay-unit-container', tabName === 'group-delay' || tabName === 'phase-delay');
+    show('select-3d-scale-container', tabName === '3d');
+    show('chip-show-specs-container', tabName === 'magnitude');
+    show('chip-two-sided-container', tabName === 'magnitude' || tabName === 'phase');
+  }
+
+  // Initialize visibility on load
+  updateToolbarActionsVisibility(AppState.ui.activeTab);
+
+  bus.on('tabChanged', (tabName) => {
+    updateToolbarActionsVisibility(tabName);
+    runAnalysis(tabName);
+  });
 
   // Plotly robust resize listener
   let resizeTimeout;
