@@ -531,6 +531,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));
   });
 
+  // Make the horizontal plot tabs container scrollable with the scroll wheel
+  const plotTabsContainer = document.querySelector('.plot-tabs');
+  if (plotTabsContainer) {
+    plotTabsContainer.addEventListener('wheel', (evt) => {
+      if (evt.deltaY !== 0) {
+        evt.preventDefault();
+        plotTabsContainer.scrollLeft += evt.deltaY;
+      }
+    }, { passive: false });
+  }
+
   // Chip toggle active state (for checkboxes inside chips)
   document.querySelectorAll('.md-chip input[type="checkbox"]').forEach(cb => {
     const chip = cb.closest('.md-chip');

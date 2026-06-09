@@ -551,10 +551,10 @@ body {
   bottom: var(--space-md);
   right: var(--space-md);
   z-index: 9999;
-  background: rgba(233, 227, 240, 0.85); /* fallback light */
+  background: var(--mini-loader-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(116, 119, 127, 0.15);
+  border: 1px solid var(--mini-loader-border);
   border-radius: var(--md-sys-shape-corner-full);
   box-shadow: var(--md-sys-elevation-3);
   display: flex;
@@ -570,14 +570,6 @@ body {
     border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
 }
 
-[data-theme="dark"] .mini-loader,
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .mini-loader {
-    background: rgba(40, 42, 47, 0.85);
-    border-color: rgba(142, 144, 153, 0.2);
-  }
-}
-
 .mini-loader.hidden {
   opacity: 0;
   transform: translateY(12px) scale(0.95);
@@ -586,16 +578,8 @@ body {
 
 /* Success status state for Ready */
 .mini-loader.success {
-  background: rgba(216, 244, 222, 0.9);
-  border-color: rgba(46, 125, 50, 0.3);
-}
-
-[data-theme="dark"] .mini-loader.success,
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .mini-loader.success {
-    background: rgba(27, 54, 34, 0.9);
-    border-color: rgba(129, 199, 132, 0.3);
-  }
+  background: var(--mini-loader-success-bg);
+  border-color: var(--mini-loader-success-border);
 }
 
 .mini-loader.success .md-spinner {
@@ -613,14 +597,7 @@ body {
   display: none;
   width: 20px;
   height: 20px;
-  color: #2e7d32;
-}
-
-[data-theme="dark"] .mini-loader__success-icon,
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .mini-loader__success-icon {
-    color: #81c784;
-  }
+  color: var(--mini-loader-success-icon);
 }
 
 .mini-loader.success .mini-loader__success-icon {
@@ -636,14 +613,7 @@ body {
 }
 
 .mini-loader.success .mini-loader-status {
-  color: #1b5e20;
-}
-
-[data-theme="dark"] .mini-loader.success .mini-loader-status,
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .mini-loader.success .mini-loader-status {
-    color: #c8e6c9;
-  }
+  color: var(--mini-loader-success-text);
 }
 
 /* ---------- Responsive ---------- */

@@ -105,6 +105,14 @@
   --space-lg: 24px;
   --space-xl: 32px;
   --space-2xl: 48px;
+
+  /* ---------- Mini Loader (Light) ---------- */
+  --mini-loader-bg: rgba(233, 227, 240, 0.85);
+  --mini-loader-border: rgba(116, 119, 127, 0.15);
+  --mini-loader-success-bg: rgba(216, 244, 222, 0.9);
+  --mini-loader-success-border: rgba(46, 125, 50, 0.3);
+  --mini-loader-success-icon: #2e7d32;
+  --mini-loader-success-text: #1b5e20;
 }
 
 /* ---------- Dark Theme ---------- */
@@ -146,6 +154,14 @@
   --md-sys-color-inverse-surface: #e3e2ea;
   --md-sys-color-inverse-on-surface: #2f3036;
   --md-sys-color-inverse-primary: #3a5ba9;
+
+  /* ---------- Mini Loader (Dark) ---------- */
+  --mini-loader-bg: rgba(40, 42, 47, 0.85);
+  --mini-loader-border: rgba(142, 144, 153, 0.2);
+  --mini-loader-success-bg: rgba(27, 54, 34, 0.9);
+  --mini-loader-success-border: rgba(129, 199, 132, 0.3);
+  --mini-loader-success-icon: #81c784;
+  --mini-loader-success-text: #c8e6c9;
 }
 
 /* Auto dark via system preference */
@@ -188,5 +204,13 @@
     --md-sys-color-inverse-surface: #e3e2ea;
     --md-sys-color-inverse-on-surface: #2f3036;
     --md-sys-color-inverse-primary: #3a5ba9;
+
+    /* ---------- Mini Loader (Dark) ---------- */
+    --mini-loader-bg: rgba(40, 42, 47, 0.85);
+    --mini-loader-border: rgba(142, 144, 153, 0.2);
+    --mini-loader-success-bg: rgba(27, 54, 34, 0.9);
+    --mini-loader-success-border: rgba(129, 199, 132, 0.3);
+    --mini-loader-success-icon: #81c784;
+    --mini-loader-success-text: #c8e6c9;
   }
 }
