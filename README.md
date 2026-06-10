@@ -21,7 +21,7 @@ A static, client-side web application for Digital Signal Processing (DSP) filter
 
 PyFDA Web runs entirely in your browser. You can access and use the live application directly here:
 
-[**https://borish127.github.io/PyFDA-Web/**](https://borish127.github.io/PyFDA-Web/)
+[**https://pyfda-web.borish127.com**](https://pyfda-web.borish127.com)
 
 ## Features
 
