@@ -351,11 +351,9 @@ const InputSpecs = (() => {
     show('field-fpb2', isBandType);
     show('field-fsb2', isBandType);
 
-    // Ripple / attenuation
-    const needsRipple = ['cheby1', 'ellip', 'firwin', 'firwin2', 'remez', 'firls'].includes(dm);
-    const needsAtten = ['cheby2', 'ellip', 'remez', 'firls', 'butter', 'bessel'].includes(dm) || !isFIR;
-    show('field-apb', needsRipple || !isFIR);
-    show('field-asb', needsAtten || !isFIR);
+    // Ripple / attenuation (visible for all non-allpass designs, both FIR and IIR)
+    show('field-apb', !isAllpass);
+    show('field-asb', !isAllpass);
 
     // Window (for firwin/firwin2)
     show('field-window', dm === 'firwin' || dm === 'firwin2');

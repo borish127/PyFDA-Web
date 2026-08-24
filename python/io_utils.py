@@ -90,22 +90,166 @@ def export_filter(format='npz', b=None, a=None, zeros=None, poles=None,
     Export filter data to the specified format.
     Returns base64-encoded data for browser download.
     """
-    b = np.array(b) if b is not None else np.array([1.0])
-    a = np.array(a) if a is not None else np.array([1.0])
+    b = np.array(b, dtype=float) if b is not None else np.array([1.0])
+    a = np.array(a, dtype=float) if a is not None else np.array([1.0])
 
     if format == 'npz':
         buf = io.BytesIO()
-        save_dict = {'b': b, 'a': a}
-        if zeros is not None:
-            save_dict['zeros'] = np.array(zeros)
-        if poles is not None:
-            save_dict['poles'] = np.array(poles)
-        if gain is not None:
-            save_dict['gain'] = np.array([gain])
-        if sos is not None:
-            save_dict['sos'] = np.array(sos)
-        if order is not None:
-            save_dict['order'] = np.array([order])
+        specs = specs or {}
+
+        # 1. Sampling frequency fs
+        fs = float(specs.get('fs', 1.0)) if specs.get('fs') is not None else 1.0
+        if fs <= 0:
+            fs = 1.0
+
+        is_norm = (specs.get('freqUnit') == 'normalized') or (fs == 1.0)
+
+        # 2. Filter Order
+        if order is None:
+            order = specs.get('order')
+        if order is None:
+            order = max(len(b), len(a)) - 1
+        order_int = int(order)
+
+        # 3. Response type mapping ('lowpass' -> 'LP', etc.)
+        rt_raw = str(specs.get('responseType', 'lowpass')).lower()
+        rt_map = {
+            'lowpass': 'LP', 'lp': 'LP',
+            'highpass': 'HP', 'hp': 'HP',
+            'bandpass': 'BP', 'bp': 'BP',
+            'bandstop': 'BS', 'bs': 'BS',
+            'allpass': 'AP', 'ap': 'AP',
+        }
+        rt = rt_map.get(rt_raw, 'LP')
+
+        # 4. Filter Family / Type ('IIR' vs 'FIR')
+        ft_raw = str(specs.get('filterFamily', 'iir')).upper()
+        ft = 'FIR' if ft_raw == 'FIR' else 'IIR'
+
+        # 5. Design Method and Creator
+        method_raw = str(specs.get('designMethod') or method or 'butter').lower()
+        method_map = {
+            'butter': 'butter',
+            'cheby1': 'cheby1',
+            'cheby2': 'cheby2',
+            'ellip': 'ellip',
+            'bessel': 'bessel',
+            'equiripple': 'equiripple',
+            'remez': 'equiripple',
+            'firwin': 'firwin',
+            'firwin2': 'firwin2',
+            'firls': 'firls',
+            'mavg': 'mavg',
+        }
+        method_key = method_map.get(method_raw, method_raw)
+
+        fc_map = {
+            'butter': 'Butter',
+            'cheby1': 'Cheby1',
+            'cheby2': 'Cheby2',
+            'ellip': 'Ellip',
+            'bessel': 'Bessel',
+            'equiripple': 'Equiripple',
+            'firwin': 'Firwin',
+            'firwin2': 'Firwin2',
+            'firls': 'Firls',
+            'mavg': 'MA',
+        }
+        fc = fc_map.get(method_key, method_key.capitalize())
+
+        # 6. Normalized corner frequencies F_PB, F_SB, etc. (normalized to f_S)
+        def _get_norm_freq(key, default_ratio):
+            val = specs.get(key)
+            if val is not None:
+                v = float(val)
+                return v if is_norm else (v / fs)
+            return default_ratio
+
+        f_pb = _get_norm_freq('fpb', 0.1)
+        f_sb = _get_norm_freq('fsb', 0.2)
+        f_pb2 = _get_norm_freq('fpb2', 0.3)
+        f_sb2 = _get_norm_freq('fsb2', 0.4)
+
+        # 7. Amplitudes (dB)
+        a_pb = float(specs.get('apb', 1.0))
+        a_sb = float(specs.get('asb', 60.0))
+
+        # 8. Coefficients [b, a] in 2D array (Desktop PyFDA format: shape (2, N))
+        max_len = max(len(b), len(a))
+        b_pad = np.pad(b, (0, max_len - len(b)), mode='constant')
+        a_pad = np.pad(a, (0, max_len - len(a)), mode='constant')
+        ba = np.array([b_pad, a_pad], dtype=float)
+
+        # 9. ZPK data
+        def _to_complex_arr(v):
+            if v is None or len(v) == 0:
+                return np.array([], dtype=complex)
+            arr = np.array(v)
+            if np.iscomplexobj(arr):
+                return arr
+            if arr.ndim == 2 and arr.shape[1] == 2:
+                return arr[:, 0] + 1j * arr[:, 1]
+            return arr.astype(complex)
+
+        zeros_arr = _to_complex_arr(zeros)
+        poles_arr = _to_complex_arr(poles)
+        gain_val = float(gain) if gain is not None else 1.0
+        zpk_arr = np.array([zeros_arr, poles_arr, gain_val], dtype=object)
+
+        creator_kind = 'sos' if (sos is not None and len(sos) > 0) else 'ba'
+        creator = np.array([creator_kind, f'pyfda.filter_designs.{method_key}'])
+
+        save_dict = {
+            # PyFDA metadata
+            '_id': np.array(['pyfda', '2']),
+
+            # Primary coefficient arrays
+            'ba': ba,
+            'b': b,
+            'a': a,
+            'zpk': zpk_arr,
+            'zeros': zeros_arr,
+            'poles': poles_arr,
+            'gain': np.array([gain_val]),
+            'k': np.array([gain_val]),
+
+            # Filter design parameters (Desktop PyFDA specification keys)
+            'f_S': np.array(fs),
+            'fs': np.array(fs),
+            'T_S': np.array(1.0 / fs),
+            'creator': creator,
+            'rt': np.array(rt),
+            'ft': np.array(ft),
+            'fc': np.array(fc),
+            'N': np.array(order_int),
+            'order': np.array(order_int),
+
+            # Frequency specifications (normalized to f_S)
+            'F_PB': np.array(f_pb),
+            'F_SB': np.array(f_sb),
+            'F_PB2': np.array(f_pb2),
+            'F_SB2': np.array(f_sb2),
+            'F_C': np.array(f_pb),
+            'F_C2': np.array(f_pb2),
+
+            # Amplitude specifications & weights
+            'A_PB': np.array(a_pb),
+            'A_SB': np.array(a_sb),
+            'A_PB2': np.array(a_pb),
+            'A_SB2': np.array(a_sb),
+            'W_PB': np.array(1.0),
+            'W_SB': np.array(1.0),
+            'W_PB2': np.array(1.0),
+            'W_SB2': np.array(1.0),
+            'info': np.array(f"{fc} {rt}"),
+        }
+
+        if sos is not None and len(sos) > 0:
+            save_dict['sos'] = np.array(sos, dtype=float)
+
+        # Full fil_dict object for complete desktop PyFDA compatibility
+        fil_dict = {k: v for k, v in save_dict.items()}
+        save_dict['fil_dict'] = np.array(fil_dict, dtype=object)
 
         np.savez_compressed(buf, **save_dict)
         buf.seek(0)
@@ -296,6 +440,45 @@ def import_filter(format='npz', data_b64='', **kwargs):
             result['gain'] = _to_scalar(data['gain'], float, 1.0)
         if 'sos' in data and 'sos' not in result:
             result['sos'] = _to_list(data['sos'])
+
+        # 5. Extract flat PyFDA specs if not already present
+        if 'specs' not in result or not result['specs']:
+            specs_map = {}
+            if 'rt' in data:
+                rt_map = {'LP': 'lowpass', 'HP': 'highpass', 'BP': 'bandpass', 'BS': 'bandstop', 'AP': 'allpass'}
+                rt_val = _to_scalar(data['rt'], str, '')
+                if rt_val in rt_map:
+                    specs_map['responseType'] = rt_map[rt_val]
+                    result['rt'] = rt_map[rt_val]
+            if 'fc' in data:
+                specs_map['filterFamily'] = _to_scalar(data['fc'], str, '').lower()
+                result['fc'] = specs_map['filterFamily']
+            if 'f_S' in data:
+                specs_map['fs'] = _to_scalar(data['f_S'], float, 48000.0)
+            elif 'fs' in data:
+                specs_map['fs'] = _to_scalar(data['fs'], float, 48000.0)
+
+            fs_val = specs_map.get('fs', 1.0)
+            mult = fs_val if fs_val > 1.0 else 1.0
+            if 'F_PB' in data:
+                specs_map['fpb'] = _to_scalar(data['F_PB'], float, 0.0) * mult
+            if 'F_SB' in data:
+                specs_map['fsb'] = _to_scalar(data['F_SB'], float, 0.0) * mult
+            if 'F_PB2' in data:
+                specs_map['fpb2'] = _to_scalar(data['F_PB2'], float, 0.0) * mult
+            if 'F_SB2' in data:
+                specs_map['fsb2'] = _to_scalar(data['F_SB2'], float, 0.0) * mult
+            if 'A_PB' in data:
+                specs_map['apb'] = _to_scalar(data['A_PB'], float, 1.0)
+            if 'A_SB' in data:
+                specs_map['asb'] = _to_scalar(data['A_SB'], float, 60.0)
+            if 'N' in data:
+                specs_map['order'] = _to_scalar(data['N'], int, 10)
+            elif 'order' in data:
+                specs_map['order'] = _to_scalar(data['order'], int, 10)
+
+            if specs_map:
+                result['specs'] = specs_map
         # Fall through to specs validation
 
     elif format == 'csv':
