@@ -1,0 +1,21 @@
+{
+  "name": "PyFDA Web",
+  "short_name": "PyFDA",
+  "description": "Design, analyze, and simulate digital filters directly in your browser.",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#3a5ba9",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "start_url": "/"
+}
