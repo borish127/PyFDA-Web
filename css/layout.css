@@ -78,6 +78,9 @@ body {
 }
 
 .top-bar__title {
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
   font-family: var(--md-sys-typescale-display-font);
   font-size: var(--md-sys-typescale-title-large);
   font-weight: 600;
@@ -365,11 +368,121 @@ body {
   color: var(--md-sys-color-on-surface-variant);
   transition: opacity var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
   pointer-events: auto;
+  overflow-y: auto;
 }
 
 .plot-empty-state.hidden {
   opacity: 0;
   pointer-events: none;
+}
+
+.empty-state-welcome {
+  max-width: 840px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-md);
+  margin: auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+.empty-state__icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.empty-state__title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.empty-state__subtitle {
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface-variant);
+  max-width: 660px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.empty-state__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  width: 100%;
+  margin-top: var(--space-xs);
+  text-align: left;
+}
+
+.empty-state__card {
+  background: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  transition: transform var(--md-sys-motion-duration-short), box-shadow var(--md-sys-motion-duration-short);
+}
+
+.empty-state__card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+.empty-state__card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.empty-state__card-desc {
+  font-size: 12.5px;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.empty-state__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  padding: 8px 16px;
+  border-radius: var(--md-sys-shape-corner-full);
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: var(--space-xs);
+}
+
+@media (max-width: 768px) {
+  .empty-state__grid {
+    grid-template-columns: 1fr;
+  }
+  .empty-state__title {
+    font-size: 19px;
+  }
 }
 
 .plot-empty-state__icon {

@@ -68,82 +68,11 @@
 
 <body>
 
-  <!-- ================= SEO: Static Content for Crawlers ================= -->
+  <!-- ================= Fallback for No-JS ================= -->
   <noscript>
-    <div
-      style="max-width: 800px; margin: 0 auto; padding: 40px 20px; font-family: sans-serif; color: #1a1a2e; line-height: 1.7;">
-      <h1>PyFDA Web &mdash; Online Python Filter Design Analysis Tool</h1>
-      <p>
-        <strong>PyFDA Web</strong> is a free, open-source web application that brings the power of
-        <strong>Python filter design</strong> directly to your browser. It is the online version of
-        <a href="https://github.com/chipmuenk/pyfda">PyFDA</a> (Python Filter Design Analysis),
-        requiring no installation, no server, and no account. All signal processing runs locally
-        in your browser via <strong>Pyodide</strong> (CPython compiled to WebAssembly), with
-        computations powered by <strong>SciPy</strong> and <strong>NumPy</strong>.
-      </p>
-
-      <h2>Design IIR and FIR Digital Filters Online</h2>
-      <p>
-        Choose from a comprehensive set of filter design methods including
-        <strong>Butterworth</strong>, <strong>Chebyshev&nbsp;I/II</strong>,
-        <strong>Elliptic&nbsp;(Cauer)</strong>, and <strong>Bessel</strong> for <strong>IIR filters</strong>,
-        or <strong>Windowed&nbsp;(firwin)</strong>, <strong>Equiripple&nbsp;(Remez)</strong>,
-        <strong>Least-Squares&nbsp;(firls)</strong>, and <strong>Moving&nbsp;Average</strong> for
-        <strong>FIR filters</strong>. Design lowpass, highpass, bandpass, bandstop, and allpass
-        responses with full control over passband ripple, stopband attenuation, and filter order.
-      </p>
-
-      <h2>Interactive Analysis &amp; Visualization</h2>
-      <p>
-        Once your filter is designed, <strong>PyFDA Web</strong> provides interactive plots for:
-      </p>
-      <ul>
-        <li><strong>Magnitude response</strong> &mdash; |H(f)| in dB, linear, or power units</li>
-        <li><strong>Phase response</strong> &mdash; continuous and wrapped phase</li>
-        <li><strong>Group delay</strong> and <strong>phase delay</strong></li>
-        <li><strong>Pole-zero plot</strong> &mdash; visualize filter stability on the z-plane</li>
-        <li><strong>Impulse response</strong> h[n] and <strong>step response</strong></li>
-        <li><strong>Custom stimulus simulation</strong> &mdash; apply arbitrary input signals</li>
-        <li><strong>3D surface |H(z)|</strong> &mdash; view the transfer function over the entire z-plane</li>
-      </ul>
-
-      <h2>Fixpoint Simulation</h2>
-      <p>
-        Simulate the effects of <strong>fixed-point quantization</strong> on your filter.
-        Configure integer and fractional bit widths for both coefficients and signals,
-        select overflow behavior (saturate or wrap) and quantization mode (round, truncate,
-        floor, ceil), and compare the quantized response against the ideal floating-point design.
-      </p>
-
-      <h2>Export Your Filters</h2>
-      <p>
-        Export designed filters in multiple formats for use in your own projects:
-        <strong>NumPy&nbsp;(.npz)</strong>, <strong>CSV&nbsp;(.csv)</strong>,
-        <strong>MATLAB&nbsp;(.mat)</strong>, and <strong>JSON&nbsp;(.json)</strong>.
-        Copy coefficients (b, a), second-order sections (SOS), or poles and zeros
-        directly to your clipboard.
-      </p>
-
-      <h2>Why Use PyFDA Online?</h2>
-      <ul>
-        <li>100% client-side &mdash; no data leaves your browser</li>
-        <li>No installation required &mdash; works on any modern browser</li>
-        <li>Powered by real Python (SciPy, NumPy) via Pyodide/WebAssembly</li>
-        <li>Open source under GPLv3</li>
-        <li>Dark and light theme support</li>
-        <li>Mobile-friendly responsive interface</li>
-      </ul>
-
-      <p>
-        <strong>PyFDA Web</strong> is ideal for students, engineers, and researchers who
-        need a quick, accessible <strong>digital signal processing</strong> (DSP) tool for
-        <strong>python filter design</strong> without setting up a local Python environment.
-      </p>
-
-      <p style="margin-top: 32px; font-size: 14px; color: #666;">
-        This application requires JavaScript to run. Please enable JavaScript in your browser
-        to use <strong>PyFDA Web</strong>.
-      </p>
+    <div style="max-width: 800px; margin: 20px auto; padding: 24px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; text-align: center; font-family: sans-serif;">
+      <h2>JavaScript Required</h2>
+      <p>PyFDA Web requires JavaScript to run Python WebAssembly (Pyodide), calculate DSP filters, and render interactive charts. Please enable JavaScript in your browser to use the application.</p>
     </div>
   </noscript>
 
@@ -174,7 +103,7 @@
         </svg>
       </button>
       <div class="top-bar__logo">Fψ</div>
-      <span class="top-bar__title">PyFDA Web</span>
+      <h1 class="top-bar__title">PyFDA Web</h1>
       <div class="top-bar__spacer"></div>
       <div class="top-bar__actions">
         <button class="md-btn md-btn--outlined" id="btn-import" data-tooltip="Load filter" aria-label="Load filter">
@@ -807,23 +736,53 @@
 
       <!-- Plot Panels -->
       <div class="plot-container">
-        <!-- Empty State -->
+        <!-- Empty State & Interactive DSP Overview -->
         <div id="plot-empty-state" class="plot-empty-state">
-          <svg class="plot-empty-state__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-          </svg>
-          <span class="plot-empty-state__text-desktop">Configure specifications and click Design Filter to show
-            graphics.</span>
-          <span class="plot-empty-state__text-mobile">Configure specifications and design a filter to show the graphics.
-            <br>Tap the menu icon (&equiv;) to expand the left panel.<span class="mobile-micro-only">
-              <br>Tap the Load Filter button (<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                <polyline points="17 8 12 3 7 8" />
-                <line x1="12" y1="3" x2="12" y2="15" />
-              </svg>) to load a filter from a file.</span></span>
+          <div class="empty-state-welcome">
+            <div class="empty-state__icon-badge">F&psi;</div>
+            <h2 class="empty-state__title">Online Python Filter Design &amp; Analysis Tool</h2>
+            <p class="empty-state__subtitle">
+              A free, open-source digital signal processing (DSP) web application that brings the full power of
+              <strong>Python filter design</strong> directly to your browser. Powered by <strong>SciPy</strong> and <strong>NumPy</strong> via <strong>Pyodide (WebAssembly)</strong> with zero installation.
+            </p>
+
+            <div class="empty-state__grid">
+              <div class="empty-state__card">
+                <h3 class="empty-state__card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                  IIR &amp; FIR Design
+                </h3>
+                <p class="empty-state__card-desc">
+                  Design lowpass, highpass, bandpass, bandstop, and allpass filters using Butterworth, Chebyshev I/II, Elliptic (Cauer), Bessel, Equiripple (Remez), and firwin windowing.
+                </p>
+              </div>
+
+              <div class="empty-state__card">
+                <h3 class="empty-state__card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  Interactive Analysis
+                </h3>
+                <p class="empty-state__card-desc">
+                  Analyze magnitude response |H(f)| (dB/linear), phase, group and phase delay, z-plane pole-zero plots, impulse and step responses, and 3D surface |H(z)| in real time.
+                </p>
+              </div>
+
+              <div class="empty-state__card">
+                <h3 class="empty-state__card-title">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                  Fixpoint &amp; Export
+                </h3>
+                <p class="empty-state__card-desc">
+                  Simulate fixed-point quantization effects, word length overflows, and export your designed filters to NumPy (.npz), CSV, MATLAB (.mat), and JSON formats.
+                </p>
+              </div>
+            </div>
+
+            <div class="empty-state__hint">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+              <span>Choose your filter specifications in the sidebar and click <strong>Design Filter</strong> to display interactive plots.</span>
+            </div>
+          </div>
         </div>
 
         <div class="plot-panel active" id="plot-magnitude"></div>
