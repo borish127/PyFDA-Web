@@ -70,9 +70,11 @@
 
   <!-- ================= Fallback for No-JS ================= -->
   <noscript>
-    <div style="max-width: 800px; margin: 20px auto; padding: 24px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; text-align: center; font-family: sans-serif;">
+    <div
+      style="max-width: 800px; margin: 20px auto; padding: 24px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; text-align: center; font-family: sans-serif;">
       <h2>JavaScript Required</h2>
-      <p>PyFDA Web requires JavaScript to run Python WebAssembly (Pyodide), calculate DSP filters, and render interactive charts. Please enable JavaScript in your browser to use the application.</p>
+      <p>PyFDA Web requires JavaScript to run Python WebAssembly (Pyodide), calculate DSP filters, and render
+        interactive charts. Please enable JavaScript in your browser to use the application.</p>
     </div>
   </noscript>
 
@@ -736,53 +738,15 @@
 
       <!-- Plot Panels -->
       <div class="plot-container">
-        <!-- Empty State & Interactive DSP Overview -->
+        <!-- Empty State -->
         <div id="plot-empty-state" class="plot-empty-state">
-          <div class="empty-state-welcome">
-            <div class="empty-state__icon-badge">F&psi;</div>
-            <h2 class="empty-state__title">Online Python Filter Design &amp; Analysis Tool</h2>
-            <p class="empty-state__subtitle">
-              A free, open-source digital signal processing (DSP) web application that brings the full power of
-              <strong>Python filter design</strong> directly to your browser. Powered by <strong>SciPy</strong> and <strong>NumPy</strong> via <strong>Pyodide (WebAssembly)</strong> with zero installation.
-            </p>
-
-            <div class="empty-state__grid">
-              <div class="empty-state__card">
-                <h3 class="empty-state__card-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                  IIR &amp; FIR Design
-                </h3>
-                <p class="empty-state__card-desc">
-                  Design lowpass, highpass, bandpass, bandstop, and allpass filters using Butterworth, Chebyshev I/II, Elliptic (Cauer), Bessel, Equiripple (Remez), and firwin windowing.
-                </p>
-              </div>
-
-              <div class="empty-state__card">
-                <h3 class="empty-state__card-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                  Interactive Analysis
-                </h3>
-                <p class="empty-state__card-desc">
-                  Analyze magnitude response |H(f)| (dB/linear), phase, group and phase delay, z-plane pole-zero plots, impulse and step responses, and 3D surface |H(z)| in real time.
-                </p>
-              </div>
-
-              <div class="empty-state__card">
-                <h3 class="empty-state__card-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                  Fixpoint &amp; Export
-                </h3>
-                <p class="empty-state__card-desc">
-                  Simulate fixed-point quantization effects, word length overflows, and export your designed filters to NumPy (.npz), CSV, MATLAB (.mat), and JSON formats.
-                </p>
-              </div>
-            </div>
-
-            <div class="empty-state__hint">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
-              <span>Choose your filter specifications in the sidebar and click <strong>Design Filter</strong> to display interactive plots.</span>
-            </div>
-          </div>
+          <svg class="plot-empty-state__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          <h2 class="plot-empty-state__title">Digital Filter Design &amp; Analysis</h2>
+          <p class="plot-empty-state__text-desktop">Configure specifications in the sidebar and click <strong>Design Filter</strong> to generate interactive plots.</p>
+          <p class="plot-empty-state__text-mobile">Tap the menu icon (&equiv;) to configure specifications and design a filter.</p>
         </div>
 
         <div class="plot-panel active" id="plot-magnitude"></div>
