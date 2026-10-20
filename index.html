@@ -54,14 +54,69 @@
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="manifest" href="site.webmanifest">
 
-  <!-- JSON-LD Structured Data for Google Site Names -->
+  <!-- JSON-LD Structured Data: WebSite, WebApplication, and FAQPage -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "PyFDA Web",
-    "alternateName": ["PyFDA", "PyFDA-Web", "PyFDA Online"],
-    "url": "https://pyfda-web.borish127.com/"
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "name": "PyFDA Web",
+        "alternateName": ["PyFDA", "PyFDA-Web", "PyFDA Online"],
+        "url": "https://pyfda-web.borish127.com/"
+      },
+      {
+        "@type": "WebApplication",
+        "name": "PyFDA Web",
+        "url": "https://pyfda-web.borish127.com/",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript and WebAssembly support",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Free, open-source online DSP tool for designing, simulating, and analyzing IIR and FIR digital filters directly in the browser via Pyodide and WebAssembly."
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "What is PyFDA Web?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PyFDA Web is a free, installation-free online digital signal processing (DSP) application that brings the functionality of the Python Filter Design Analysis tool directly into your web browser."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What digital filter design methods does PyFDA Web support?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "PyFDA Web supports Infinite Impulse Response (IIR) filters including Butterworth, Chebyshev Type I and II, Elliptic (Cauer), and Bessel, as well as Finite Impulse Response (FIR) filters including Windowed (firwin), Equiripple (Remez), and Moving Average methods across lowpass, highpass, bandpass, and bandstop configurations."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How does PyFDA Web process signal processing algorithms without a server?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "All signal processing computations run 100% locally on your machine using Pyodide (Python compiled to WebAssembly), utilizing native NumPy and SciPy libraries with zero server-side latency or data transmission."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I export filter coefficients and simulation data?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, designed filters and coefficients can be exported in NumPy (.npz), CSV (.csv), MATLAB (.mat), and JSON formats, as well as copied directly to your clipboard."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
 </head>
