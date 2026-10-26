@@ -327,20 +327,7 @@ const bus = new EventBus();
 document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
 
-  // Ensure loading overlay stays visible for at least 1.2 seconds to prevent flashing
-  const startTime = Date.now();
-  const MIN_SPLASH_TIME = 1200;
-  const overlay = document.getElementById('loading-overlay');
   const ml = document.getElementById('mini-loader');
-
-  setTimeout(() => {
-    if (overlay) overlay.classList.add('hidden');
-    
-    // If Pyodide is not ready yet, show the mini-loader status pill
-    if (!window.pyodideEngineReady && ml) {
-      ml.classList.remove('hidden');
-    }
-  }, MIN_SPLASH_TIME);
 
   // Initialize UI modules immediately so they are visible/interactive
   if (typeof InputSpecs !== 'undefined') InputSpecs.init();
@@ -355,9 +342,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     AppState.ui.isLoading = false;
     bus.emit('pyodideReady');
 
-    const elapsed = Date.now() - startTime;
-    if (elapsed >= MIN_SPLASH_TIME && ml) {
-      // The status pill is visible on the main page, transition it to success state
+    if (ml) {
+      // The status pill is visible, transition it to success state
       ml.classList.add('success');
       const mlStatus = document.getElementById('mini-loader-status');
       if (mlStatus) mlStatus.textContent = 'Ready!';
