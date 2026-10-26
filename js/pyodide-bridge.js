@@ -78,21 +78,30 @@ const PyodideBridge = (() => {
     });
   }
 
+  let initPromise = null;
+
   /* ----- Load Pyodide + Packages ----- */
-  async function init() {
+  function init() {
+    if (ready) return Promise.resolve(true);
+    if (initPromise) return initPromise;
+
     updateLoadingStatus('Starting Web Worker…', 0);
     worker = new Worker('js/pyodide-worker.js');
     worker.onmessage = handleWorkerMessage;
     
-    try {
-        await dispatchToWorker('init', {}, 0); // no timeout for initialization
+    initPromise = dispatchToWorker('init', {}, 0)
+      .then(() => {
         ready = true;
         return true;
-    } catch (err) {
+      })
+      .catch(err => {
+        initPromise = null;
         updateLoadingStatus(`Error: ${err.message}`, 0);
-        console.error('Worker init failed:', err);
+        console.warn('Worker init error:', err);
         throw err;
-    }
+      });
+
+    return initPromise;
   }
 
   /* ----- Run arbitrary Python code ----- */
@@ -161,9 +170,10 @@ const PyodideBridge = (() => {
   }
 
   function isReady() { return ready; }
+  function isInitializing() { return !ready && initPromise !== null; }
 
   return {
-    init, runPython, callPython, isReady,
+    init, runPython, callPython, isReady, isInitializing,
     designFilter, freqResponse, groupDelay, phaseDelay,
     impulseResponse, stepResponse, stimulusResponse,
     pzData, surface3D, fixpointSim, exportData, importData

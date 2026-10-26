@@ -179,6 +179,7 @@ function switchTab(tabName) {
 /* ---------- Design Filter Action ---------- */
 async function designFilter() {
   if (!window.pyodideEngineReady) {
+    if (typeof startPyodideInit === 'function') startPyodideInit();
     showToast("Please wait, initializing math engine...");
     return;
   }
@@ -321,13 +322,42 @@ async function runAnalysis(tabName) {
 }
 
 
+/* ---------- Pyodide Lifecycle Management ---------- */
+let pyodideInitStarted = false;
+function startPyodideInit() {
+  if (pyodideInitStarted) return;
+  pyodideInitStarted = true;
+
+  const ml = document.getElementById('mini-loader');
+  if (ml) ml.classList.remove('hidden');
+
+  PyodideBridge.init().then(() => {
+    AppState.ui.isLoading = false;
+    bus.emit('pyodideReady');
+
+    if (ml) {
+      ml.classList.add('success');
+      const mlStatus = document.getElementById('mini-loader-status');
+      if (mlStatus) mlStatus.textContent = 'Ready!';
+      
+      setTimeout(() => {
+        ml.classList.add('hidden');
+        setTimeout(() => {
+          ml.classList.remove('success');
+        }, 500);
+      }, 1500);
+    }
+  }).catch(err => {
+    console.warn('Pyodide background preload did not complete:', err);
+    if (ml) ml.classList.add('hidden');
+  });
+}
+
 /* ---------- Bootstrap ---------- */
 const bus = new EventBus();
 
 document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
-
-  const ml = document.getElementById('mini-loader');
 
   // Initialize UI modules immediately so they are visible/interactive
   if (typeof InputSpecs !== 'undefined') InputSpecs.init();
@@ -337,28 +367,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof FileIO !== 'undefined') FileIO.init();
   if (typeof PlotManager !== 'undefined') PlotManager.init();
 
-  // Load Pyodide in the background
-  PyodideBridge.init().then(() => {
-    AppState.ui.isLoading = false;
-    bus.emit('pyodideReady');
+  // Preload on first user interaction or when the page is fully loaded and idle
+  const interactionEvents = ['pointerdown', 'keydown', 'touchstart'];
+  const onInteraction = () => {
+    interactionEvents.forEach(e => window.removeEventListener(e, onInteraction, { passive: true }));
+    startPyodideInit();
+  };
+  interactionEvents.forEach(e => window.addEventListener(e, onInteraction, { passive: true, once: true }));
 
-    if (ml) {
-      // The status pill is visible, transition it to success state
-      ml.classList.add('success');
-      const mlStatus = document.getElementById('mini-loader-status');
-      if (mlStatus) mlStatus.textContent = 'Ready!';
-      
-      setTimeout(() => {
-        ml.classList.add('hidden');
-        setTimeout(() => {
-          ml.classList.remove('success');
-        }, 500); // matches transition duration
-      }, 1500); // show "Ready!" for 1.5s
-    }
-  }).catch(err => {
-    showToast('Failed to initialize Python environment', 'error', 10000);
-    const mlStatus = document.getElementById('mini-loader-status');
-    if (mlStatus) mlStatus.textContent = 'Initialization failed';
+  // Fallback preload after all initial assets (fonts, styles, scripts) have settled
+  window.addEventListener('load', () => {
+    setTimeout(startPyodideInit, 2500);
   });
 
   // Event listeners
