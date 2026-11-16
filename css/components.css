@@ -2,26 +2,24 @@
    PyFDA Web — MD3 Expressive Components
    ============================================================ */
 
+/* ---------- Visually Hidden Utility ---------- */
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
 /* ---------- Modal / Dialog ---------- */
-.md-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 5000;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
-}
-
-.md-modal-backdrop.open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.md-modal {
+dialog.md-modal {
+  margin: auto;
+  border: none;
+  color: var(--md-sys-color-on-surface);
   background: var(--md-sys-color-surface-container-high);
   border-radius: var(--md-sys-shape-corner-extra-large);
   padding: var(--space-lg);
@@ -29,12 +27,27 @@
   max-width: 420px;
   width: 90vw;
   box-shadow: var(--md-sys-elevation-5);
-  transform: translateY(24px) scale(0.95);
-  transition: transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
 }
 
-.md-modal-backdrop.open .md-modal {
-  transform: translateY(0) scale(1);
+dialog.md-modal::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  dialog.md-modal[open] {
+    animation: modalIn var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ---------- Cards ---------- */
@@ -249,6 +262,16 @@
   white-space: nowrap;
 }
 
+.md-btn:focus-visible,
+.md-btn--icon:focus-visible,
+.md-fab:focus-visible,
+.md-segmented__btn:focus-visible,
+.plot-tab:focus-visible,
+.menu-toggle:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
 .md-btn:active {
   transform: scale(0.97);
 }
@@ -447,10 +470,23 @@
   }
 }
 
-.md-chip.active {
+.md-chip:has(input:checked) {
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   border-color: transparent;
+}
+
+.md-chip:has(input:focus-visible) {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+@supports not selector(:has(*)) {
+  .md-chip.active {
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    border-color: transparent;
+  }
 }
 
 /* ---------- Switch (Toggle) ---------- */
@@ -492,7 +528,16 @@
 }
 
 .md-switch input {
-  display: none;
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.md-switch input:focus-visible~.md-switch__track {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
 }
 
 .md-switch input:checked~.md-switch__track {
@@ -519,7 +564,16 @@
 }
 
 .md-checkbox input {
-  display: none;
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.md-checkbox input:focus-visible~.md-checkbox__box {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
 }
 
 .md-checkbox__box {
@@ -628,7 +682,18 @@
   border: 3px solid var(--md-sys-color-surface-container-highest);
   border-top-color: var(--md-sys-color-primary);
   border-radius: 50%;
-  animation: spin 800ms linear infinite;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .md-spinner {
+    animation: spin 800ms linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md-spinner {
+    animation: spin 6s linear infinite;
+  }
 }
 
 @keyframes spin {

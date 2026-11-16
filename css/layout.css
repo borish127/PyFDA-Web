@@ -22,11 +22,10 @@ body {
   color: var(--md-sys-color-on-surface);
   line-height: 1.5;
   min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
 /* ---------- App Shell ---------- */
@@ -38,7 +37,9 @@ body {
     "topbar topbar"
     "sidebar main";
   height: 100vh;
+  height: 100dvh;
   max-height: 100vh;
+  max-height: 100dvh;
   width: 100%;
   max-width: 100%;
   overflow-x: hidden;
@@ -445,8 +446,13 @@ body {
   font-weight: 700;
   font-size: 32px;
   font-family: var(--md-sys-typescale-display-font);
-  animation: logoPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   box-shadow: var(--md-sys-elevation-2);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .loading-overlay__logo {
+    animation: logoPulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
 }
 
 @keyframes logoPulse {

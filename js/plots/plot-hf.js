@@ -122,8 +122,8 @@
 
     // Two-sided: mirror to negative frequencies
     if (plotOpts.twoSided && freqX.length > 0) {
-      const negFreq = freqX.slice().reverse().map(f => -f);
-      const negMag = magY.slice().reverse();
+      const negFreq = freqX.toReversed().map(f => -f);
+      const negMag = magY.toReversed();
       freqX = [...negFreq, ...freqX];
       magY = [...negMag, ...magY];
     }
@@ -159,8 +159,8 @@
       }
 
       if (plotOpts.twoSided && fxFreqX.length > 0) {
-        const negFreq = fxFreqX.slice().reverse().map(f => -f);
-        const negMag = fxMagY.slice().reverse();
+        const negFreq = fxFreqX.toReversed().map(f => -f);
+        const negMag = fxMagY.toReversed();
         fxFreqX = [...negFreq, ...fxFreqX];
         fxMagY = [...negMag, ...fxMagY];
       }
@@ -411,8 +411,8 @@
     }
 
     if (plotOpts.twoSided && freqX.length > 0) {
-      const negFreq = freqX.slice().reverse().map(f => -f);
-      const negPhase = phaseY.slice().reverse().map(p => -p);
+      const negFreq = freqX.toReversed().map(f => -f);
+      const negPhase = phaseY.toReversed().map(p => -p);
       freqX = [...negFreq, ...freqX];
       phaseY = [...negPhase, ...phaseY];
     }
@@ -449,8 +449,8 @@
       }
 
       if (plotOpts.twoSided && fxFreqX.length > 0) {
-        const negFreq = fxFreqX.slice().reverse().map(f => -f);
-        const negPhase = fxPhaseY.slice().reverse().map(p => -p);
+        const negFreq = fxFreqX.toReversed().map(f => -f);
+        const negPhase = fxPhaseY.toReversed().map(p => -p);
         fxFreqX = [...negFreq, ...fxFreqX];
         fxPhaseY = [...negPhase, ...fxPhaseY];
       }

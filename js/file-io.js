@@ -11,9 +11,18 @@ const FileIO = (() => {
 
     // Modal close
     document.getElementById('export-modal-close')?.addEventListener('click', closeExportModal);
-    document.getElementById('export-modal-backdrop')?.addEventListener('click', (e) => {
-      if (e.target === e.currentTarget) closeExportModal();
-    });
+    const dialog = document.getElementById('export-modal');
+    if (dialog && !('closedBy' in HTMLDialogElement.prototype)) {
+      dialog.addEventListener('click', (e) => {
+        if (e.target !== dialog) return;
+        const rect = dialog.getBoundingClientRect();
+        const inContent = (
+          rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+          rect.left <= e.clientX && e.clientX <= rect.left + rect.width
+        );
+        if (!inContent) closeExportModal();
+      });
+    }
 
     // Format buttons inside modal
     document.querySelectorAll('[data-export-fmt]').forEach(btn => {
@@ -45,11 +54,11 @@ const FileIO = (() => {
     const filenameInput = document.getElementById('export-filename');
     if (filenameInput) filenameInput.value = generateFilename();
 
-    document.getElementById('export-modal-backdrop')?.classList.add('open');
+    document.getElementById('export-modal')?.showModal();
   }
 
   function closeExportModal() {
-    document.getElementById('export-modal-backdrop')?.classList.remove('open');
+    document.getElementById('export-modal')?.close();
   }
 
   /* ---------- Execute Export ---------- */

@@ -52,7 +52,11 @@ const InputCoeffs = (() => {
     tbody.querySelectorAll('td[contenteditable]').forEach(td => {
       td.addEventListener('blur', () => handleEdit(td));
       td.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); td.blur(); }
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (e.isComposing || e.keyCode === 229) return;
+          td.blur();
+        }
       });
     });
   }

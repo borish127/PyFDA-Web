@@ -112,21 +112,52 @@ function showToast(message, type = 'info', duration = 4000) {
 }
 
 /* ---------- Theme ---------- */
-function initTheme() {
-  const saved = localStorage.getItem('pyfda-theme');
-  if (saved && saved !== 'system') {
+function getSystemColorScheme() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(saved) {
+  const meta = document.querySelector('meta[name="color-scheme"]');
+  if (saved === 'light' || saved === 'dark') {
     document.documentElement.setAttribute('data-theme', saved);
+    if (meta) meta.content = saved;
     AppState.ui.theme = saved;
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    if (meta) meta.content = 'light dark';
+    AppState.ui.theme = 'system';
   }
 }
 
+function initTheme() {
+  let saved = null;
+  try { saved = localStorage.getItem('pyfda-theme'); } catch (_) {}
+  applyTheme(saved);
+
+  window.addEventListener('storage', (e) => {
+    if (e.key !== 'pyfda-theme') return;
+    applyTheme(e.newValue);
+    bus.emit('themeChanged', AppState.ui.theme);
+    bus.emit('replotAll');
+  });
+}
+
 function toggleTheme() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('pyfda-theme', next);
-  AppState.ui.theme = next;
-  bus.emit('themeChanged', next);
+  const systemScheme = getSystemColorScheme();
+  const explicit = document.documentElement.getAttribute('data-theme');
+  const rendered = (explicit === 'light' || explicit === 'dark') ? explicit : systemScheme;
+  const target = rendered === 'dark' ? 'light' : 'dark';
+
+  try {
+    if (target === systemScheme) {
+      localStorage.removeItem('pyfda-theme');
+    } else {
+      localStorage.setItem('pyfda-theme', target);
+    }
+  } catch (_) {}
+
+  applyTheme(target === systemScheme ? null : target);
+  bus.emit('themeChanged', AppState.ui.theme);
 
   // Update Plotly plots theme
   bus.emit('replotAll');
@@ -166,7 +197,9 @@ function switchTab(tabName) {
   AppState.ui.activeTab = tabName;
 
   document.querySelectorAll('.plot-tab[data-tab]').forEach(t => {
-    t.classList.toggle('active', t.dataset.tab === tabName);
+    const isActive = t.dataset.tab === tabName;
+    t.classList.toggle('active', isActive);
+    t.setAttribute('aria-selected', String(isActive));
   });
 
   document.querySelectorAll('.plot-panel').forEach(p => {
@@ -408,7 +441,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Update active tab styling
     document.querySelectorAll('.sidebar-tabs [data-side-tab]').forEach(t => {
-      t.classList.toggle('active', t.dataset.sideTab === target);
+      const isActive = t.dataset.sideTab === target;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', String(isActive));
     });
 
     // Translate the track horizontally (apply standard CSS transition)
@@ -531,9 +566,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, { passive: true });
   }
 
-  // Plot Tab clicks
+  // Plot Tab clicks & keyboard navigation
   document.querySelectorAll('.plot-tab[data-tab]').forEach(tab => {
     tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+  });
+
+  document.querySelectorAll('[role="tablist"]').forEach(tablist => {
+    tablist.addEventListener('keydown', (e) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(e.key)) return;
+      const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+      const idx = tabs.indexOf(document.activeElement);
+      if (idx === -1) return;
+      e.preventDefault();
+      let nextIdx = idx;
+      if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') nextIdx = 0;
+      else if (e.key === 'End') nextIdx = tabs.length - 1;
+      tabs[nextIdx].focus();
+      tabs[nextIdx].click();
+    });
   });
 
   // Make the horizontal plot tabs container scrollable with the scroll wheel
@@ -547,12 +599,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, { passive: false });
   }
 
-  // Chip toggle active state (for checkboxes inside chips)
-  document.querySelectorAll('.md-chip input[type="checkbox"]').forEach(cb => {
-    const chip = cb.closest('.md-chip');
-    if (cb.checked) chip?.classList.add('active');
-    cb.addEventListener('change', () => chip?.classList.toggle('active', cb.checked));
-  });
+  // Chip toggle active state fallback for browsers without CSS :has()
+  if (!CSS.supports('selector(:has(*))')) {
+    document.querySelectorAll('.md-chip input[type="checkbox"]').forEach(cb => {
+      const chip = cb.closest('.md-chip');
+      if (cb.checked) chip?.classList.add('active');
+      cb.addEventListener('change', () => chip?.classList.toggle('active', cb.checked));
+    });
+  }
 
   // Tab change → run analysis
   function updateToolbarActionsVisibility(tabName) {

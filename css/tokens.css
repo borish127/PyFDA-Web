@@ -4,6 +4,7 @@
 
 /* ---------- Color Scheme (Light) ---------- */
 :root {
+  color-scheme: light dark;
   /* Primary tonal palette — deep indigo */
   --md-sys-color-primary: #3a5ba9;
   --md-sys-color-on-primary: #ffffff;
@@ -116,7 +117,12 @@
 }
 
 /* ---------- Dark Theme ---------- */
-[data-theme="dark"] {
+:root:has(> head > meta[name="color-scheme"][content="light"]) {
+  color-scheme: light;
+}
+
+[data-theme="dark"],
+:root:has(> head > meta[name="color-scheme"][content="dark"]) {
   color-scheme: dark;
   --md-sys-color-primary: #adc6ff;
   --md-sys-color-on-primary: #072d6f;
