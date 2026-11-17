@@ -6,15 +6,7 @@
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light dark">
-  <script>
-    try {
-      var t = localStorage.getItem('pyfda-theme');
-      if (t === 'light' || t === 'dark') {
-        document.querySelector('meta[name="color-scheme"]').content = t;
-        document.documentElement.setAttribute('data-theme', t);
-      }
-    } catch (e) {}
-  </script>
+  <script src="js/theme-init.js"></script>
   <title>PyFDA Web - Online Python Filter Design Analysis Tool</title>
   <meta name="description"
     content="Design, analyze, and simulate digital filters directly in your browser. PyFDA Web is a free, installation-free online version of the Python Filter Design Analysis tool.">
