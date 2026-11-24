@@ -117,6 +117,39 @@ dialog.md-modal::backdrop {
   border-right: none;
 }
 
+.md-segmented--grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  border-radius: var(--md-sys-shape-corner-medium);
+  overflow: hidden;
+}
+
+.md-segmented--grid .md-segmented__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.md-segmented--grid .md-segmented__btn:nth-child(-n+5) {
+  grid-column: span 2;
+  border-bottom: 1px solid var(--md-sys-color-outline);
+}
+
+.md-segmented--grid .md-segmented__btn:nth-child(5) {
+  border-right: none;
+}
+
+.md-segmented--grid .md-segmented__btn:nth-child(n+6) {
+  grid-column: span 5;
+}
+
+.md-segmented--grid .md-segmented__btn:nth-child(7) {
+  border-right: none;
+}
+
 @media (hover: hover) {
   .md-segmented__btn:hover {
     background: var(--md-sys-color-surface-container-high);
@@ -790,6 +823,16 @@ dialog.md-modal::backdrop {
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+  }
+
+  .md-segmented--grid {
+    display: grid;
+    overflow: hidden;
+    white-space: normal;
+  }
+
+  .md-segmented--grid .md-segmented__btn {
+    flex-shrink: unset;
   }
 
   .md-segmented::-webkit-scrollbar {

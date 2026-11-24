@@ -70,6 +70,16 @@ const FileIO = (() => {
     closeExportModal();
 
     try {
+      const specsCopy = { ...AppState.specs };
+      const mul = (typeof InputSpecs !== 'undefined' && InputSpecs.getFreqMultiplier)
+        ? InputSpecs.getFreqMultiplier() : 1;
+      if (specsCopy.freqUnit !== 'normalized' && specsCopy.freqUnit !== 'f_ny') {
+        specsCopy.fs = specsCopy.fs * mul;
+        specsCopy.fpb = specsCopy.fpb * mul;
+        specsCopy.fsb = specsCopy.fsb * mul;
+        specsCopy.fpb2 = specsCopy.fpb2 * mul;
+        specsCopy.fsb2 = specsCopy.fsb2 * mul;
+      }
       const data = {
         b: AppState.filter.b,
         a: AppState.filter.a,
@@ -79,7 +89,7 @@ const FileIO = (() => {
         sos: AppState.filter.sos,
         order: AppState.filter.order,
         method: AppState.filter.method,
-        specs: AppState.specs,
+        specs: specsCopy,
       };
 
       const result = await PyodideBridge.exportData(fmt, data);

@@ -29,7 +29,7 @@ class EventBus {
 const AppState = {
   /* Filter specifications */
   specs: {
-    responseType: 'lowpass',      // lowpass, highpass, bandpass, bandstop, allpass
+    responseType: 'lowpass',      // lowpass, highpass, bandpass, bandstop, allpass, hilbert, differentiator
     filterFamily: 'iir',          // iir, fir
     designMethod: 'butter',       // butter, cheby1, cheby2, ellip, bessel, firwin, firwin2, remez, firls, mavg
     fs: 48000,                    // Sampling frequency (Hz)
@@ -41,7 +41,16 @@ const AppState = {
     asb: 60,                      // Stopband attenuation (dB)
     order: null,                  // null = auto, number = manual
     window: 'hamming',            // Window type for firwin
-    freqUnit: 'hz',               // hz, normalized
+    winParam: 8,                  // First parameter for parameterized windows
+    winParam2: 1,                 // Second parameter (e.g. gen. gaussian / exponential)
+    wpb: 1,                       // Passband weight (remez/firls)
+    wsb: 1,                       // Stopband weight
+    wpb2: 1,                      // Band 2 weight
+    wsb2: 1,                      // Band 2 stop weight
+    gridDensity: 16,              // Remez grid density
+    maStages: 1,                  // Moving average cascaded stages
+    maNormalize: true,            // Moving average unity DC gain
+    freqUnit: 'hz',               // hz, khz, mhz, ghz, normalized (F_s), f_ny
     ampUnit: 'db',                // db, linear, power
   },
 
@@ -70,7 +79,7 @@ const AppState = {
 
   /* Fixpoint configuration */
   fixpoint: {
-    enabled: true,
+    enabled: false,
     coeffQI: 2,
     coeffQF: 13,
     signalQI: 2,
@@ -85,6 +94,7 @@ const AppState = {
     x: null,
     y: null,
   },
+  lastStimulus: null,
 
   /* UI state */
   ui: {
@@ -96,8 +106,62 @@ const AppState = {
   }
 };
 
-/* ---------- Toast System ---------- */
+/* ---------- Logger & Toast System ---------- */
+const AppLogger = (() => {
+  const entries = [];
+
+  function append(level, message) {
+    const now = new Date();
+    const ts = now.toTimeString().slice(0, 8);
+    const tag = level === 'error' ? 'ERROR' : (level === 'warning' ? 'WARNING' : 'INFO');
+    entries.push({ ts, tag, level, message: String(message) });
+    if (entries.length > 200) entries.shift();
+
+    const body = document.getElementById('logger-entries');
+    const count = document.getElementById('logger-count');
+    if (count) count.textContent = String(entries.length);
+    if (body) {
+      const div = document.createElement('div');
+      div.className = `logger-entry ${level}`;
+      div.textContent = `[${ts}] [${tag}] ${message}`;
+      body.appendChild(div);
+      if (body.childElementCount > 200) body.removeChild(body.firstElementChild);
+      body.scrollTop = body.scrollHeight;
+    }
+  }
+
+  function init() {
+    const drawer = document.getElementById('logger-drawer');
+    const toggleBtn = document.getElementById('btn-logger-toggle');
+    const chevron = document.getElementById('logger-chevron');
+    toggleBtn?.addEventListener('click', () => {
+      const open = drawer?.classList.toggle('open');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (chevron) chevron.textContent = open ? '▼' : '▲';
+      setTimeout(() => {
+        document.querySelectorAll('.plot-panel.active .js-plotly-plot').forEach(el => {
+          if (typeof Plotly !== 'undefined' && Plotly.Plots) Plotly.Plots.resize(el);
+        });
+      }, 60);
+    });
+    document.getElementById('btn-logger-clear')?.addEventListener('click', () => {
+      entries.length = 0;
+      const body = document.getElementById('logger-entries');
+      const count = document.getElementById('logger-count');
+      if (body) body.replaceChildren();
+      if (count) count.textContent = '0';
+    });
+    document.getElementById('btn-logger-copy')?.addEventListener('click', () => {
+      const txt = entries.map(e => `[${e.ts}] [${e.tag}] ${e.message}`).join('\n');
+      navigator.clipboard.writeText(txt).then(() => showToast('Log copied to clipboard', 'info')).catch(() => { });
+    });
+  }
+
+  return { append, init };
+})();
+
 function showToast(message, type = 'info', duration = 4000) {
+  AppLogger.append(type, message);
   const container = document.getElementById('toast-container');
   if (!container) return;
   const toast = document.createElement('div');
@@ -131,7 +195,7 @@ function applyTheme(saved) {
 
 function initTheme() {
   let saved = null;
-  try { saved = localStorage.getItem('pyfda-theme'); } catch (_) {}
+  try { saved = localStorage.getItem('pyfda-theme'); } catch (_) { }
   applyTheme(saved);
 
   window.addEventListener('storage', (e) => {
@@ -154,7 +218,7 @@ function toggleTheme() {
     } else {
       localStorage.setItem('pyfda-theme', target);
     }
-  } catch (_) {}
+  } catch (_) { }
 
   applyTheme(target === systemScheme ? null : target);
   bus.emit('themeChanged', AppState.ui.theme);
@@ -227,17 +291,22 @@ async function designFilter() {
     // Apply frequency unit multiplier (user enters kHz/MHz/GHz, DSP needs Hz)
     const mul = (typeof InputSpecs !== 'undefined' && InputSpecs.getFreqMultiplier)
       ? InputSpecs.getFreqMultiplier() : 1;
-    if (specs.freqUnit !== 'normalized') {
+    const isNorm = specs.freqUnit === 'normalized';
+    const isFNy = specs.freqUnit === 'f_ny';
+    if (!isNorm && !isFNy) {
       specs.fs = specs.fs * mul;
       specs.fpb = specs.fpb * mul;
       specs.fsb = specs.fsb * mul;
       specs.fpb2 = specs.fpb2 * mul;
       specs.fsb2 = specs.fsb2 * mul;
+      if (specs.fs <= 0) throw new Error('Sampling frequency must be > 0');
     }
 
-    if (specs.fs <= 0) throw new Error('Sampling frequency must be > 0');
-    if (specs.fpb <= 0) throw new Error('Passband frequency must be > 0');
-    if (specs.fpb >= specs.fs / 2) throw new Error('Passband frequency must be < Fs/2');
+    const nyq = isNorm ? 0.5 : (isFNy ? 1.0 : specs.fs / 2);
+    if (!['allpass', 'hilbert', 'differentiator'].includes(specs.responseType)) {
+      if (specs.fpb <= 0) throw new Error('Passband frequency must be > 0');
+      if (specs.fpb >= nyq) throw new Error('Passband frequency must be < Nyquist');
+    }
 
     // Call Pyodide
     const result = await PyodideBridge.designFilter(specs);
@@ -252,6 +321,7 @@ async function designFilter() {
       sos: result.sos || null,
       order: result.order,
       method: result.method,
+      weights: result.weights || null,
     };
 
     // Clear cached analysis
@@ -289,7 +359,9 @@ async function designFilter() {
 async function runAnalysis(tabName) {
   if (!AppState.filter.b) return;
   const { b, a } = AppState.filter;
-  const fs = AppState.specs.fs;
+  const fs = (typeof InputSpecs !== 'undefined' && InputSpecs.getEffectiveFsHz)
+    ? InputSpecs.getEffectiveFsHz()
+    : AppState.specs.fs;
 
   try {
     switch (tabName) {
@@ -372,7 +444,7 @@ function startPyodideInit() {
       ml.classList.add('success');
       const mlStatus = document.getElementById('mini-loader-status');
       if (mlStatus) mlStatus.textContent = 'Ready!';
-      
+
       setTimeout(() => {
         ml.classList.add('hidden');
         setTimeout(() => {
@@ -397,8 +469,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (typeof InputCoeffs !== 'undefined') InputCoeffs.init();
   if (typeof InputPZ !== 'undefined') InputPZ.init();
   if (typeof FixpointPanel !== 'undefined') FixpointPanel.init();
+  if (typeof InfoPanel !== 'undefined') InfoPanel.init();
   if (typeof FileIO !== 'undefined') FileIO.init();
   if (typeof PlotManager !== 'undefined') PlotManager.init();
+  AppLogger.init();
 
   // Preload on first user interaction or when the page is fully loaded and idle
   const interactionEvents = ['pointerdown', 'keydown', 'touchstart'];
@@ -609,19 +683,61 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Tab change → run analysis
+  const moreBtn = document.getElementById('btn-plot-more');
+  const morePopover = document.getElementById('plot-more-popover');
+
+  function closeMorePopover() {
+    if (morePopover) morePopover.hidden = true;
+    if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  moreBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!morePopover) return;
+    const willOpen = morePopover.hidden;
+    morePopover.hidden = !willOpen;
+    moreBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (morePopover && !morePopover.hidden && !e.target.closest('#plot-more-wrap')) {
+      closeMorePopover();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeMorePopover();
+  });
+
   function updateToolbarActionsVisibility(tabName) {
     const show = (id, visible) => {
       const el = document.getElementById(id);
       if (el) el.style.display = visible ? '' : 'none';
     };
 
+    closeMorePopover();
+
+    // Primary controls on the bar
     show('select-mag-scale-container', tabName === 'magnitude');
+    show('chip-show-specs-container', tabName === 'magnitude');
     show('select-phase-unit-container', tabName === 'phase');
     show('select-phase-wrap-container', tabName === 'phase');
     show('select-delay-unit-container', tabName === 'group-delay' || tabName === 'phase-delay');
+    show('chip-pz-hf-container', tabName === 'pz');
+    show('chip-pz-log-container', tabName === 'pz');
     show('select-3d-scale-container', tabName === '3d');
-    show('chip-show-specs-container', tabName === 'magnitude');
+    show('select-3d-mode-container', tabName === '3d');
+
+    // Secondary controls inside Options popover
+    const hasMore = (tabName === 'magnitude' || tabName === 'phase' || tabName === '3d');
+    show('plot-more-wrap', hasMore);
+    show('select-hf-qty-container', tabName === 'magnitude');
+    show('select-inset-container', tabName === 'magnitude');
+    show('chip-zero-phase-container', tabName === 'magnitude');
+    show('chip-phase-overlay-container', tabName === 'magnitude');
     show('chip-two-sided-container', tabName === 'magnitude' || tabName === 'phase');
+    show('chip-3d-polar-container', tabName === '3d');
+    show('chip-3d-light-container', tabName === '3d');
   }
 
   // Initialize visibility on load

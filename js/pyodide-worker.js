@@ -22,12 +22,18 @@ async function initPyodide() {
   await pyodide.loadPackage('scipy');
 
   postMessage({ type: 'status', msg: 'Loading DSP modules…', percent: 80 });
+  await pyodide.runPythonAsync(`
+import sys, os
+if '.' not in sys.path:
+    sys.path.insert(0, '.')
+`);
   const modules = ['filter_design', 'filter_analysis', 'fixpoint', 'io_utils'];
   for (const mod of modules) {
     // Relative to this worker script (js/pyodide-worker.js) -> go up to parent
     const resp = await fetch('../python/' + mod + '.py');
     if (resp.ok) {
       const code = await resp.text();
+      pyodide.FS.writeFile(mod + '.py', code);
       await pyodide.runPythonAsync(code);
     } else {
       throw new Error("Failed to load module: " + mod);

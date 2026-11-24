@@ -1,219 +1,260 @@
 /* ============================================================
-   PyFDA Web — Transient Response Plots (Impulse, Step, Stimulus)
+   PyFDA Web — Time-Domain Transient & Stimulus/FFT Plots
+   Supports Impulse, Step, and full Stimulus Generator (presets,
+   noise, bandlimiting, time vs FFT spectrum, fixpoint & error).
    ============================================================ */
 
 (function () {
   bus.on('plotImpulse', renderImpulse);
   bus.on('plotStep', renderStep);
-  bus.on('plotStimulus', renderStimulus);
+  bus.on('plotStimulus', runStimulus);
   bus.on('fixpointResult', () => {
-    if (AppState.analysis.impulseResponse) renderImpulse(AppState.analysis.impulseResponse);
-    if (AppState.analysis.stepResponse) renderStep(AppState.analysis.stepResponse);
-    if (AppState.stimulus.x) renderStimulus();
+    if (AppState.analysis.impulseResponse && AppState.ui.activeTab === 'impulse') renderImpulse(AppState.analysis.impulseResponse);
+    if (AppState.analysis.stepResponse && AppState.ui.activeTab === 'step') renderStep(AppState.analysis.stepResponse);
+    if (AppState.ui.activeTab === 'stimulus') renderStimulusCached();
   });
   bus.on('fixpointCleared', () => {
-    if (AppState.analysis.impulseResponse) renderImpulse(AppState.analysis.impulseResponse);
-    if (AppState.analysis.stepResponse) renderStep(AppState.analysis.stepResponse);
-    if (AppState.stimulus.x) renderStimulus();
+    if (AppState.analysis.impulseResponse && AppState.ui.activeTab === 'impulse') renderImpulse(AppState.analysis.impulseResponse);
+    if (AppState.analysis.stepResponse && AppState.ui.activeTab === 'step') renderStep(AppState.analysis.stepResponse);
+    if (AppState.ui.activeTab === 'stimulus') renderStimulusCached();
   });
 
-  // Stimulus button
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-stimulus-run')?.addEventListener('click', runStimulus);
+    document.getElementById('sel-stim-type')?.addEventListener('change', (e) => {
+      const exprField = document.getElementById('field-stim-expr');
+      if (exprField) exprField.style.display = e.target.value === 'custom' ? '' : 'none';
+      if (AppState.ui.activeTab === 'stimulus' && AppState.filter.b) runStimulus();
+    });
+
+    ['sel-stim-domain', 'chk-stim-db', 'chk-stim-err', 'chk-stim-stem', 'inp-stim-dbmin'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', renderStimulusCached);
+    });
+    ['sel-stim-noise', 'sel-stim-win', 'chk-stim-bl'].forEach(id => {
+      document.getElementById(id)?.addEventListener('change', () => {
+        if (AppState.ui.activeTab === 'stimulus' && AppState.filter.b) runStimulus();
+      });
+    });
   });
+
+  function buildStemTraces(x, y, name, color) {
+    const stemX = [];
+    const stemY = [];
+    for (let i = 0; i < x.length; i++) {
+      stemX.push(x[i], x[i], null);
+      stemY.push(0, y[i], null);
+    }
+    return [
+      {
+        x: stemX, y: stemY,
+        type: 'scatter', mode: 'lines',
+        line: { color, width: 1.5 },
+        showlegend: false, hoverinfo: 'skip',
+      },
+      {
+        x, y,
+        type: 'scatter', mode: 'markers',
+        name,
+        marker: { color, size: 6 },
+        hovertemplate: 'n = %{x}<br>y = %{y:.5f}<extra></extra>',
+      },
+    ];
+  }
 
   function renderImpulse(data) {
     const c = PlotManager.getThemeColors();
+    let maxIdx = data.h.length - 1;
+    while (maxIdx > 20 && Math.abs(data.h[maxIdx]) < 1e-6) maxIdx--;
+    const nSlice = data.n.slice(0, maxIdx + 5);
+    const hSlice = data.h.slice(0, maxIdx + 5);
 
-    // Stem plot: markers + lines to zero
-    const traces = [];
-
-    // Vertical stems
-    for (let i = 0; i < data.n.length; i++) {
+    const traces = buildStemTraces(nSlice, hSlice, 'h[n] (Float)', c.primary);
+    if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
+      const fx = AppState.fixpoint.result;
       traces.push({
-        x: [data.n[i], data.n[i]],
-        y: [0, data.h[i]],
-        type: 'scatter',
-        mode: 'lines',
-        line: { color: c.primary, width: 1.5 },
-        showlegend: false,
-        hoverinfo: 'skip',
+        x: fx.n.slice(0, nSlice.length),
+        y: fx.y_fix_imp.slice(0, nSlice.length),
+        type: 'scatter', mode: 'markers',
+        name: `h_q[n] (${fx.total_bits}b)`,
+        marker: { color: c.error, size: 6, symbol: 'diamond-open', line: { width: 2 } },
       });
     }
 
-    // Markers on top
-    traces.push({
-      x: data.n,
-      y: data.h,
-      type: 'scatter',
-      mode: 'markers',
-      name: 'h[n]',
-      marker: { color: c.primary, size: 6 },
-      hovertemplate: 'n = %{x}<br>h[n] = %{y:.6e}<extra></extra>',
+    const layout = PlotManager.baseLayout('Impulse Response h[n]', 'Sample index (n)', 'Amplitude', {
+      showlegend: true, legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
     });
-
-    // Zero line
-    traces.push({
-      x: [data.n[0], data.n[data.n.length - 1]],
-      y: [0, 0],
-      type: 'scatter', mode: 'lines',
-      line: { color: c.grid, width: 0.8 },
-      showlegend: false, hoverinfo: 'skip',
-    });
-
-    // Fixpoint overlay
-    if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
-      const fx = AppState.fixpoint.result;
-      const y_fx = fx.y_fix_imp;
-      if (y_fx) {
-        for (let i = 0; i < fx.n.length; i++) {
-          traces.push({
-            x: [fx.n[i], fx.n[i]],
-            y: [0, y_fx[i]],
-            type: 'scatter', mode: 'lines',
-            line: { color: c.error, width: 1, dash: 'dot' },
-            showlegend: false, hoverinfo: 'skip',
-          });
-        }
-        traces.push({
-          x: fx.n,
-          y: y_fx,
-          type: 'scatter', mode: 'markers',
-          name: `Fixpoint (${fx.total_bits}-bit)`,
-          marker: { color: c.error, size: 5, symbol: 'diamond' },
-          hovertemplate: 'n = %{x}<br>h_fx[n] = %{y:.6e}<extra></extra>',
-        });
-      }
-    }
-
-    const layout = PlotManager.baseLayout(
-      'Impulse Response h[n]',
-      'Sample n',
-      'Amplitude',
-      {
-        showlegend: true,
-        legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
-      }
-    );
-
     PlotManager.plotToDiv('plot-impulse', traces, layout);
   }
 
   function renderStep(data) {
     const c = PlotManager.getThemeColors();
-
     const traces = [{
-      x: data.n,
-      y: data.s,
-      type: 'scatter',
-      mode: 'lines+markers',
-      name: 'Step Response',
-      line: { color: c.primary, width: 2 },
-      marker: { color: c.primary, size: 4 },
-      hovertemplate: 'n = %{x}<br>s[n] = %{y:.6f}<extra></extra>',
+      x: data.n, y: data.s,
+      type: 'scatter', mode: 'lines',
+      name: 'Step s[n]',
+      line: { color: c.primary, width: 2.5 },
+      hovertemplate: 'n = %{x}<br>s[n] = %{y:.5f}<extra></extra>',
     }];
-
-    // Overlay Fixpoint simulation data if available
     if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
       const fx = AppState.fixpoint.result;
-      const y_fx_step = fx.y_fix_step;
-      if (y_fx_step) {
-        traces.push({
-          x: fx.n,
-          y: y_fx_step,
-          type: 'scatter',
-          mode: 'lines+markers',
-          name: `Fixpoint (${fx.total_bits}-bit)`,
-          line: { color: c.error, width: 1.5, dash: 'dash' },
-          marker: { color: c.error, size: 4, symbol: 'diamond' },
-          hovertemplate: 'n = %{x}<br>s_fx[n] = %{y:.6f}<extra></extra>',
-        });
-      }
+      traces.push({
+        x: fx.n.slice(0, data.n.length),
+        y: fx.y_fix_step.slice(0, data.n.length),
+        type: 'scatter', mode: 'lines',
+        name: `s_q[n] (${fx.total_bits}b)`,
+        line: { color: c.error, width: 2, dash: 'dash' },
+      });
     }
-
-    const layout = PlotManager.baseLayout(
-      'Step Response',
-      'Sample n',
-      'Amplitude',
-      {
-        showlegend: true,
-        legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
-      }
-    );
-
+    const layout = PlotManager.baseLayout('Step Response s[n]', 'Sample index (n)', 'Amplitude', {
+      showlegend: true, legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
+    });
     PlotManager.plotToDiv('plot-step', traces, layout);
   }
 
-  function renderStimulus() {
-    if (!AppState.stimulus.x) return;
-    const c = PlotManager.getThemeColors();
-    const n = AppState.stimulus.n || Array.from({length: AppState.stimulus.x.length}, (_, i) => i);
-    const traces = [
-      {
-        x: n, y: AppState.stimulus.x,
-        type: 'scatter', mode: 'lines',
-        name: 'Input x[n]',
-        line: { color: c.secondary, width: 1.5 },
-      },
-      {
-        x: n, y: AppState.stimulus.y,
-        type: 'scatter', mode: 'lines',
-        name: 'Output y[n]',
-        line: { color: c.primary, width: 2.5 },
-      },
-    ];
+  function getStimulusOptions() {
+    const num = (id, dflt) => {
+      const v = parseFloat(document.getElementById(id)?.value);
+      return Number.isFinite(v) ? v : dflt;
+    };
+    const fs = (typeof InputSpecs !== 'undefined' && InputSpecs.getEffectiveFsHz)
+      ? InputSpecs.getEffectiveFsHz()
+      : (AppState.specs.fs || 48000);
+    return {
+      stim_type: document.getElementById('sel-stim-type')?.value || 'sine',
+      stim_expr: document.getElementById('inp-stimulus')?.value?.trim() || 'sin(2*pi*n*1000/fs)',
+      fs,
+      n_samples: Math.max(16, Math.min(8192, Math.round(num('inp-stim-n', 256)))),
+      n_start: Math.max(0, Math.round(num('inp-stim-n0', 0))),
+      amp: num('inp-stim-amp', 1),
+      freq1: num('inp-stim-f1', 1000),
+      phi1_deg: num('inp-stim-phi', 0),
+      dc: num('inp-stim-dc', 0),
+      noise_type: document.getElementById('sel-stim-noise')?.value || 'none',
+      noise_std: Math.max(0, num('inp-stim-noise-std', 0.1)),
+      bandlimit: Boolean(document.getElementById('chk-stim-bl')?.checked),
+      fft_win: document.getElementById('sel-stim-win')?.value || 'rectangular',
+    };
+  }
 
-    // Overlay Fixpoint simulation data if available
-    if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
-      const fx = AppState.fixpoint.result;
-      if (fx.y_fix_stim) {
+  async function runStimulus() {
+    if (!AppState.filter.b) return;
+    try {
+      const opts = getStimulusOptions();
+      const res = await PyodideBridge.stimulusResponse(AppState.filter.b, AppState.filter.a, opts);
+      AppState.lastStimulus = { ...res, ...opts };
+
+      if (AppState.fixpoint.enabled && typeof FixpointPanel !== 'undefined') {
+        await FixpointPanel.runFixpointSim(res.x, opts);
+      } else {
+        renderStimulusPlot(res);
+      }
+    } catch (err) {
+      showToast(`Stimulus error: ${err.message}`, 'error');
+    }
+  }
+
+  function renderStimulusCached() {
+    if (AppState.lastStimulus) renderStimulusPlot(AppState.lastStimulus);
+  }
+
+  function renderStimulusPlot(data) {
+    const c = PlotManager.getThemeColors();
+    const domain = document.getElementById('sel-stim-domain')?.value || 'time';
+    const isDb = Boolean(document.getElementById('chk-stim-db')?.checked);
+    const showErr = Boolean(document.getElementById('chk-stim-err')?.checked);
+    const isStem = Boolean(document.getElementById('chk-stim-stem')?.checked);
+    const dbMin = parseFloat(document.getElementById('inp-stim-dbmin')?.value) || -100;
+
+    const fx = (AppState.fixpoint.enabled && AppState.fixpoint.result) ? AppState.fixpoint.result : null;
+    const metricsEl = document.getElementById('stim-metrics');
+    if (metricsEl) {
+      const pXqText = fx && fx.p_xq_dbw !== null && fx.p_xq_dbw !== undefined
+        ? ` | P_Xq = ${fx.p_xq_dbw.toFixed(2)} dBW | P_Yq = ${fx.p_yq_dbw?.toFixed(2) ?? '—'} dBW`
+        : '';
+      metricsEl.textContent = `P_X = ${data.p_x_dbw.toFixed(2)} dBW | P_Y = ${data.p_y_dbw.toFixed(2)} dBW${pXqText} | NENBW = ${data.nenbw.toFixed(2)} (${data.nenbw_db.toFixed(2)} dB) | CGAIN = ${data.cgain.toFixed(3)}`;
+    }
+
+    const traces = [];
+    if (domain === 'fft') {
+      const yX = isDb ? data.x_fft_db : data.x_fft_lin;
+      const yY = isDb ? data.y_fft_db : data.y_fft_lin;
+      traces.push({
+        x: data.fft_freq, y: yX,
+        type: 'scatter', mode: 'lines',
+        name: 'Input X(f)', line: { color: c.textSecondary, width: 1.5, dash: 'dot' },
+      });
+      traces.push({
+        x: data.fft_freq, y: yY,
+        type: 'scatter', mode: 'lines',
+        name: 'Output Y(f)', line: { color: c.primary, width: 2.3 },
+      });
+      if (fx && fx.y_fix_fft_db && fx.y_fix_fft_db.length === data.fft_freq.length) {
+        const yFix = isDb ? fx.y_fix_fft_db : fx.y_fix_fft_db.map(v => Math.pow(10, v / 20));
         traces.push({
-          x: fx.n.slice(0, fx.y_fix_stim.length),
-          y: fx.y_fix_stim,
-          type: 'scatter',
-          mode: 'lines',
-          name: `Fixpoint (${fx.total_bits}-bit)`,
-          line: { color: c.error, width: 2, dash: 'dash' },
+          x: data.fft_freq, y: yFix,
+          type: 'scatter', mode: 'lines',
+          name: `Output Y_q(f) (${fx.total_bits}b)`, line: { color: c.error, width: 2, dash: 'dash' },
+        });
+      }
+      const layout = PlotManager.baseLayout(
+        'Stimulus FFT Spectrum',
+        'Frequency (Hz)',
+        isDb ? 'Magnitude (dB)' : 'Magnitude (Linear)',
+        {
+          showlegend: true,
+          legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
+          yaxis: isDb ? { range: [dbMin, 5], title: { text: 'Magnitude (dB)', font: { size: 13 } }, gridcolor: c.grid } : undefined,
+        }
+      );
+      PlotManager.plotToDiv('plot-stimulus-chart', traces, layout);
+      return;
+    }
+
+    // Time domain
+    const n0 = data.n_start || 0;
+    const xPlot = n0 < data.n.length ? data.n.slice(n0) : data.n;
+    const xArr = n0 < data.x.length ? data.x.slice(n0) : data.x;
+    const yArr = n0 < data.y.length ? data.y.slice(n0) : data.y;
+    const toPlotY = (arr) => isDb ? arr.map(v => Math.max(dbMin, 20 * Math.log10(Math.max(Math.abs(v), 1e-12)))) : arr;
+
+    traces.push({
+      x: xPlot, y: toPlotY(xArr),
+      type: 'scatter', mode: isStem ? 'lines+markers' : 'lines',
+      name: 'Input x[n]', line: { color: c.textSecondary, width: 1.5, dash: 'dot' },
+    });
+    if (isStem) {
+      traces.push(...buildStemTraces(xPlot, toPlotY(yArr), 'Output y[n]', c.primary));
+    } else {
+      traces.push({
+        x: xPlot, y: toPlotY(yArr),
+        type: 'scatter', mode: 'lines',
+        name: 'Output y[n]', line: { color: c.primary, width: 2.3 },
+      });
+    }
+
+    if (fx && fx.y_fix_stim && fx.y_fix_stim.length === data.y.length) {
+      const yFix = n0 < fx.y_fix_stim.length ? fx.y_fix_stim.slice(n0) : fx.y_fix_stim;
+      traces.push({
+        x: xPlot, y: toPlotY(yFix),
+        type: 'scatter', mode: isStem ? 'markers' : 'lines',
+        name: `Fixpoint y_q[n] (${fx.total_bits}b)`, line: { color: c.error, width: 2, dash: 'dash' },
+      });
+      if (showErr) {
+        const err = yArr.map((v, i) => v - yFix[i]);
+        traces.push({
+          x: xPlot, y: toPlotY(err),
+          type: 'scatter', mode: 'lines',
+          name: 'Error (y - y_q)', line: { color: '#ff9800', width: 1.6 },
         });
       }
     }
 
     const layout = PlotManager.baseLayout(
-      'Stimulus Response',
-      'Sample n',
-      'Amplitude',
-      {
-        showlegend: true,
-        legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
-      }
+      'Stimulus Response (Time)',
+      'Sample index (n)',
+      isDb ? 'Amplitude (dB)' : 'Amplitude',
+      { showlegend: true, legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' } }
     );
-
     PlotManager.plotToDiv('plot-stimulus-chart', traces, layout);
-  }
-
-  async function runStimulus() {
-    if (!AppState.filter.b) {
-      showToast('Design a filter first', 'error');
-      return;
-    }
-
-    const expr = document.getElementById('inp-stimulus')?.value;
-    if (!expr) { showToast('Enter a stimulus expression', 'error'); return; }
-
-    try {
-      const result = await PyodideBridge.stimulusResponse(
-        AppState.filter.b, AppState.filter.a, expr, AppState.specs.fs, 512
-      );
-
-      // Persist stimulus data so fixpoint sim can use the same input signal
-      AppState.stimulus.n = result.n;
-      AppState.stimulus.x = result.x;
-      AppState.stimulus.y = result.y;
-
-      renderStimulus();
-
-    } catch (err) {
-      showToast(`Stimulus error: ${err.message}`, 'error');
-    }
   }
 })();

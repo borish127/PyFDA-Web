@@ -19,7 +19,7 @@ const PyodideBridge = (() => {
 
     const overlayStatus = document.getElementById('loading-status');
     if (overlayStatus) overlayStatus.textContent = msg;
-    
+
     // Optionally update progress bar if you have one
     const mlBar = document.getElementById('loading-bar-fill');
     if (mlBar) mlBar.style.width = percent + '%';
@@ -51,29 +51,29 @@ const PyodideBridge = (() => {
   function dispatchToWorker(type, payload = {}, timeoutMs = 30000) {
     return new Promise((resolve, reject) => {
       const msgId = msgCounter++;
-      
+
       // Optionally add a timeout fallback for freezing Python computations
       let timeoutId = null;
       if (timeoutMs > 0 && type !== 'init') {
-          timeoutId = setTimeout(() => {
-              if (pendingRequests.has(msgId)) {
-                  pendingRequests.delete(msgId);
-                  reject(new Error(`Worker execution timed out after ${timeoutMs}ms for function: ${payload?.funcName || 'unknown'}`));
-              }
-          }, timeoutMs);
+        timeoutId = setTimeout(() => {
+          if (pendingRequests.has(msgId)) {
+            pendingRequests.delete(msgId);
+            reject(new Error(`Worker execution timed out after ${timeoutMs}ms for function: ${payload?.funcName || 'unknown'}`));
+          }
+        }, timeoutMs);
       }
 
       pendingRequests.set(msgId, {
-          resolve: (res) => {
-              if (timeoutId) clearTimeout(timeoutId);
-              resolve(res);
-          },
-          reject: (err) => {
-              if (timeoutId) clearTimeout(timeoutId);
-              reject(err);
-          }
+        resolve: (res) => {
+          if (timeoutId) clearTimeout(timeoutId);
+          resolve(res);
+        },
+        reject: (err) => {
+          if (timeoutId) clearTimeout(timeoutId);
+          reject(err);
+        }
       });
-      
+
       worker.postMessage({ type, msgId, payload });
     });
   }
@@ -88,7 +88,7 @@ const PyodideBridge = (() => {
     updateLoadingStatus('Starting Web Worker…', 0);
     worker = new Worker('js/pyodide-worker.js');
     worker.onmessage = handleWorkerMessage;
-    
+
     initPromise = dispatchToWorker('init', {}, 0)
       .then(() => {
         ready = true;
@@ -141,14 +141,39 @@ const PyodideBridge = (() => {
     return callPython('step_response', JSON.stringify({ b, a, n_samples: nSamples }));
   }
 
-  async function stimulusResponse(b, a, stimExpr, fs, nSamples) {
-    return callPython('stimulus_response', JSON.stringify({
-      b, a, stim_expr: stimExpr, fs, n_samples: nSamples
-    }));
+  async function stimulusResponse(b, a, stimOpts) {
+    const payload = (typeof stimOpts === 'object' && stimOpts !== null)
+      ? { b, a, ...stimOpts }
+      : { b, a, stim_expr: stimOpts, fs: arguments[3], n_samples: arguments[4] };
+    return callPython('stimulus_response', JSON.stringify(payload));
   }
 
   async function pzData(b, a) {
     return callPython('pz_data', JSON.stringify({ b, a }));
+  }
+
+  async function coeffsToZpkSos(b, a) {
+    return callPython('coeffs_to_zpk_sos', JSON.stringify({ b, a }));
+  }
+
+  async function zpkToBaSos(zeros, poles, gain) {
+    return callPython('zpk_to_ba_sos', JSON.stringify({ zeros, poles, gain }));
+  }
+
+  async function filterPerformance(b, a, specs) {
+    return callPython('filter_performance', JSON.stringify({ b, a, specs }));
+  }
+
+  async function formatCoeffs(b, a, opts) {
+    return callPython('format_coeffs', JSON.stringify({ b, a, ...opts }));
+  }
+
+  async function quantizeCoeffs(b, a, opts) {
+    return callPython('quantize_coeffs', JSON.stringify({ b, a, ...opts }));
+  }
+
+  async function generateVerilog(b, a, config) {
+    return callPython('generate_verilog', JSON.stringify({ b, a, ...config }));
   }
 
   async function surface3D(b, a, nPoints) {
@@ -176,6 +201,8 @@ const PyodideBridge = (() => {
     init, runPython, callPython, isReady, isInitializing,
     designFilter, freqResponse, groupDelay, phaseDelay,
     impulseResponse, stepResponse, stimulusResponse,
-    pzData, surface3D, fixpointSim, exportData, importData
+    pzData, coeffsToZpkSos, zpkToBaSos, filterPerformance,
+    formatCoeffs, quantizeCoeffs, generateVerilog,
+    surface3D, fixpointSim, exportData, importData
   };
 })();

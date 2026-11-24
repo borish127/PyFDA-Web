@@ -103,6 +103,7 @@ def export_filter(format='npz', b=None, a=None, zeros=None, poles=None,
             fs = 1.0
 
         is_norm = (specs.get('freqUnit') == 'normalized') or (fs == 1.0)
+        is_nyq = (specs.get('freqUnit') == 'f_ny')
 
         # 2. Filter Order
         if order is None:
@@ -119,6 +120,8 @@ def export_filter(format='npz', b=None, a=None, zeros=None, poles=None,
             'bandpass': 'BP', 'bp': 'BP',
             'bandstop': 'BS', 'bs': 'BS',
             'allpass': 'AP', 'ap': 'AP',
+            'hilbert': 'HIL', 'hil': 'HIL',
+            'differentiator': 'DIFF', 'diff': 'DIFF',
         }
         rt = rt_map.get(rt_raw, 'LP')
 
@@ -162,7 +165,11 @@ def export_filter(format='npz', b=None, a=None, zeros=None, poles=None,
             val = specs.get(key)
             if val is not None:
                 v = float(val)
-                return v if is_norm else (v / fs)
+                if is_norm:
+                    return v
+                if is_nyq:
+                    return v / 2.0
+                return v / fs
             return default_ratio
 
         f_pb = _get_norm_freq('fpb', 0.1)
@@ -237,10 +244,12 @@ def export_filter(format='npz', b=None, a=None, zeros=None, poles=None,
             'A_SB': np.array(a_sb),
             'A_PB2': np.array(a_pb),
             'A_SB2': np.array(a_sb),
-            'W_PB': np.array(1.0),
-            'W_SB': np.array(1.0),
-            'W_PB2': np.array(1.0),
-            'W_SB2': np.array(1.0),
+            'W_PB': np.array(float(specs.get('wpb', 1.0))),
+            'W_SB': np.array(float(specs.get('wsb', 1.0))),
+            'W_PB2': np.array(float(specs.get('wpb2', 1.0))),
+            'W_SB2': np.array(float(specs.get('wsb2', 1.0))),
+            'freq_specs_unit': np.array(str(specs.get('freqUnit', 'hz'))),
+            'amp_specs_unit': np.array(str(specs.get('ampUnit', 'db'))),
             'info': np.array(f"{fc} {rt}"),
         }
 
@@ -385,28 +394,70 @@ def import_filter(format='npz', data_b64='', **kwargs):
                 # Attempt to extract UI specs from desktop PyFDA
                 specs_map = {}
                 if 'rt' in fd:
-                    rt_map = {'LP': 'lowpass', 'HP': 'highpass', 'BP': 'bandpass', 'BS': 'bandstop', 'AP': 'allpass'}
-                    rt_val = _to_scalar(fd['rt'], str, '')
+                    rt_map = {
+                        'LP': 'lowpass', 'HP': 'highpass', 'BP': 'bandpass',
+                        'BS': 'bandstop', 'AP': 'allpass',
+                        'HIL': 'hilbert', 'DIFF': 'differentiator',
+                    }
+                    rt_val = _to_scalar(fd['rt'], str, '').upper()
                     if rt_val in rt_map:
                         specs_map['responseType'] = rt_map[rt_val]
                         result['rt'] = rt_map[rt_val]
+                if 'ft' in fd:
+                    ft_val = _to_scalar(fd['ft'], str, '').lower()
+                    if ft_val in ('iir', 'fir'):
+                        specs_map['filterFamily'] = ft_val
+                        result['fc'] = ft_val
                 if 'fc' in fd:
-                    specs_map['filterFamily'] = _to_scalar(fd['fc'], str, '').lower()
-                    result['fc'] = specs_map['filterFamily']
+                    fc_raw = _to_scalar(fd['fc'], str, '').lower()
+                    fc_to_method = {
+                        'butter': 'butter', 'cheby1': 'cheby1', 'cheby2': 'cheby2',
+                        'ellip': 'ellip', 'bessel': 'bessel',
+                        'equiripple': 'remez', 'remez': 'remez',
+                        'firwin': 'firwin', 'firwin2': 'firwin2',
+                        'firls': 'firls', 'ma': 'mavg', 'mavg': 'mavg',
+                    }
+                    if fc_raw in fc_to_method:
+                        specs_map['designMethod'] = fc_to_method[fc_raw]
+                        result['method'] = fc_to_method[fc_raw]
                 if 'f_S' in fd:
-                    specs_map['fs'] = _to_scalar(fd['f_S'], float, 48000.0)
+                    fs_val = _to_scalar(fd['f_S'], float, 48000.0)
+                    specs_map['fs'] = fs_val
+                saved_fu = _to_scalar(fd['freq_specs_unit'], str, '') if 'freq_specs_unit' in fd else ''
+                if saved_fu in ('hz', 'khz', 'mhz', 'ghz', 'normalized', 'f_ny'):
+                    specs_map['freqUnit'] = saved_fu
+                else:
+                    specs_map['freqUnit'] = 'normalized' if specs_map.get('fs', 1.0) == 1.0 else 'hz'
+                fu = specs_map['freqUnit']
+                if fu == 'normalized':
+                    fs_mult = 1.0
+                elif fu == 'f_ny':
+                    fs_mult = 2.0
+                else:
+                    u_div = {'khz': 1e3, 'mhz': 1e6, 'ghz': 1e9}.get(fu, 1.0)
+                    fs_mult = specs_map.get('fs', 1.0) / u_div
                 if 'F_PB' in fd:
-                    specs_map['fpb'] = _to_scalar(fd['F_PB'], float, 0.0)
+                    specs_map['fpb'] = _to_scalar(fd['F_PB'], float, 0.1) * fs_mult
                 if 'F_SB' in fd:
-                    specs_map['fsb'] = _to_scalar(fd['F_SB'], float, 0.0)
+                    specs_map['fsb'] = _to_scalar(fd['F_SB'], float, 0.2) * fs_mult
                 if 'F_PB2' in fd:
-                    specs_map['fpb2'] = _to_scalar(fd['F_PB2'], float, 0.0)
+                    specs_map['fpb2'] = _to_scalar(fd['F_PB2'], float, 0.3) * fs_mult
                 if 'F_SB2' in fd:
-                    specs_map['fsb2'] = _to_scalar(fd['F_SB2'], float, 0.0)
+                    specs_map['fsb2'] = _to_scalar(fd['F_SB2'], float, 0.4) * fs_mult
                 if 'A_PB' in fd:
                     specs_map['apb'] = _to_scalar(fd['A_PB'], float, 1.0)
                 if 'A_SB' in fd:
                     specs_map['asb'] = _to_scalar(fd['A_SB'], float, 60.0)
+                if 'W_PB' in fd:
+                    specs_map['wpb'] = _to_scalar(fd['W_PB'], float, 1.0)
+                if 'W_SB' in fd:
+                    specs_map['wsb'] = _to_scalar(fd['W_SB'], float, 1.0)
+                if 'W_PB2' in fd:
+                    specs_map['wpb2'] = _to_scalar(fd['W_PB2'], float, 1.0)
+                if 'W_SB2' in fd:
+                    specs_map['wsb2'] = _to_scalar(fd['W_SB2'], float, 1.0)
+                if 'amp_specs_unit' in fd:
+                    specs_map['ampUnit'] = _to_scalar(fd['amp_specs_unit'], str, 'db')
                 if 'N' in fd:
                     specs_map['order'] = _to_scalar(fd['N'], int, 10)
                 if specs_map:
@@ -446,19 +497,34 @@ def import_filter(format='npz', data_b64='', **kwargs):
             specs_map = {}
             if 'rt' in data:
                 rt_map = {'LP': 'lowpass', 'HP': 'highpass', 'BP': 'bandpass', 'BS': 'bandstop', 'AP': 'allpass'}
-                rt_val = _to_scalar(data['rt'], str, '')
+                rt_val = _to_scalar(data['rt'], str, '').upper()
                 if rt_val in rt_map:
                     specs_map['responseType'] = rt_map[rt_val]
                     result['rt'] = rt_map[rt_val]
+            if 'ft' in data:
+                ft_val = _to_scalar(data['ft'], str, '').lower()
+                if ft_val in ('iir', 'fir'):
+                    specs_map['filterFamily'] = ft_val
+                    result['fc'] = ft_val
             if 'fc' in data:
-                specs_map['filterFamily'] = _to_scalar(data['fc'], str, '').lower()
-                result['fc'] = specs_map['filterFamily']
+                fc_raw = _to_scalar(data['fc'], str, '').lower()
+                fc_to_method = {
+                    'butter': 'butter', 'cheby1': 'cheby1', 'cheby2': 'cheby2',
+                    'ellip': 'ellip', 'bessel': 'bessel',
+                    'equiripple': 'remez', 'remez': 'remez',
+                    'firwin': 'firwin', 'firwin2': 'firwin2',
+                    'firls': 'firls', 'ma': 'mavg', 'mavg': 'mavg',
+                }
+                if fc_raw in fc_to_method:
+                    specs_map['designMethod'] = fc_to_method[fc_raw]
+                    result['method'] = fc_to_method[fc_raw]
             if 'f_S' in data:
                 specs_map['fs'] = _to_scalar(data['f_S'], float, 48000.0)
             elif 'fs' in data:
                 specs_map['fs'] = _to_scalar(data['fs'], float, 48000.0)
 
             fs_val = specs_map.get('fs', 1.0)
+            specs_map['freqUnit'] = 'normalized' if fs_val == 1.0 else 'hz'
             mult = fs_val if fs_val > 1.0 else 1.0
             if 'F_PB' in data:
                 specs_map['fpb'] = _to_scalar(data['F_PB'], float, 0.0) * mult

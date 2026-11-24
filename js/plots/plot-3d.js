@@ -1,6 +1,7 @@
 /* ============================================================
-   PyFDA Web — 3D Surface Plot |H(z)|
-   With dB scale and frequency response unit circle wrap-around
+   PyFDA Web — 3D Surface / Mesh / Contour Plot |H(z)|
+   Supports Surface, Wireframe Mesh, 2D Contour, Linear vs dB scale,
+   lighting toggle, unit circle overlay, and P/Z plane markers.
    ============================================================ */
 
 (function () {
@@ -8,12 +9,26 @@
 
   const plot3Dopts = {
     scale: 'linear', // 'linear' or 'db'
+    mode: 'surface', // 'surface', 'mesh', 'contour'
+    polar: true,
+    lighting: true,
   };
 
-  // Bind change event
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sel-3d-scale')?.addEventListener('change', (e) => {
       plot3Dopts.scale = e.target.value;
+      if (AppState.analysis.surface3d) render(AppState.analysis.surface3d);
+    });
+    document.getElementById('sel-3d-mode')?.addEventListener('change', (e) => {
+      plot3Dopts.mode = e.target.value;
+      if (AppState.analysis.surface3d) render(AppState.analysis.surface3d);
+    });
+    document.getElementById('chk-3d-polar')?.addEventListener('change', (e) => {
+      plot3Dopts.polar = e.target.checked;
+      if (AppState.analysis.surface3d) render(AppState.analysis.surface3d);
+    });
+    document.getElementById('chk-3d-light')?.addEventListener('change', (e) => {
+      plot3Dopts.lighting = e.target.checked;
       if (AppState.analysis.surface3d) render(AppState.analysis.surface3d);
     });
   });
@@ -27,9 +42,6 @@
     let hoverTemplate = 'Re: %{x:.3f}<br>Im: %{y:.3f}<br>|H(z)|: %{z:.3f}<extra></extra>';
 
     if (plot3Dopts.scale === 'db') {
-      // Convert to dB: 20 * log10(H)
-      // Since data.z is absolute magnitude, we compute 20 * log10(val)
-      // Clip to [-60, 40] dB for a clean 3D visualization without runaway peaks/valleys
       zData = data.z.map(row => row.map(val => {
         const db = 20 * Math.log10(Math.max(val, 1e-5));
         return Math.max(-60, Math.min(40, db));
@@ -38,118 +50,114 @@
       hoverTemplate = 'Re: %{x:.3f}<br>Im: %{y:.3f}<br>|H(z)|: %{z:.2f} dB<extra></extra>';
     }
 
+    const colorscale = [
+      [0, '#1a237e'], [0.25, '#3a5ba9'], [0.5, '#adc6ff'], [0.75, '#ffb74d'], [1, '#d32f2f'],
+    ];
+
+    if (plot3Dopts.mode === 'contour') {
+      const contourTraces = [{
+        x: data.x,
+        y: data.y,
+        z: zData,
+        type: 'contour',
+        colorscale,
+        contours: { coloring: 'heatmap', showlabels: true },
+        hovertemplate: hoverTemplate,
+      }];
+      if (plot3Dopts.polar) {
+        const theta = Array.from({ length: 181 }, (_, i) => (2 * Math.PI * i) / 180);
+        contourTraces.push({
+          x: theta.map(Math.cos), y: theta.map(Math.sin),
+          type: 'scatter', mode: 'lines', name: 'Unit Circle',
+          line: { color: '#ffffff', width: 2, dash: 'dash' },
+        });
+      }
+      const layout2d = PlotManager.baseLayout(
+        `2D Contour ${zTitle} on z-Plane`, 'Re(z)', 'Im(z)',
+        { xaxis: { scaleanchor: 'y', scaleratio: 1, gridcolor: c.grid }, showlegend: true }
+      );
+      PlotManager.plotToDiv('plot-3d', contourTraces, layout2d);
+      return;
+    }
+
     const traces = [{
       x: data.x,
       y: data.y,
       z: zData,
       type: 'surface',
-      colorscale: [
-        [0,   '#1a237e'],
-        [0.15, '#283593'],
-        [0.3, '#3a5ba9'],
-        [0.45, '#5c8aff'],
-        [0.6, '#adc6ff'],
-        [0.75, '#ffb74d'],
-        [0.9, '#ff7043'],
-        [1,   '#d32f2f'],
-      ],
+      colorscale,
+      hidesurface: plot3Dopts.mode === 'mesh',
       contours: {
-        z: { show: true, usecolormap: true, highlightcolor: '#fff', project: { z: false } }
+        x: { show: plot3Dopts.mode === 'mesh', color: c.textSecondary, width: 1 },
+        y: { show: plot3Dopts.mode === 'mesh', color: c.textSecondary, width: 1 },
+        z: { show: true, usecolormap: true, highlightcolor: '#fff', project: { z: false } },
       },
       hovertemplate: hoverTemplate,
-      lighting: {
-        ambient: 0.6,
-        diffuse: 0.6,
-        specular: 0.3,
-        roughness: 0.5,
-      },
+      lighting: plot3Dopts.lighting
+        ? { ambient: 0.6, diffuse: 0.7, specular: 0.35, roughness: 0.45 }
+        : { ambient: 1.0, diffuse: 0.0, specular: 0.0 },
     }];
 
-    // Add unit circle at z=0 (or z=-60 if dB)
-    const uc_z_level = plot3Dopts.scale === 'db' ? -60 : 0;
-    const uc_x = [], uc_y = [], uc_z = [];
-    for (let i = 0; i <= 360; i += 2) {
-      const rad = (i * Math.PI) / 180;
-      uc_x.push(Math.cos(rad));
-      uc_y.push(Math.sin(rad));
-      uc_z.push(uc_z_level);
-    }
-    traces.push({
-      x: uc_x, y: uc_y, z: uc_z,
-      type: 'scatter3d', mode: 'lines',
-      name: 'Unit Circle',
-      line: { color: '#ffffff', width: 4 },
-      hoverinfo: 'skip',
-    });
-
-    // Wrapped Frequency Response Trace on Unit Circle
-    if (AppState.analysis.freqResponse) {
-      const fr = AppState.analysis.freqResponse;
-      const uc_fr_x = [];
-      const uc_fr_y = [];
-      const uc_fr_z = [];
-
-      const nPoints = fr.freq.length;
-      // Freq goes from 0 to fs/2 (which is 0 to pi in radians)
-      for (let i = 0; i < nPoints; i++) {
-        const rad = Math.PI * (fr.freq[i] / (AppState.specs.fs / 2));
-        uc_fr_x.push(Math.cos(rad));
-        uc_fr_y.push(Math.sin(rad));
-        
-        let val = fr.mag[i];
-        if (plot3Dopts.scale === 'db') {
-          val = 20 * Math.log10(Math.max(val, 1e-5));
-          val = Math.max(-60, Math.min(40, val));
-        }
-        uc_fr_z.push(val);
+    const ucZ = plot3Dopts.scale === 'db' ? -60 : 0;
+    if (plot3Dopts.polar) {
+      const ucX = [], ucY = [], ucZv = [];
+      for (let i = 0; i <= 360; i += 2) {
+        const rad = (i * Math.PI) / 180;
+        ucX.push(Math.cos(rad));
+        ucY.push(Math.sin(rad));
+        ucZv.push(ucZ);
       }
-      // Mirror to form the bottom half (-pi to 0)
-      for (let i = nPoints - 1; i >= 0; i--) {
-        const rad = -Math.PI * (fr.freq[i] / (AppState.specs.fs / 2));
-        uc_fr_x.push(Math.cos(rad));
-        uc_fr_y.push(Math.sin(rad));
-        
-        let val = fr.mag[i];
-        if (plot3Dopts.scale === 'db') {
-          val = 20 * Math.log10(Math.max(val, 1e-5));
-          val = Math.max(-60, Math.min(40, val));
-        }
-        uc_fr_z.push(val);
-      }
-
       traces.push({
-        x: uc_fr_x, y: uc_fr_y, z: uc_fr_z,
+        x: ucX, y: ucY, z: ucZv,
         type: 'scatter3d', mode: 'lines',
-        name: 'Freq Response |H(e^jω)|',
-        line: { color: '#00e676', width: 6 },
-        hovertemplate: plot3Dopts.scale === 'db'
-          ? '|H(e^jω)|: %{z:.2f} dB<extra></extra>'
-          : '|H(e^jω)|: %{z:.3f}<extra></extra>',
+        name: 'Unit Circle',
+        line: { color: '#ffffff', width: 4 },
+        hoverinfo: 'skip',
       });
     }
 
-    // Add pole/zero markers if available
+    if (AppState.analysis.freqResponse) {
+      const fr = AppState.analysis.freqResponse;
+      const ucFrX = [], ucFrY = [], ucFrZ = [];
+      const nPoints = fr.freq.length;
+      const fMax = fr.freq[nPoints - 1] || 1;
+      for (let i = 0; i < nPoints; i++) {
+        const rad = Math.PI * (fr.freq[i] / fMax);
+        ucFrX.push(Math.cos(rad));
+        ucFrY.push(Math.sin(rad));
+        let val = fr.mag[i];
+        if (plot3Dopts.scale === 'db') val = Math.max(-60, Math.min(40, 20 * Math.log10(Math.max(val, 1e-5))));
+        ucFrZ.push(val);
+      }
+      for (let i = nPoints - 1; i >= 0; i--) {
+        const rad = -Math.PI * (fr.freq[i] / fMax);
+        ucFrX.push(Math.cos(rad));
+        ucFrY.push(Math.sin(rad));
+        let val = fr.mag[i];
+        if (plot3Dopts.scale === 'db') val = Math.max(-60, Math.min(40, 20 * Math.log10(Math.max(val, 1e-5))));
+        ucFrZ.push(val);
+      }
+      traces.push({
+        x: ucFrX, y: ucFrY, z: ucFrZ,
+        type: 'scatter3d', mode: 'lines',
+        name: 'Freq Response |H(e^jω)|',
+        line: { color: '#00e676', width: 5 },
+      });
+    }
+
     if (AppState.analysis.pzData) {
       const pz = AppState.analysis.pzData;
-
-      // Zeros
-      if (pz.zeros_real && pz.zeros_real.length > 0) {
+      if (pz.zeros_real?.length) {
         traces.push({
-          x: pz.zeros_real, y: pz.zeros_imag,
-          z: pz.zeros_real.map(() => uc_z_level),
-          type: 'scatter3d', mode: 'markers',
-          name: 'Zeros',
+          x: pz.zeros_real, y: pz.zeros_imag, z: pz.zeros_real.map(() => ucZ),
+          type: 'scatter3d', mode: 'markers', name: 'Zeros',
           marker: { size: 6, color: c.primary, symbol: 'circle' },
         });
       }
-
-      // Poles
-      if (pz.poles_real && pz.poles_real.length > 0) {
+      if (pz.poles_real?.length) {
         traces.push({
-          x: pz.poles_real, y: pz.poles_imag,
-          z: pz.poles_real.map(() => uc_z_level),
-          type: 'scatter3d', mode: 'markers',
-          name: 'Poles',
+          x: pz.poles_real, y: pz.poles_imag, z: pz.poles_real.map(() => ucZ),
+          type: 'scatter3d', mode: 'markers', name: 'Poles',
           marker: { size: 6, color: c.error, symbol: 'x' },
         });
       }

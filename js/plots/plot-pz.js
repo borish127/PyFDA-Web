@@ -1,6 +1,7 @@
 /* ============================================================
-   PyFDA Web — Pole-Zero Plot
-   With detailed polar coordinate tooltips (Radius & Angle)
+   PyFDA Web — Pole-Zero (z-plane) Plot
+   Unit circle, zeros (o), poles (x), stability badge, fixpoint overlay,
+   and optional |H(f)| magnitude overlay around the unit circle.
    ============================================================ */
 
 (function () {
@@ -12,158 +13,176 @@
     if (AppState.analysis.pzData) render(AppState.analysis.pzData);
   });
 
+  const pzOpts = {
+    showHf: false,
+    logHf: false,
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('chk-pz-hf')?.addEventListener('change', (e) => {
+      pzOpts.showHf = e.target.checked;
+      if (AppState.analysis.pzData) render(AppState.analysis.pzData);
+    });
+    document.getElementById('chk-pz-log')?.addEventListener('change', (e) => {
+      pzOpts.logHf = e.target.checked;
+      if (AppState.analysis.pzData) render(AppState.analysis.pzData);
+    });
+  });
+
   function render(data) {
-    if (!data || !data.zeros_real) return;
     const c = PlotManager.getThemeColors();
     const traces = [];
 
-    // Unit circle
-    const uc_x = [];
-    const uc_y = [];
-    for (let i = 0; i <= 360; i += 1) {
-      const rad = (i * Math.PI) / 180;
-      uc_x.push(Math.cos(rad));
-      uc_y.push(Math.sin(rad));
-    }
-
+    // Unit circle points
+    const theta = Array.from({ length: 201 }, (_, i) => (2 * Math.PI * i) / 200);
     traces.push({
-      x: uc_x,
-      y: uc_y,
+      x: theta.map(Math.cos),
+      y: theta.map(Math.sin),
       type: 'scatter',
       mode: 'lines',
-      name: 'Unit Circle',
-      line: { color: c.grid, width: 1.5, dash: 'dot' },
+      name: 'Unit Circle |z|=1',
+      line: { color: c.textSecondary, width: 1.5, dash: 'dash' },
       hoverinfo: 'skip',
     });
 
-    // Helper to generate hover labels in polar coordinates
-    const makeHoverText = (realArr, imagArr, labelPrefix) => {
-      const texts = [];
-      for (let i = 0; i < realArr.length; i++) {
-        const re = realArr[i];
-        const im = imagArr[i];
-        const r = Math.sqrt(re * re + im * im);
-        const rad = Math.atan2(im, re);
-        const deg = rad * 180 / Math.PI;
-        const angleNormalized = rad / Math.PI; // normalized angle as fraction of pi
-        texts.push(`${labelPrefix}<br>Re: ${re.toFixed(6)}<br>Im: ${im.toFixed(6)}<br>Radius (r): ${r.toFixed(4)}<br>Angle (θ): ${deg.toFixed(1)}° (${angleNormalized.toFixed(3)}π rad)`);
-      }
-      return texts;
-    };
+    // Optional |H(f)| radial projection around unit circle (matching pyfda plot_pz.py)
+    if (pzOpts.showHf && AppState.analysis.freqResponse) {
+      const fr = AppState.analysis.freqResponse;
+      const nPts = fr.freq.length;
+      const step = Math.max(1, Math.floor(nPts / 256));
+      const fMax = fr.freq[nPts - 1] || 1;
+      const hx = [];
+      const hy = [];
 
-    // Zeros (circles)
-    if (data.zeros_real.length > 0) {
-      const zerosText = makeHoverText(data.zeros_real, data.zeros_imag, 'Zero');
+      const scaleRadius = (m, dbVal) => {
+        if (pzOpts.logHf) {
+          const clamped = Math.max(-80, Math.min(20, dbVal));
+          return 1 + (clamped + 80) / 160 * 0.5;
+        }
+        return 1 + Math.min(1.5, m) * 0.5;
+      };
+
+      for (let i = 0; i < nPts; i += step) {
+        const ang = Math.PI * (fr.freq[i] / fMax);
+        const r = scaleRadius(fr.mag[i], fr.mag_db[i]);
+        hx.push(r * Math.cos(ang));
+        hy.push(r * Math.sin(ang));
+      }
+      for (let i = nPts - 1; i >= 0; i -= step) {
+        const ang = -Math.PI * (fr.freq[i] / fMax);
+        const r = scaleRadius(fr.mag[i], fr.mag_db[i]);
+        hx.push(r * Math.cos(ang));
+        hy.push(r * Math.sin(ang));
+      }
+
+      traces.push({
+        x: hx,
+        y: hy,
+        type: 'scatter',
+        mode: 'lines',
+        name: pzOpts.logHf ? '|H(f)| (Log)' : '|H(f)| around |z|=1',
+        line: { color: c.tertiary, width: 1.8 },
+      });
+    }
+
+    // Zeros (Float)
+    if (data.zeros_real && data.zeros_real.length > 0) {
       traces.push({
         x: data.zeros_real,
         y: data.zeros_imag,
-        text: zerosText,
         type: 'scatter',
         mode: 'markers',
-        name: 'Zeros',
+        name: `Zeros (${data.zeros_real.length})`,
         marker: {
           symbol: 'circle-open',
-          size: 12,
+          size: 11,
           color: c.primary,
           line: { width: 2.5, color: c.primary },
         },
-        hovertemplate: '%{text}<extra></extra>',
+        hovertemplate: 'Zero: %{x:.5f} + %{y:.5f}j<br>|z| = %{customdata:.5f}<extra></extra>',
+        customdata: data.zeros_real.map((re, i) => Math.hypot(re, data.zeros_imag[i])),
       });
     }
 
-    // Poles (crosses)
-    if (data.poles_real.length > 0) {
-      const polesText = makeHoverText(data.poles_real, data.poles_imag, 'Pole');
+    // Poles (Float)
+    let isStable = true;
+    if (data.poles_real && data.poles_real.length > 0) {
+      const radii = data.poles_real.map((re, i) => Math.hypot(re, data.poles_imag[i]));
+      isStable = radii.every(r => r < 1.0001);
+
       traces.push({
         x: data.poles_real,
         y: data.poles_imag,
-        text: polesText,
         type: 'scatter',
         mode: 'markers',
-        name: 'Poles',
+        name: `Poles (${data.poles_real.length})`,
         marker: {
           symbol: 'x',
-          size: 12,
+          size: 11,
           color: c.error,
           line: { width: 2.5, color: c.error },
         },
-        hovertemplate: '%{text}<extra></extra>',
+        hovertemplate: 'Pole: %{x:.5f} + %{y:.5f}j<br>|p| = %{customdata:.5f}<extra></extra>',
+        customdata: radii,
       });
     }
 
-    // Overlay Fixpoint simulation poles/zeros if available
+    // Fixpoint overlay
     if (AppState.fixpoint.enabled && AppState.fixpoint.result) {
       const fx = AppState.fixpoint.result;
       if (fx.zeros_fix_real && fx.zeros_fix_real.length > 0) {
-        const fxZerosText = makeHoverText(fx.zeros_fix_real, fx.zeros_fix_imag, 'Quantized Zero');
         traces.push({
           x: fx.zeros_fix_real,
           y: fx.zeros_fix_imag,
-          text: fxZerosText,
           type: 'scatter',
           mode: 'markers',
-          name: `Zeros (FX: ${fx.total_bits}-bit)`,
-          marker: {
-            symbol: 'circle',
-            size: 8,
-            color: '#ff9800',
-          },
-          hovertemplate: '%{text}<extra></extra>',
+          name: `Zeros FX (${fx.total_bits}-bit)`,
+          marker: { symbol: 'circle-open', size: 9, color: '#ff9800', line: { width: 1.8, color: '#ff9800' } },
         });
       }
       if (fx.poles_fix_real && fx.poles_fix_real.length > 0) {
-        const fxPolesText = makeHoverText(fx.poles_fix_real, fx.poles_fix_imag, 'Quantized Pole');
         traces.push({
           x: fx.poles_fix_real,
           y: fx.poles_fix_imag,
-          text: fxPolesText,
           type: 'scatter',
           mode: 'markers',
-          name: `Poles (FX: ${fx.total_bits}-bit)`,
-          marker: {
-            symbol: 'diamond-open',
-            size: 8,
-            color: '#e65100',
-            line: { width: 2, color: '#e65100' },
-          },
-          hovertemplate: '%{text}<extra></extra>',
+          name: `Poles FX (${fx.total_bits}-bit)`,
+          marker: { symbol: 'x-thin', size: 10, color: '#ff9800', line: { width: 1.8, color: '#ff9800' } },
         });
       }
     }
 
-    // Axis lines
-    traces.push({
-      x: [-1.8, 1.8], y: [0, 0],
-      type: 'scatter', mode: 'lines',
-      line: { color: c.grid, width: 0.8 },
-      hoverinfo: 'skip', showlegend: false,
+    let maxCoord = pzOpts.showHf ? 1.8 : 1.2;
+    [...(data.zeros_real || []), ...(data.poles_real || [])].forEach(v => {
+      if (Math.abs(v) > maxCoord - 0.2) maxCoord = Math.abs(v) + 0.3;
     });
-    traces.push({
-      x: [0, 0], y: [-1.8, 1.8],
-      type: 'scatter', mode: 'lines',
-      line: { color: c.grid, width: 0.8 },
-      hoverinfo: 'skip', showlegend: false,
+    [...(data.zeros_imag || []), ...(data.poles_imag || [])].forEach(v => {
+      if (Math.abs(v) > maxCoord - 0.2) maxCoord = Math.abs(v) + 0.3;
     });
 
     const layout = PlotManager.baseLayout(
-      'Pole-Zero Plot',
-      'Real',
-      'Imaginary',
+      `Pole-Zero Plot (${isStable ? 'Stable' : 'UNSTABLE'})`,
+      'Real(z)',
+      'Imag(z)',
       {
         xaxis: {
-          title: { text: 'Real', font: { size: 13 } },
-          gridcolor: c.grid, zerolinecolor: c.grid,
-          scaleanchor: 'y', scaleratio: 1,
-          range: [-1.8, 1.8],
+          title: { text: 'Real(z)', font: { size: 13 } },
+          range: [-maxCoord, maxCoord],
+          gridcolor: c.grid,
+          zerolinecolor: c.textSecondary,
+          zerolinewidth: 1,
         },
         yaxis: {
-          title: { text: 'Imaginary', font: { size: 13 } },
-          gridcolor: c.grid, zerolinecolor: c.grid,
-          range: [-1.8, 1.8],
+          title: { text: 'Imag(z)', font: { size: 13 } },
+          range: [-maxCoord, maxCoord],
+          scaleanchor: 'x',
+          scaleratio: 1,
+          gridcolor: c.grid,
+          zerolinecolor: c.textSecondary,
+          zerolinewidth: 1,
         },
         showlegend: true,
         legend: { x: 1, xanchor: 'right', y: 1, bgcolor: 'rgba(0,0,0,0)' },
-        hovermode: 'closest',
       }
     );
 

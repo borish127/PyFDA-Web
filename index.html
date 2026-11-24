@@ -144,8 +144,8 @@
     <!-- ---- Top App Bar ---- -->
     <header class="top-bar">
       <button type="button" class="menu-toggle md-btn--icon" id="btn-menu" aria-label="Toggle sidebar">
-        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12" />
           <line x1="3" y1="6" x2="21" y2="6" />
           <line x1="3" y1="18" x2="21" y2="18" />
@@ -155,18 +155,20 @@
       <h1 class="top-bar__title">PyFDA Web</h1>
       <div class="top-bar__spacer"></div>
       <div class="top-bar__actions">
-        <button type="button" class="md-btn md-btn--outlined" id="btn-import" data-tooltip="Load filter" aria-label="Load filter">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button type="button" class="md-btn md-btn--outlined" id="btn-import" data-tooltip="Load filter"
+          aria-label="Load filter">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />
           </svg>
           <span class="mobile-text-only">Load<br>Filter</span>
         </button>
-        <button type="button" class="md-btn md-btn--outlined" id="btn-export" data-tooltip="Save filter" aria-label="Save filter">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <button type="button" class="md-btn md-btn--outlined" id="btn-export" data-tooltip="Save filter"
+          aria-label="Save filter">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
             <polyline points="7 10 12 15 17 10" />
             <line x1="12" y1="15" x2="12" y2="3" />
@@ -174,8 +176,8 @@
           <span class="mobile-text-only">Save<br>Filter</span>
         </button>
         <button type="button" class="md-btn--icon" id="btn-theme" data-tooltip="Toggle Theme" aria-label="Toggle theme">
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5" />
             <line x1="12" y1="1" x2="12" y2="3" />
             <line x1="12" y1="21" x2="12" y2="23" />
@@ -215,9 +217,12 @@
     <aside class="sidebar" id="sidebar">
 
       <nav class="sidebar-tabs" role="tablist" aria-label="Sidebar sections">
-        <button type="button" class="plot-tab active" id="side-tab-design" data-side-tab="design" role="tab" aria-selected="true" aria-controls="side-pane-design" style="flex:1;">Design</button>
-        <button type="button" class="plot-tab" id="side-tab-analysis" data-side-tab="analysis" role="tab" aria-selected="false" aria-controls="side-pane-analysis" style="flex:1;">Analysis</button>
-        <button type="button" class="plot-tab" id="side-tab-about" data-side-tab="about" role="tab" aria-selected="false" aria-controls="side-pane-about" style="flex:1;">About</button>
+        <button type="button" class="plot-tab active" id="side-tab-design" data-side-tab="design" role="tab"
+          aria-selected="true" aria-controls="side-pane-design" style="flex:1;">Design</button>
+        <button type="button" class="plot-tab" id="side-tab-analysis" data-side-tab="analysis" role="tab"
+          aria-selected="false" aria-controls="side-pane-analysis" style="flex:1;">Analysis</button>
+        <button type="button" class="plot-tab" id="side-tab-about" data-side-tab="about" role="tab"
+          aria-selected="false" aria-controls="side-pane-about" style="flex:1;">About</button>
       </nav>
       <div class="sidebar-viewport">
         <div class="sidebar-swipe-track" id="sidebar-track">
@@ -238,12 +243,14 @@
                   <span id="lbl-response-text"
                     style="font-family:var(--md-sys-typescale-body-font); font-size:var(--md-sys-typescale-body-medium); font-weight:500; color:var(--md-sys-color-primary); letter-spacing:0.02em;">Lowpass</span>
                 </div>
-                <div class="md-segmented" id="seg-response">
-                  <button class="md-segmented__btn active" data-value="lowpass">LP</button>
-                  <button class="md-segmented__btn" data-value="highpass">HP</button>
-                  <button class="md-segmented__btn" data-value="bandpass">BP</button>
-                  <button class="md-segmented__btn" data-value="bandstop">BS</button>
-                  <button class="md-segmented__btn" data-value="allpass">AP</button>
+                <div class="md-segmented md-segmented--grid" id="seg-response">
+                  <button type="button" class="md-segmented__btn active" data-value="lowpass" title="Lowpass">LP</button>
+                  <button type="button" class="md-segmented__btn" data-value="highpass" title="Highpass">HP</button>
+                  <button type="button" class="md-segmented__btn" data-value="bandpass" title="Bandpass">BP</button>
+                  <button type="button" class="md-segmented__btn" data-value="bandstop" title="Bandstop">BS</button>
+                  <button type="button" class="md-segmented__btn" data-value="allpass" title="Allpass / Delay">AP</button>
+                  <button type="button" class="md-segmented__btn" data-value="hilbert" title="Hilbert Transformer (FIR)">Hilbert</button>
+                  <button type="button" class="md-segmented__btn" data-value="differentiator" title="Differentiator (FIR)">Diff</button>
                 </div>
               </div>
 
@@ -282,14 +289,14 @@
                   <label class="md-select__label" for="sel-method">Design Method</label>
                 </div>
 
-                <!-- Window (for firwin) -->
+                <!-- Window (for firwin/firwin2) -->
                 <div class="md-select" id="field-window" style="display:none; margin-top: var(--space-sm);">
                   <select class="md-select__input" id="sel-window">
                     <option value="hamming">Hamming</option>
                     <option value="hann">Hann</option>
                     <option value="blackman">Blackman</option>
                     <option value="bartlett">Bartlett</option>
-                    <option value="kaiser">Kaiser (β=8)</option>
+                    <option value="kaiser">Kaiser (β)</option>
                     <option value="rectangular">Rectangular (Boxcar)</option>
                     <option value="flattop">Flat Top</option>
                     <option value="bohman">Bohman</option>
@@ -297,17 +304,48 @@
                     <option value="nuttall">Nuttall</option>
                     <option value="blackmanharris">Blackman-Harris</option>
                     <option value="cosine">Cosine</option>
-                    <option value="exponential">Exponential</option>
-                    <option value="tukey">Tukey (α=0.5)</option>
-                    <option value="taylor">Taylor</option>
+                    <option value="exponential">Exponential (τ)</option>
+                    <option value="tukey">Tukey (α)</option>
+                    <option value="taylor">Taylor (nbar)</option>
                     <option value="lanczos">Lanczos</option>
                     <option value="barthann">Barthann</option>
-                    <option value="gaussian">Gaussian (σ=7)</option>
-                    <option value="general_gaussian">Gen. Gaussian</option>
-                    <option value="dpss">DPSS (Slepian)</option>
-                    <option value="chebwin">Chebyshev Window</option>
+                    <option value="gaussian">Gaussian (σ)</option>
+                    <option value="general_gaussian">Gen. Gaussian (p, σ)</option>
+                    <option value="dpss">DPSS / Slepian (NW)</option>
+                    <option value="chebwin">Chebyshev Win (dB)</option>
                   </select>
                   <label class="md-select__label" for="sel-window">Window Type</label>
+                </div>
+
+                <!-- Parameterized window parameters -->
+                <div class="row" id="field-win-param-row" style="display:none; gap: var(--space-md); margin-top: var(--space-sm);">
+                  <div class="md-field" id="field-win-param" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-win-param" value="8" step="any">
+                    <label class="md-field__label" id="lbl-win-param" for="inp-win-param">Parameter</label>
+                  </div>
+                  <div class="md-field" id="field-win-param2" style="flex:1; margin-bottom:0; display:none;">
+                    <input class="md-field__input" type="number" id="inp-win-param2" value="1" step="any">
+                    <label class="md-field__label" id="lbl-win-param2" for="inp-win-param2">Param 2</label>
+                  </div>
+                </div>
+
+                <!-- Grid density (Remez) -->
+                <div class="md-field" id="field-grid-density" style="display:none; margin-top: var(--space-sm); margin-bottom:0;">
+                  <input class="md-field__input" type="number" id="inp-grid-density" value="16" min="8" max="256" step="1">
+                  <label class="md-field__label" for="inp-grid-density">Remez Grid Density (L)</label>
+                </div>
+
+                <!-- Moving Average options -->
+                <div class="row" id="field-ma-opts" style="display:none; gap: var(--space-md); margin-top: var(--space-sm); align-items: center;">
+                  <div class="md-field" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-ma-stages" value="1" min="1" max="16" step="1">
+                    <label class="md-field__label" for="inp-ma-stages">Cascaded Stages</label>
+                  </div>
+                  <label class="md-checkbox">
+                    <input type="checkbox" id="chk-ma-norm" checked>
+                    <span class="md-checkbox__box"><svg viewBox="0 0 16 16"><polyline points="3 8 7 12 13 4"/></svg></span>
+                    Normalize
+                  </label>
                 </div>
               </div>
 
@@ -320,6 +358,10 @@
                       d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 14H5V5h7v12zm2-6h5v2h-5v-2zm0 4h5v2h-5v-2zm0-8h5v2h-5V7z" />
                   </svg>
                   Specifications
+                  <span class="top-bar__spacer"></span>
+                  <button type="button" class="md-btn md-btn--text" id="btn-sort-edges"
+                    style="padding: 2px 8px; min-height: 26px; font-size: 12px;"
+                    title="Sort frequency band edges in ascending order">Sort</button>
                 </div>
 
                 <!-- Units -->
@@ -330,7 +372,8 @@
                       <option value="khz">kHz</option>
                       <option value="mhz">MHz</option>
                       <option value="ghz">GHz</option>
-                      <option value="normalized">F_s</option>
+                      <option value="normalized">F_s (0…0.5)</option>
+                      <option value="f_ny">f_Ny (0…1)</option>
                     </select>
                     <label class="md-select__label" for="sel-freq-unit">Frequency Unit</label>
                   </div>
@@ -384,6 +427,30 @@
                 <div class="md-field" id="field-asb">
                   <input class="md-field__input" type="number" id="inp-asb" value="60" min="0" step="any">
                   <label class="md-field__label" id="lbl-asb" for="inp-asb">Stopband Atten. (dB)</label>
+                </div>
+
+                <!-- Weight Specifications (for Remez / firls) -->
+                <div id="field-weights" style="display:none; margin-bottom: var(--space-md);">
+                  <div class="row" style="gap: var(--space-sm); margin-bottom: var(--space-sm);">
+                    <div class="md-field" style="flex:1; margin-bottom:0;">
+                      <input class="md-field__input" type="number" id="inp-wpb" value="1" min="0.0001" step="any">
+                      <label class="md-field__label" for="inp-wpb">W_PB</label>
+                    </div>
+                    <div class="md-field" style="flex:1; margin-bottom:0;">
+                      <input class="md-field__input" type="number" id="inp-wsb" value="1" min="0.0001" step="any">
+                      <label class="md-field__label" for="inp-wsb">W_SB</label>
+                    </div>
+                  </div>
+                  <div class="row" id="field-weights-2" style="gap: var(--space-sm); display:none;">
+                    <div class="md-field" style="flex:1; margin-bottom:0;">
+                      <input class="md-field__input" type="number" id="inp-wpb2" value="1" min="0.0001" step="any">
+                      <label class="md-field__label" for="inp-wpb2">W_PB2</label>
+                    </div>
+                    <div class="md-field" style="flex:1; margin-bottom:0;">
+                      <input class="md-field__input" type="number" id="inp-wsb2" value="1" min="0.0001" step="any">
+                      <label class="md-field__label" for="inp-wsb2">W_SB2</label>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Filter Order -->
@@ -472,28 +539,52 @@
             <!-- Coefficients -->
             <div class="md-card" id="card-coeffs">
               <div class="md-card__title">
-                <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                <svg aria-hidden="true" class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                   fill="currentColor">
                   <path
                     d="M3 3v18h18V3H3zm16 16H5V5h14v14zM7 7h2v2H7V7zm0 4h2v2H7v-2zm0 4h2v2H7v-2zm4-8h6v2h-6V7zm0 4h6v2h-6v-2zm0 4h6v2h-6v-2z" />
                 </svg>
                 Coefficients
+                <span class="top-bar__spacer"></span>
+                <span id="coeff-count-badge" style="font-size:11px; color:var(--md-sys-color-on-surface-variant);"></span>
               </div>
               <div class="row mb-md" style="gap:var(--space-sm);">
-                <button class="md-btn md-btn--tonal" id="btn-copy-ba" data-tooltip="Copy to clipboard"
+                <button type="button" class="md-btn md-btn--tonal" id="btn-copy-ba" data-tooltip="Copy to clipboard"
                   style="flex:1; font-size:12px;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="9" y="9" width="13" height="13" rx="2" />
                     <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
                   </svg>
                   Copy b,a
                 </button>
-                <button class="md-btn md-btn--outlined" id="btn-copy-sos" data-tooltip="Copy Second-Order Sections"
+                <button type="button" class="md-btn md-btn--outlined" id="btn-copy-sos" data-tooltip="Copy Second-Order Sections"
                   style="flex:1; font-size:12px;">
                   Copy SOS
                 </button>
               </div>
-              <div class="md-table-wrap" id="table-coeffs-wrap" style="max-height: 200px; overflow-y: auto;">
+              <div class="row mb-sm" style="gap:var(--space-sm); margin-bottom: var(--space-sm);">
+                <div class="md-select" style="flex:1.2;">
+                  <select class="md-select__input" id="sel-coeff-fmt" aria-label="Coefficient Format">
+                    <option value="float">Float</option>
+                    <option value="dec">Dec (Int)</option>
+                    <option value="bin">Binary</option>
+                    <option value="hex">Hex</option>
+                    <option value="csd">CSD</option>
+                  </select>
+                  <label class="md-select__label" for="sel-coeff-fmt">Format</label>
+                </div>
+                <div class="md-field" style="flex:0.8; margin-bottom:0;">
+                  <input class="md-field__input" type="number" id="inp-coeff-digits" value="6" min="2" max="15" step="1">
+                  <label class="md-field__label" for="inp-coeff-digits">Digits</label>
+                </div>
+              </div>
+              <div class="row" style="gap: 4px; margin-bottom: var(--space-sm); flex-wrap:wrap;">
+                <button type="button" class="md-btn md-btn--outlined" id="btn-coeff-add" style="flex:1; min-height:28px; padding:2px 6px; font-size:11px;" title="Append a zero tap/row">+ Tap</button>
+                <button type="button" class="md-btn md-btn--outlined" id="btn-coeff-zero" style="flex:1; min-height:28px; padding:2px 6px; font-size:11px;" title="Set |c| < 1e-12 to exact 0">= 0 &lt; ε</button>
+                <button type="button" class="md-btn md-btn--outlined" id="btn-coeff-quant" style="flex:1; min-height:28px; padding:2px 6px; font-size:11px;" title="Quantize b,a to current Q_C format">Quantize</button>
+              </div>
+              <div id="coeff-word-info" style="display:none; font-size:11px; color:var(--md-sys-color-on-surface-variant); margin-bottom:var(--space-xs); font-family:var(--md-sys-typescale-mono-font, monospace);"></div>
+              <div class="md-table-wrap" id="table-coeffs-wrap" style="max-height: 220px; overflow-y: auto;">
                 <table class="md-table" id="table-coeffs">
                   <caption class="visually-hidden">Filter transfer function coefficients</caption>
                   <thead>
@@ -501,63 +592,80 @@
                       <th scope="col">#</th>
                       <th scope="col">b[n]</th>
                       <th scope="col">a[n]</th>
+                      <th scope="col" aria-label="Remove"></th>
                     </tr>
                   </thead>
                   <tbody id="tbody-coeffs">
                     <tr>
-                      <td colspan="3"
+                      <td colspan="4"
                         style="text-align:center; color:var(--md-sys-color-on-surface-variant); font-style:italic;">
-                        Design
-                        a
-                        filter to see coefficients</td>
+                        Design a filter to see coefficients</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+              <button type="button" class="md-btn md-btn--text w-full" id="btn-coeff-expand" style="display:none; margin-top:4px; font-size:12px;">Show all rows</button>
             </div>
 
             <!-- Poles & Zeros -->
             <div class="md-card" id="card-pz">
               <div class="md-card__title">
-                <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                <svg aria-hidden="true" class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                   fill="currentColor">
                   <path
                     d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z" />
                 </svg>
                 Poles &amp; Zeros
-              </div>
-              <div class="row mb-md" style="gap:var(--space-sm);">
-                <button class="md-btn md-btn--tonal" id="btn-copy-pz" style="flex:1; font-size:12px;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" />
-                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                  </svg>
+                <span class="top-bar__spacer"></span>
+                <button type="button" class="md-btn md-btn--tonal" id="btn-copy-pz" style="min-height:26px; padding:2px 8px; font-size:11px;">
                   Copy P/Z
                 </button>
               </div>
-              <div class="md-table-wrap" id="table-pz-wrap" style="max-height: 200px; overflow-y: auto;">
+              <div class="row mb-sm" style="gap:var(--space-sm); margin-bottom: var(--space-sm);">
+                <div class="md-select" style="flex:1;">
+                  <select class="md-select__input" id="sel-pz-coord" aria-label="Pole-Zero Coordinate Format">
+                    <option value="cartesian">Cartesian (Re, Im)</option>
+                    <option value="polar_deg">Polar (r ∠ deg)</option>
+                    <option value="polar_rad">Polar (r ∠ rad)</option>
+                  </select>
+                  <label class="md-select__label" for="sel-pz-coord">Coords</label>
+                </div>
+                <div class="md-select" style="flex:0.85;">
+                  <select class="md-select__input" id="sel-pz-norm" aria-label="Gain Normalization">
+                    <option value="none">No Norm</option>
+                    <option value="dc">Norm DC=1</option>
+                    <option value="max">Norm Max=1</option>
+                  </select>
+                  <label class="md-select__label" for="sel-pz-norm">Normalize</label>
+                </div>
+              </div>
+              <div class="row" style="gap: 4px; margin-bottom: var(--space-sm);">
+                <button type="button" class="md-btn md-btn--outlined" id="btn-pz-add-zero" style="flex:1; min-height:28px; padding:2px 6px; font-size:11px;">+ Zero</button>
+                <button type="button" class="md-btn md-btn--outlined" id="btn-pz-add-pole" style="flex:1; min-height:28px; padding:2px 6px; font-size:11px;">+ Pole</button>
+                <button type="button" class="md-btn md-btn--outlined" id="btn-pz-zero" style="flex:1; min-height:28px; padding:2px 6px; font-size:11px;" title="Snap near-zero parts < 1e-12 to 0">= 0 &lt; ε</button>
+              </div>
+              <div class="md-table-wrap" id="table-pz-wrap" style="max-height: 210px; overflow-y: auto;">
                 <table class="md-table" id="table-pz">
                   <caption class="visually-hidden">Filter poles and zeros</caption>
                   <thead>
                     <tr>
                       <th scope="col">Type</th>
-                      <th scope="col">Real</th>
-                      <th scope="col">Imag</th>
+                      <th scope="col" id="th-pz-col1">Real</th>
+                      <th scope="col" id="th-pz-col2">Imag</th>
+                      <th scope="col" aria-label="Remove"></th>
                     </tr>
                   </thead>
                   <tbody id="tbody-pz">
                     <tr>
-                      <td colspan="3"
+                      <td colspan="4"
                         style="text-align:center; color:var(--md-sys-color-on-surface-variant); font-style:italic;">
-                        Design
-                        a
-                        filter to see poles/zeros</td>
+                        Design a filter to see poles/zeros</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <div class="md-field mt-md">
-                <input class="md-field__input" type="text" id="inp-gain" readonly value="—">
+                <input class="md-field__input" type="number" step="any" id="inp-gain" value="">
                 <label class="md-field__label" for="inp-gain">Gain (k)</label>
               </div>
             </div>
@@ -566,7 +674,7 @@
             <div class="md-card" id="card-fixpoint">
               <div class="md-card__title">
                 <span class="row" style="gap:var(--space-sm);">
-                  <svg class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                  <svg aria-hidden="true" class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                     fill="currentColor">
                     <path d="M7 2v11h3v9l7-12h-4l4-8z" />
                   </svg>
@@ -574,53 +682,217 @@
                 </span>
               </div>
               <div id="fixpoint-fields" class="col gap-md mt-md">
-                <div class="md-section-label">Coefficient Quantization</div>
+                <div class="md-select">
+                  <select class="md-select__input" id="sel-fx-topology" aria-label="Filter Topology">
+                    <option value="auto">Auto (FIR DF / IIR SOS)</option>
+                    <option value="fir_df">FIR Direct Form</option>
+                    <option value="iir_df1">IIR Direct Form I</option>
+                    <option value="iir_sos">IIR Cascaded SOS (DF-I)</option>
+                  </select>
+                  <label class="md-select__label" for="sel-fx-topology">Topology</label>
+                </div>
+
+                <!-- Signal-flow SVG diagram -->
+                <div id="fx-topology-diagram" style="border:1px solid var(--md-sys-color-outline-variant); border-radius:var(--radius-sm); padding:6px; background:var(--md-sys-color-surface-container-low); text-align:center;">
+                  <svg aria-hidden="true" viewBox="0 0 260 44" style="width:100%; height:36px; display:block;">
+                    <defs>
+                      <marker id="fx-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+                        <path d="M0,0 L6,3 L0,6 z" fill="currentColor"/>
+                      </marker>
+                    </defs>
+                    <g fill="none" stroke="currentColor" stroke-width="1.3" style="color:var(--md-sys-color-on-surface-variant);">
+                      <line x1="6" y1="22" x2="38" y2="22" marker-end="url(#fx-arrow)"/>
+                      <rect x="40" y="10" width="36" height="24" rx="4" fill="var(--md-sys-color-surface)"/>
+                      <line x1="76" y1="22" x2="104" y2="22" marker-end="url(#fx-arrow)"/>
+                      <rect x="106" y="10" width="48" height="24" rx="4" fill="var(--md-sys-color-surface)"/>
+                      <line x1="154" y1="22" x2="182" y2="22" marker-end="url(#fx-arrow)"/>
+                      <rect x="184" y="10" width="36" height="24" rx="4" fill="var(--md-sys-color-surface)"/>
+                      <line x1="220" y1="22" x2="252" y2="22" marker-end="url(#fx-arrow)"/>
+                    </g>
+                    <g font-size="9" font-family="monospace" text-anchor="middle" fill="var(--md-sys-color-on-surface)">
+                      <text x="18" y="16">x[n]</text>
+                      <text x="58" y="25">Q_X</text>
+                      <text x="90" y="16">×Q_C</text>
+                      <text x="130" y="25">Acc Q_A</text>
+                      <text x="202" y="25">Q_Y</text>
+                      <text x="242" y="16">y[n]</text>
+                    </g>
+                  </svg>
+                </div>
+
+                <!-- Q_C: Coefficients -->
+                <div class="row" style="justify-content:space-between; align-items:center;">
+                  <span class="md-section-label" style="margin:0;">Q_C Coefficients</span>
+                  <span id="fx-qc-info" style="font-size:11px; color:var(--md-sys-color-on-surface-variant); font-family:monospace;">W=16b</span>
+                </div>
                 <div class="row" style="gap:var(--space-sm)">
-                  <div class="md-field" style="flex:1">
-                    <input class="md-field__input" type="number" id="inp-coeff-qi" value="2" min="0" step="1">
-                    <label class="md-field__label" for="inp-coeff-qi">QI (int bits)</label>
+                  <div class="md-field" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-coeff-qi" value="2" min="0" max="32" step="1">
+                    <label class="md-field__label" for="inp-coeff-qi">QI</label>
                   </div>
-                  <div class="md-field" style="flex:1">
-                    <input class="md-field__input" type="number" id="inp-coeff-qf" value="13" min="0" step="1">
-                    <label class="md-field__label" for="inp-coeff-qf">QF (frac bits)</label>
+                  <div class="md-field" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-coeff-qf" value="13" min="0" max="48" step="1">
+                    <label class="md-field__label" for="inp-coeff-qf">QF</label>
                   </div>
                 </div>
-                <div class="md-section-label">Signal Quantization</div>
-                <div class="row" style="gap:var(--space-sm)">
-                  <div class="md-field" style="flex:1">
-                    <input class="md-field__input" type="number" id="inp-sig-qi" value="2" min="0" step="1">
-                    <label class="md-field__label" for="inp-sig-qi">QI (int bits)</label>
-                  </div>
-                  <div class="md-field" style="flex:1">
-                    <input class="md-field__input" type="number" id="inp-sig-qf" value="13" min="0" step="1">
-                    <label class="md-field__label" for="inp-sig-qf">QF (frac bits)</label>
-                  </div>
+
+                <!-- Q_X: Input -->
+                <div class="row" style="justify-content:space-between; align-items:center;">
+                  <span class="md-section-label" style="margin:0;">Q_X Input Signal</span>
+                  <span id="fx-qx-info" style="font-size:11px; color:var(--md-sys-color-on-surface-variant); font-family:monospace;">W=16b</span>
                 </div>
-                <div class="row" style="gap:var(--space-md)">
-                  <div class="md-select" style="flex:1">
-                    <select class="md-select__input" id="sel-overflow">
-                      <option value="sat">Saturate</option>
+                <div class="row" style="gap:var(--space-sm)">
+                  <div class="md-field" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-sig-qi" value="0" min="0" max="32" step="1">
+                    <label class="md-field__label" for="inp-sig-qi">QI</label>
+                  </div>
+                  <div class="md-field" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-sig-qf" value="15" min="0" max="48" step="1">
+                    <label class="md-field__label" for="inp-sig-qf">QF</label>
+                  </div>
+                  <div class="md-select" style="flex:1;">
+                    <select class="md-select__input" id="sel-in-ovfl" aria-label="Input Overflow">
+                      <option value="sat">Sat</option>
                       <option value="wrap">Wrap</option>
                     </select>
-                    <label class="md-select__label" for="sel-overflow">Overflow</label>
+                    <label class="md-select__label" for="sel-in-ovfl">Ovfl</label>
                   </div>
-                  <div class="md-select" style="flex:1">
-                    <select class="md-select__input" id="sel-quant">
+                  <div class="md-select" style="flex:1;">
+                    <select class="md-select__input" id="sel-in-quant" aria-label="Input Quantization">
                       <option value="round">Round</option>
                       <option value="floor">Floor</option>
-                      <option value="fix">Fix (toward zero)</option>
+                      <option value="fix">Fix</option>
                       <option value="ceil">Ceil</option>
                       <option value="rint">Rint</option>
                     </select>
-                    <label class="md-select__label" for="sel-quant">Quantization</label>
+                    <label class="md-select__label" for="sel-in-quant">Quant</label>
                   </div>
                 </div>
-                <button class="md-btn md-btn--tonal w-full" id="btn-fixpoint-sim">
+
+                <!-- Q_A: Accumulator -->
+                <div class="row" style="justify-content:space-between; align-items:center;">
+                  <span class="md-section-label" style="margin:0;">Q_A Accumulator</span>
+                  <span id="fx-qa-info" style="font-size:11px; color:var(--md-sys-color-on-surface-variant); font-family:monospace;">Auto</span>
+                </div>
+                <div class="row" style="gap:var(--space-sm)">
+                  <div class="md-select" style="flex:1.1;">
+                    <select class="md-select__input" id="sel-acc-mode" aria-label="Accumulator Sizing Mode">
+                      <option value="auto">Auto (Coeff)</option>
+                      <option value="full">Full (Taps)</option>
+                      <option value="man">Manual</option>
+                    </select>
+                    <label class="md-select__label" for="sel-acc-mode">Mode</label>
+                  </div>
+                  <div class="md-field" style="flex:0.8; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-acc-qi" value="4" min="0" max="64" step="1" disabled>
+                    <label class="md-field__label" for="inp-acc-qi">QI</label>
+                  </div>
+                  <div class="md-field" style="flex:0.8; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-acc-qf" value="28" min="0" max="64" step="1" disabled>
+                    <label class="md-field__label" for="inp-acc-qf">QF</label>
+                  </div>
+                </div>
+                <div class="row" style="gap:var(--space-sm)">
+                  <div class="md-select" style="flex:1;">
+                    <select class="md-select__input" id="sel-acc-ovfl" aria-label="Accumulator Overflow">
+                      <option value="wrap">Wrap</option>
+                      <option value="sat">Sat</option>
+                    </select>
+                    <label class="md-select__label" for="sel-acc-ovfl">Acc Ovfl</label>
+                  </div>
+                  <div class="md-select" style="flex:1;">
+                    <select class="md-select__input" id="sel-acc-quant" aria-label="Accumulator Quantization">
+                      <option value="floor">Floor</option>
+                      <option value="round">Round</option>
+                      <option value="fix">Fix</option>
+                      <option value="ceil">Ceil</option>
+                      <option value="rint">Rint</option>
+                    </select>
+                    <label class="md-select__label" for="sel-acc-quant">Acc Quant</label>
+                  </div>
+                </div>
+
+                <!-- Q_Y: Output -->
+                <div class="row" style="justify-content:space-between; align-items:center;">
+                  <span class="md-section-label" style="margin:0;">Q_Y Output Signal</span>
+                  <label class="md-checkbox" style="font-size:11px;">
+                    <input type="checkbox" id="chk-fx-lock-xy" checked>
+                    <span class="md-checkbox__box"><svg viewBox="0 0 16 16"><polyline points="3 8 7 12 13 4"/></svg></span>
+                    Lock Q_X
+                  </label>
+                </div>
+                <div class="row" style="gap:var(--space-sm)">
+                  <div class="md-field" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-out-qi" value="0" min="0" max="32" step="1" disabled>
+                    <label class="md-field__label" for="inp-out-qi">QI</label>
+                  </div>
+                  <div class="md-field" style="flex:1; margin-bottom:0;">
+                    <input class="md-field__input" type="number" id="inp-out-qf" value="15" min="0" max="48" step="1" disabled>
+                    <label class="md-field__label" for="inp-out-qf">QF</label>
+                  </div>
+                  <div class="md-select" style="flex:1;">
+                    <select class="md-select__input" id="sel-out-ovfl" aria-label="Output Overflow" disabled>
+                      <option value="sat">Sat</option>
+                      <option value="wrap">Wrap</option>
+                    </select>
+                    <label class="md-select__label" for="sel-out-ovfl">Ovfl</label>
+                  </div>
+                  <div class="md-select" style="flex:1;">
+                    <select class="md-select__input" id="sel-out-quant" aria-label="Output Quantization" disabled>
+                      <option value="round">Round</option>
+                      <option value="floor">Floor</option>
+                      <option value="fix">Fix</option>
+                      <option value="ceil">Ceil</option>
+                      <option value="rint">Rint</option>
+                    </select>
+                    <label class="md-select__label" for="sel-out-quant">Quant</label>
+                  </div>
+                </div>
+
+                <!-- Simulation Metrics & Overflows -->
+                <div id="fx-stats-box" style="display:none; padding:8px 10px; border-radius:var(--radius-sm); background:var(--md-sys-color-surface-container-low); font-size:11.5px; line-height:1.5;"></div>
+
+                <button type="button" class="md-btn md-btn--tonal w-full" id="btn-fixpoint-sim">
                   <span class="md-spinner" id="fixpoint-spinner" style="display:none;"></span>
                   Simulate Fixpoint
                 </button>
-                <button class="md-btn md-btn--text w-full mt-sm" id="btn-fixpoint-clear">Clear</button>
+                <div class="row" style="gap:var(--space-sm);">
+                  <button type="button" class="md-btn md-btn--outlined" id="btn-fx-verilog" style="flex:1; font-size:12px;">Verilog HDL</button>
+                  <button type="button" class="md-btn md-btn--text" id="btn-fixpoint-clear" style="flex:0.7; font-size:12px;">Clear</button>
+                </div>
               </div>
+            </div>
+
+            <!-- Design Info & H(f) Verification -->
+            <div class="md-card" id="card-info">
+              <div class="md-card__title">
+                <svg aria-hidden="true" class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                  fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                </svg>
+                Design Info &amp; H(f) Check
+              </div>
+              <div id="info-summary" style="font-size:12px; color:var(--md-sys-color-on-surface-variant); line-height:1.6;">
+                Design a filter to inspect performance and stability.
+              </div>
+              <div class="md-table-wrap mt-sm" id="info-hf-wrap" style="display:none; max-height: 180px; overflow-y: auto; margin-top: var(--space-sm);">
+                <table class="md-table">
+                  <caption class="visually-hidden">Target vs achieved magnitude response</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Band</th>
+                      <th scope="col">Spec</th>
+                      <th scope="col">Actual</th>
+                      <th scope="col">OK</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-info-hf"></tbody>
+                </table>
+              </div>
+              <details class="mt-md" id="info-algo-doc" style="margin-top: var(--space-md); font-size:12px; color:var(--md-sys-color-on-surface-variant);">
+                <summary style="cursor:pointer; font-weight:600; color:var(--md-sys-color-on-surface);">Algorithm &amp; Method Notes</summary>
+                <p id="info-algo-text" style="margin-top:6px; line-height:1.5;">Select and design a filter to read design notes.</p>
+              </details>
             </div>
           </div>
 
@@ -648,7 +920,8 @@
                       style="color: var(--md-sys-color-on-surface); font-weight: 600;">borish127</span></span>
                   <span>Licensed under <span
                       style="color: var(--md-sys-color-on-surface); font-weight: 600;">GPLv3</span></span>
-                  <span style="font-size: 12px; opacity: 0.85;">Runs 100% Client-Side via Pyodide &amp; WebAssembly</span>
+                  <span style="font-size: 12px; opacity: 0.85;">Runs 100% Client-Side via Pyodide &amp;
+                    WebAssembly</span>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: var(--space-sm);">
@@ -684,9 +957,9 @@
                   </a>
                   <a href="https://borish127.com/" target="_blank" rel="noopener noreferrer"
                     class="md-btn md-btn--outlined w-full" style="justify-content: center; text-decoration: none;">
-                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                      style="margin-right: 8px;">
+                    <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round" style="margin-right: 8px;">
                       <rect x="3" y="3" width="7" height="7" rx="1" />
                       <rect x="14" y="3" width="7" height="7" rx="1" />
                       <rect x="14" y="14" width="7" height="7" rx="1" />
@@ -710,11 +983,17 @@
                 </div>
                 <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6;">
                   <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px;">
-                    <li><strong>Select Response Type:</strong> Choose Lowpass (LP), Highpass (HP), Bandpass (BP), Bandstop (BS), or Allpass (AP).</li>
-                    <li><strong>Select Filter Family:</strong> Choose Infinite Impulse Response (IIR) or Finite Impulse Response (FIR).</li>
-                    <li><strong>Choose Design Method:</strong> Select Butterworth, Chebyshev, Elliptic, Bessel, Windowed FIR, or Equiripple.</li>
-                    <li><strong>Configure Specifications:</strong> Set sampling rate (<em>f<sub>s</sub></em>), corner frequencies (<em>f<sub>pb</sub></em>, <em>f<sub>sb</sub></em>), and allowable ripple/attenuation (<em>A<sub>pb</sub></em>, <em>A<sub>sb</sub></em>).</li>
-                    <li><strong>Design &amp; Analyze:</strong> Click <strong>Design Filter</strong> to compute coefficients and explore interactive frequency, pole-zero, and transient plots.</li>
+                    <li><strong>Select Response Type:</strong> Choose Lowpass (LP), Highpass (HP), Bandpass (BP),
+                      Bandstop (BS), or Allpass (AP).</li>
+                    <li><strong>Select Filter Family:</strong> Choose Infinite Impulse Response (IIR) or Finite Impulse
+                      Response (FIR).</li>
+                    <li><strong>Choose Design Method:</strong> Select Butterworth, Chebyshev, Elliptic, Bessel, Windowed
+                      FIR, or Equiripple.</li>
+                    <li><strong>Configure Specifications:</strong> Set sampling rate (<em>f<sub>s</sub></em>), corner
+                      frequencies (<em>f<sub>pb</sub></em>, <em>f<sub>sb</sub></em>), and allowable ripple/attenuation
+                      (<em>A<sub>pb</sub></em>, <em>A<sub>sb</sub></em>).</li>
+                    <li><strong>Design &amp; Analyze:</strong> Click <strong>Design Filter</strong> to compute
+                      coefficients and explore interactive frequency, pole-zero, and transient plots.</li>
                   </ol>
                 </div>
               </div>
@@ -728,22 +1007,32 @@
                   </svg>
                   Filter Algorithms &amp; Methods
                 </div>
-                <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
+                <div
+                  style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6; display: flex; flex-direction: column; gap: 12px;">
                   <div>
-                    <strong style="color: var(--md-sys-color-on-surface); font-size: 13.5px;">IIR (Infinite Impulse Response):</strong>
+                    <strong style="color: var(--md-sys-color-on-surface); font-size: 13.5px;">IIR (Infinite Impulse
+                      Response):</strong>
                     <ul style="margin: 6px 0 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px;">
-                      <li><strong>Butterworth:</strong> Maximally flat passband magnitude with monotonic roll-off. No passband ripple.</li>
-                      <li><strong>Chebyshev Type I:</strong> Equiripple passband with sharper transition roll-off into monotonic stopband.</li>
-                      <li><strong>Chebyshev Type II:</strong> Monotonic passband with equiripple stopband attenuation.</li>
-                      <li><strong>Elliptic (Cauer):</strong> Equiripple in both passband and stopband; achieves steepest cutoff for a given order.</li>
-                      <li><strong>Bessel / Thomson:</strong> Maximally flat group delay with linear phase, preserving transient pulse fidelity.</li>
+                      <li><strong>Butterworth:</strong> Maximally flat passband magnitude with monotonic roll-off. No
+                        passband ripple.</li>
+                      <li><strong>Chebyshev Type I:</strong> Equiripple passband with sharper transition roll-off into
+                        monotonic stopband.</li>
+                      <li><strong>Chebyshev Type II:</strong> Monotonic passband with equiripple stopband attenuation.
+                      </li>
+                      <li><strong>Elliptic (Cauer):</strong> Equiripple in both passband and stopband; achieves steepest
+                        cutoff for a given order.</li>
+                      <li><strong>Bessel / Thomson:</strong> Maximally flat group delay with linear phase, preserving
+                        transient pulse fidelity.</li>
                     </ul>
                   </div>
                   <div>
-                    <strong style="color: var(--md-sys-color-on-surface); font-size: 13.5px;">FIR (Finite Impulse Response):</strong>
+                    <strong style="color: var(--md-sys-color-on-surface); font-size: 13.5px;">FIR (Finite Impulse
+                      Response):</strong>
                     <ul style="margin: 6px 0 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px;">
-                      <li><strong>Windowed FIR (firwin):</strong> Linear-phase FIR using Hamming, Hann, Blackman, Bartlett, Kaiser, or Flat-top windows.</li>
-                      <li><strong>Equiripple (Parks-McClellan / Remez):</strong> Optimal Chebyshev minimax approximation across design bands.</li>
+                      <li><strong>Windowed FIR (firwin):</strong> Linear-phase FIR using Hamming, Hann, Blackman,
+                        Bartlett, Kaiser, or Flat-top windows.</li>
+                      <li><strong>Equiripple (Parks-McClellan / Remez):</strong> Optimal Chebyshev minimax approximation
+                        across design bands.</li>
                       <li><strong>Moving Average:</strong> Linear smoothing filter with uniform tap coefficients.</li>
                       <li><strong>Least-Squares (firls):</strong> Weighted least-squares error minimization.</li>
                     </ul>
@@ -764,12 +1053,17 @@
                 </div>
                 <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6;">
                   <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px;">
-                    <li><strong>Frequency Response:</strong> Magnitude in dB, linear voltage, or power; phase unwrapped or wrapped into [-π, π].</li>
-                    <li><strong>Group &amp; Phase Delay:</strong> Frequency-dependent time delay in sample steps or milliseconds.</li>
-                    <li><strong>Poles &amp; Zeros (z-plane):</strong> Complex roots plotted against the unit circle |z|=1 with automatic stability verification.</li>
+                    <li><strong>Frequency Response:</strong> Magnitude in dB, linear voltage, or power; phase unwrapped
+                      or wrapped into [-π, π].</li>
+                    <li><strong>Group &amp; Phase Delay:</strong> Frequency-dependent time delay in sample steps or
+                      milliseconds.</li>
+                    <li><strong>Poles &amp; Zeros (z-plane):</strong> Complex roots plotted against the unit circle
+                      |z|=1 with automatic stability verification.</li>
                     <li><strong>Time-Domain Transient:</strong> Unit impulse response h[n] and step response s[n].</li>
-                    <li><strong>Custom Stimulus:</strong> Real-time signal generator for evaluating custom mathematical waveforms.</li>
-                    <li><strong>3D Complex Surface:</strong> Full 3D interactive rendering of |H(z)| across the complex z-plane.</li>
+                    <li><strong>Custom Stimulus:</strong> Real-time signal generator for evaluating custom mathematical
+                      waveforms.</li>
+                    <li><strong>3D Complex Surface:</strong> Full 3D interactive rendering of |H(z)| across the complex
+                      z-plane.</li>
                   </ul>
                 </div>
               </div>
@@ -784,9 +1078,12 @@
                   </svg>
                   Fixed-Point &amp; Export Formats
                 </div>
-                <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
+                <div
+                  style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6; display: flex; flex-direction: column; gap: 10px;">
                   <p style="margin: 0;">
-                    Simulate hardware implementation constraints on FPGAs and DSP processors with configurable word lengths (total bits, integer QI, fractional QF), overflow modes (Saturation vs. Wrap), and quantization methods (Round, Floor, Fix, Ceil, Rint).
+                    Simulate hardware implementation constraints on FPGAs and DSP processors with configurable word
+                    lengths (total bits, integer QI, fractional QF), overflow modes (Saturation vs. Wrap), and
+                    quantization methods (Round, Floor, Fix, Ceil, Rint).
                   </p>
                   <div>
                     <strong style="color: var(--md-sys-color-on-surface);">Export Formats:</strong>
@@ -811,22 +1108,34 @@
                   </svg>
                   Frequently Asked Questions
                 </div>
-                <div style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6; display: flex; flex-direction: column; gap: 14px;">
+                <div
+                  style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.6; display: flex; flex-direction: column; gap: 14px;">
                   <div>
-                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">What is PyFDA Web?</strong>
-                    <span>PyFDA Web is a free, web-based digital filter design and signal processing tool that brings the functionality of the Python Filter Design Analysis tool directly into your browser without installation.</span>
+                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">What is
+                      PyFDA Web?</strong>
+                    <span>PyFDA Web is a free, web-based digital filter design and signal processing tool that brings
+                      the functionality of the Python Filter Design Analysis tool directly into your browser without
+                      installation.</span>
                   </div>
                   <div>
-                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">How does it run Python algorithms in the browser?</strong>
-                    <span>All signal processing calculations execute 100% locally on your computer using Pyodide (Python compiled to WebAssembly) with native NumPy and SciPy libraries, ensuring zero server latency and complete data privacy.</span>
+                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">How does
+                      it run Python algorithms in the browser?</strong>
+                    <span>All signal processing calculations execute 100% locally on your computer using Pyodide (Python
+                      compiled to WebAssembly) with native NumPy and SciPy libraries, ensuring zero server latency and
+                      complete data privacy.</span>
                   </div>
                   <div>
-                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">What digital filter types can I design?</strong>
-                    <span>You can design Lowpass, Highpass, Bandpass, Bandstop, and Allpass filters using either IIR methods (Butterworth, Chebyshev I &amp; II, Elliptic, Bessel) or FIR methods (Windowed, Equiripple, Moving Average, Least-Squares).</span>
+                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">What
+                      digital filter types can I design?</strong>
+                    <span>You can design Lowpass, Highpass, Bandpass, Bandstop, and Allpass filters using either IIR
+                      methods (Butterworth, Chebyshev I &amp; II, Elliptic, Bessel) or FIR methods (Windowed,
+                      Equiripple, Moving Average, Least-Squares).</span>
                   </div>
                   <div>
-                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">Can I export filter coefficients to MATLAB or Python?</strong>
-                    <span>Yes, designed coefficients can be exported directly to NumPy (.npz), MATLAB (.mat), CSV (.csv), and JSON formats or copied to your clipboard.</span>
+                    <strong style="color: var(--md-sys-color-on-surface); display: block; margin-bottom: 2px;">Can I
+                      export filter coefficients to MATLAB or Python?</strong>
+                    <span>Yes, designed coefficients can be exported directly to NumPy (.npz), MATLAB (.mat), CSV
+                      (.csv), and JSON formats or copied to your clipboard.</span>
                   </div>
                 </div>
               </div>
@@ -868,18 +1177,27 @@
       <!-- Plot Toolbar -->
       <div class="plot-toolbar">
         <nav class="plot-tabs" role="tablist" aria-label="Plot views">
-          <button type="button" class="plot-tab active" id="tab-magnitude" data-tab="magnitude" role="tab" aria-selected="true" aria-controls="plot-magnitude">|H(f)| Magnitude</button>
-          <button type="button" class="plot-tab" id="tab-phase" data-tab="phase" role="tab" aria-selected="false" aria-controls="plot-phase">Phase</button>
-          <button type="button" class="plot-tab" id="tab-group-delay" data-tab="group-delay" role="tab" aria-selected="false" aria-controls="plot-group-delay">Group Delay</button>
-          <button type="button" class="plot-tab" id="tab-phase-delay" data-tab="phase-delay" role="tab" aria-selected="false" aria-controls="plot-phase-delay">Phase Delay</button>
-          <button type="button" class="plot-tab" id="tab-pz" data-tab="pz" role="tab" aria-selected="false" aria-controls="plot-pz">Poles / Zeros</button>
-          <button type="button" class="plot-tab" id="tab-impulse" data-tab="impulse" role="tab" aria-selected="false" aria-controls="plot-impulse">Impulse h[n]</button>
-          <button type="button" class="plot-tab" id="tab-step" data-tab="step" role="tab" aria-selected="false" aria-controls="plot-step">Step</button>
-          <button type="button" class="plot-tab" id="tab-stimulus" data-tab="stimulus" role="tab" aria-selected="false" aria-controls="plot-stimulus">Stimulus</button>
-          <button type="button" class="plot-tab" id="tab-3d" data-tab="3d" role="tab" aria-selected="false" aria-controls="plot-3d">3D |H(z)|</button>
+          <button type="button" class="plot-tab active" id="tab-magnitude" data-tab="magnitude" role="tab"
+            aria-selected="true" aria-controls="plot-magnitude">|H(f)| Magnitude</button>
+          <button type="button" class="plot-tab" id="tab-phase" data-tab="phase" role="tab" aria-selected="false"
+            aria-controls="plot-phase">Phase</button>
+          <button type="button" class="plot-tab" id="tab-group-delay" data-tab="group-delay" role="tab"
+            aria-selected="false" aria-controls="plot-group-delay">Group Delay</button>
+          <button type="button" class="plot-tab" id="tab-phase-delay" data-tab="phase-delay" role="tab"
+            aria-selected="false" aria-controls="plot-phase-delay">Phase Delay</button>
+          <button type="button" class="plot-tab" id="tab-pz" data-tab="pz" role="tab" aria-selected="false"
+            aria-controls="plot-pz">Poles / Zeros</button>
+          <button type="button" class="plot-tab" id="tab-impulse" data-tab="impulse" role="tab" aria-selected="false"
+            aria-controls="plot-impulse">Impulse h[n]</button>
+          <button type="button" class="plot-tab" id="tab-step" data-tab="step" role="tab" aria-selected="false"
+            aria-controls="plot-step">Step</button>
+          <button type="button" class="plot-tab" id="tab-stimulus" data-tab="stimulus" role="tab" aria-selected="false"
+            aria-controls="plot-stimulus">Stimulus</button>
+          <button type="button" class="plot-tab" id="tab-3d" data-tab="3d" role="tab" aria-selected="false"
+            aria-controls="plot-3d">3D |H(z)|</button>
         </nav>
         <div class="plot-toolbar__actions">
-          <!-- Magnitude Scale Selector -->
+          <!-- Essential Primary Controls (Always Compact) -->
           <div class="md-select md-select--small" id="select-mag-scale-container" style="display:none;"
             data-tooltip-bottom="Magnitude Scale">
             <select class="md-select__input" id="sel-mag-scale" aria-label="Magnitude Scale">
@@ -889,7 +1207,11 @@
             </select>
           </div>
 
-          <!-- Phase Unit Selector -->
+          <label class="md-chip" id="chip-show-specs-container" data-tooltip-bottom="Show Specs">
+            <input type="checkbox" id="chk-show-specs" checked class="visually-hidden">
+            <span>Specs</span>
+          </label>
+
           <div class="md-select md-select--small" id="select-phase-unit-container" style="display:none;"
             data-tooltip-bottom="Phase Unit">
             <select class="md-select__input" id="sel-phase-unit" aria-label="Phase Unit">
@@ -898,7 +1220,6 @@
             </select>
           </div>
 
-          <!-- Phase Wrap Selector -->
           <div class="md-select md-select--small" id="select-phase-wrap-container" style="display:none;"
             data-tooltip-bottom="Phase Wrapping">
             <select class="md-select__input" id="sel-phase-wrap" aria-label="Phase Wrapping">
@@ -907,7 +1228,6 @@
             </select>
           </div>
 
-          <!-- Delay Unit Selector -->
           <div class="md-select md-select--small" id="select-delay-unit-container" style="display:none;"
             data-tooltip-bottom="Delay Unit">
             <select class="md-select__input" id="sel-delay-unit" aria-label="Delay Unit">
@@ -916,7 +1236,15 @@
             </select>
           </div>
 
-          <!-- 3D Scale Selector -->
+          <label class="md-chip" id="chip-pz-hf-container" style="display:none;" data-tooltip-bottom="Show |H(f)| around unit circle">
+            <input type="checkbox" id="chk-pz-hf" class="visually-hidden">
+            <span>|H(f)|</span>
+          </label>
+          <label class="md-chip" id="chip-pz-log-container" style="display:none;" data-tooltip-bottom="Logarithmic |H(f)| scale on unit circle">
+            <input type="checkbox" id="chk-pz-log" class="visually-hidden">
+            <span>Log H</span>
+          </label>
+
           <div class="md-select md-select--small" id="select-3d-scale-container" style="display:none;"
             data-tooltip-bottom="3D Z-Axis Scale">
             <select class="md-select__input" id="sel-3d-scale" aria-label="3D Z-Axis Scale">
@@ -925,14 +1253,70 @@
             </select>
           </div>
 
-          <label class="md-chip" id="chip-show-specs-container" data-tooltip-bottom="Show Specs">
-            <input type="checkbox" id="chk-show-specs" checked class="visually-hidden">
-            <span>Specs</span>
-          </label>
-          <label class="md-chip" id="chip-two-sided-container" data-tooltip-bottom="Two-sided spectrum">
-            <input type="checkbox" id="chk-two-sided" class="visually-hidden">
-            <span>± f</span>
-          </label>
+          <div class="md-select md-select--small" id="select-3d-mode-container" style="display:none;"
+            data-tooltip-bottom="3D Plot Style">
+            <select class="md-select__input" id="sel-3d-mode" aria-label="3D Plot Style">
+              <option value="surface">Surface</option>
+              <option value="mesh">Wireframe</option>
+              <option value="contour">Contour 2D</option>
+            </select>
+          </div>
+
+          <!-- Secondary Options Dropdown -->
+          <div class="plot-more-wrap" id="plot-more-wrap">
+            <button type="button" class="md-btn md-btn--outlined plot-more-btn" id="btn-plot-more"
+              aria-expanded="false" aria-controls="plot-more-popover">
+              Options ▾
+            </button>
+            <div class="plot-more-popover" id="plot-more-popover" hidden>
+              <div class="plot-more-row" id="select-hf-qty-container">
+                <label class="plot-more-label" for="sel-hf-qty">Component</label>
+                <div class="md-select md-select--small">
+                  <select class="md-select__input" id="sel-hf-qty" aria-label="H(f) Quantity">
+                    <option value="mag">|H|</option>
+                    <option value="re">Re{H}</option>
+                    <option value="im">Im{H}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="plot-more-row" id="select-inset-container">
+                <label class="plot-more-label" for="sel-hf-inset">Zoom Inset</label>
+                <div class="md-select md-select--small">
+                  <select class="md-select__input" id="sel-hf-inset" aria-label="Inset Zoom">
+                    <option value="off">Off</option>
+                    <option value="passband">Passband</option>
+                    <option value="stopband">Stopband</option>
+                  </select>
+                </div>
+              </div>
+
+              <label class="plot-more-check" id="chip-zero-phase-container">
+                <input type="checkbox" id="chk-zero-phase">
+                <span>Zero-phase FIR amplitude</span>
+              </label>
+
+              <label class="plot-more-check" id="chip-phase-overlay-container">
+                <input type="checkbox" id="chk-phase-overlay">
+                <span>Overlay Phase (+φ)</span>
+              </label>
+
+              <label class="plot-more-check" id="chip-two-sided-container">
+                <input type="checkbox" id="chk-two-sided">
+                <span>Two-sided spectrum (± f)</span>
+              </label>
+
+              <label class="plot-more-check" id="chip-3d-polar-container">
+                <input type="checkbox" id="chk-3d-polar" checked>
+                <span>Show Unit Circle</span>
+              </label>
+
+              <label class="plot-more-check" id="chip-3d-light-container">
+                <input type="checkbox" id="chk-3d-light" checked>
+                <span>Surface Lighting</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -945,8 +1329,10 @@
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
           </svg>
           <h2 class="plot-empty-state__title">Digital Filter Design &amp; Analysis</h2>
-          <p class="plot-empty-state__text-desktop">Configure specifications in the sidebar and click <strong>Design Filter</strong> to generate interactive plots.</p>
-          <p class="plot-empty-state__text-mobile">Tap the menu icon (&equiv;) to configure specifications and design a filter.</p>
+          <p class="plot-empty-state__text-desktop">Configure specifications in the sidebar and click <strong>Design
+              Filter</strong> to generate interactive plots.</p>
+          <p class="plot-empty-state__text-mobile">Tap the menu icon (&equiv;) to configure specifications and design a
+            filter.</p>
         </div>
 
         <div class="plot-panel active" id="plot-magnitude" role="tabpanel" aria-labelledby="tab-magnitude"></div>
@@ -957,18 +1343,83 @@
         <div class="plot-panel" id="plot-impulse" role="tabpanel" aria-labelledby="tab-impulse"></div>
         <div class="plot-panel" id="plot-step" role="tabpanel" aria-labelledby="tab-step"></div>
         <div class="plot-panel" id="plot-stimulus" role="tabpanel" aria-labelledby="tab-stimulus">
-          <div style="padding: var(--space-md);">
-            <div class="md-field">
-              <input class="md-field__input" type="text" id="inp-stimulus" value="sin(2*pi*n*1000/fs)"
-                placeholder="e.g. sin(2*pi*n*1000/fs)">
-              <label class="md-field__label" for="inp-stimulus">Stimulus Expression</label>
+          <div class="stim-controls">
+            <div class="stim-row">
+              <div class="md-select md-select--small" style="min-width:110px;">
+                <select class="md-select__input" id="sel-stim-domain" aria-label="Stimulus Domain">
+                  <option value="time">Time Domain</option>
+                  <option value="fft">Frequency (FFT)</option>
+                </select>
+              </div>
+              <div class="md-select md-select--small" style="min-width:120px;">
+                <select class="md-select__input" id="sel-stim-type" aria-label="Waveform Type">
+                  <option value="sine">Sine</option>
+                  <option value="impulse">Impulse</option>
+                  <option value="step">Step</option>
+                  <option value="rect">Square / Rect</option>
+                  <option value="sawtooth">Sawtooth</option>
+                  <option value="chirp">Chirp Sweep</option>
+                  <option value="custom">Custom Expr</option>
+                </select>
+              </div>
+              <div class="md-select md-select--small" style="min-width:105px;">
+                <select class="md-select__input" id="sel-stim-noise" aria-label="Noise Type">
+                  <option value="none">No Noise</option>
+                  <option value="gauss">Gauss Noise</option>
+                  <option value="uniform">Uniform Noise</option>
+                  <option value="prbs">PRBS</option>
+                </select>
+              </div>
+              <div class="md-select md-select--small" style="min-width:115px;">
+                <select class="md-select__input" id="sel-stim-win" aria-label="FFT Window">
+                  <option value="rectangular">Win: Rect</option>
+                  <option value="hann">Win: Hann</option>
+                  <option value="hamming">Win: Hamming</option>
+                  <option value="blackman">Win: Blackman</option>
+                  <option value="flattop">Win: Flattop</option>
+                  <option value="bartlett">Win: Bartlett</option>
+                  <option value="kaiser">Win: Kaiser</option>
+                </select>
+              </div>
+              <label class="md-chip" title="Bandlimit signal harmonics"><input type="checkbox" id="chk-stim-bl" class="visually-hidden"><span>BL</span></label>
+              <label class="md-chip" title="Logarithmic dB amplitude"><input type="checkbox" id="chk-stim-db" class="visually-hidden"><span>dB</span></label>
+              <label class="md-chip" title="Plot quantization error y - y_q"><input type="checkbox" id="chk-stim-err" class="visually-hidden"><span>Err</span></label>
+              <label class="md-chip" title="Stem markers in time domain"><input type="checkbox" id="chk-stim-stem" class="visually-hidden"><span>Stem</span></label>
             </div>
-            <button type="button" class="md-btn md-btn--tonal mt-md" id="btn-stimulus-run">Run Stimulus</button>
+            <div class="stim-row">
+              <label class="stim-mini-field"><span>A1</span><input type="number" id="inp-stim-amp" value="1" step="any"></label>
+              <label class="stim-mini-field"><span>f1</span><input type="number" id="inp-stim-f1" value="1000" step="any"></label>
+              <label class="stim-mini-field"><span>φ1°</span><input type="number" id="inp-stim-phi" value="0" step="any"></label>
+              <label class="stim-mini-field"><span>DC</span><input type="number" id="inp-stim-dc" value="0" step="any"></label>
+              <label class="stim-mini-field"><span>Noise σ</span><input type="number" id="inp-stim-noise-std" value="0.1" min="0" step="any"></label>
+              <label class="stim-mini-field"><span>N0</span><input type="number" id="inp-stim-n0" value="0" min="0" step="1"></label>
+              <label class="stim-mini-field"><span>N</span><input type="number" id="inp-stim-n" value="256" min="16" max="8192" step="16"></label>
+              <label class="stim-mini-field"><span>dBmin</span><input type="number" id="inp-stim-dbmin" value="-100" max="0" step="10"></label>
+              <div class="md-field stim-expr-field" id="field-stim-expr" style="display:none;">
+                <input class="md-field__input" type="text" id="inp-stimulus" value="sin(2*pi*n*1000/fs)" placeholder="e.g. sin(2*pi*n*1000/fs)">
+                <label class="md-field__label" for="inp-stimulus">Expression</label>
+              </div>
+              <button type="button" class="md-btn md-btn--tonal" id="btn-stimulus-run" style="min-height:32px; padding:4px 12px;">Run Stimulus</button>
+            </div>
+            <div id="stim-metrics" class="stim-metrics"></div>
           </div>
-          <div id="plot-stimulus-chart" style="flex:1;"></div>
+          <div id="plot-stimulus-chart" style="flex:1; min-height:0;"></div>
         </div>
         <div class="plot-panel" id="plot-3d" role="tabpanel" aria-labelledby="tab-3d"></div>
       </div>
+
+      <!-- Collapsible Status Logger Drawer -->
+      <section class="logger-drawer" id="logger-drawer" aria-label="Event Logger">
+        <div class="logger-header">
+          <button type="button" class="logger-toggle" id="btn-logger-toggle" aria-expanded="false">
+            <span id="logger-chevron">▲</span> Log Console <span class="logger-badge" id="logger-count">0</span>
+          </button>
+          <span class="top-bar__spacer"></span>
+          <button type="button" class="md-btn md-btn--text logger-action-btn" id="btn-logger-copy">Copy</button>
+          <button type="button" class="md-btn md-btn--text logger-action-btn" id="btn-logger-clear">Clear</button>
+        </div>
+        <div class="logger-body" id="logger-entries" role="log" aria-live="polite"></div>
+      </section>
     </main>
 
   </div><!-- /app-shell -->
@@ -976,7 +1427,8 @@
   <!-- ================= Export Modal ================= -->
   <dialog class="md-modal" id="export-modal" closedby="any" aria-labelledby="export-modal-title">
     <div class="md-card__title" id="export-modal-title" style="margin-bottom:var(--space-lg);">
-      <svg aria-hidden="true" class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+      <svg aria-hidden="true" class="md-card__title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+        fill="currentColor">
         <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
       </svg>
       Export Filter
@@ -988,28 +1440,32 @@
     <div class="md-section-label">Choose format</div>
     <div class="col gap-md mt-md">
       <button type="button" class="md-btn md-btn--tonal w-full" data-export-fmt="npz">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
         NumPy (.npz)
       </button>
       <button type="button" class="md-btn md-btn--tonal w-full" data-export-fmt="csv">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
         CSV (.csv)
       </button>
       <button type="button" class="md-btn md-btn--tonal w-full" data-export-fmt="mat">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
         MATLAB (.mat)
       </button>
       <button type="button" class="md-btn md-btn--tonal w-full" data-export-fmt="json">
-        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2">
           <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
           <polyline points="14 2 14 8 20 8" />
         </svg>
@@ -1017,6 +1473,21 @@
       </button>
     </div>
     <button type="button" class="md-btn md-btn--text w-full mt-md" id="export-modal-close">Cancel</button>
+  </dialog>
+
+  <!-- ================= Verilog HDL Modal ================= -->
+  <dialog class="md-modal" id="verilog-modal" closedby="any" aria-labelledby="verilog-modal-title" style="max-width:680px; width:92vw;">
+    <div class="md-card__title" id="verilog-modal-title" style="margin-bottom:var(--space-md);">
+      Verilog HDL Netlist
+      <span class="top-bar__spacer"></span>
+      <span id="verilog-topo-badge" style="font-size:12px; color:var(--md-sys-color-primary);"></span>
+    </div>
+    <pre id="verilog-code" style="max-height:52dvh; overflow:auto; padding:12px; border-radius:var(--radius-sm); background:var(--md-sys-color-surface-container-low); font-size:12px; line-height:1.45; margin:0 0 var(--space-md) 0;"></pre>
+    <div class="row" style="gap:var(--space-sm);">
+      <button type="button" class="md-btn md-btn--tonal" id="btn-verilog-copy" style="flex:1;">Copy Verilog</button>
+      <button type="button" class="md-btn md-btn--outlined" id="btn-verilog-download" style="flex:1;">Download .v</button>
+      <button type="button" class="md-btn md-btn--text" id="verilog-modal-close">Close</button>
+    </div>
   </dialog>
 
   <!-- Toast Container -->
@@ -1041,6 +1512,7 @@
   <script src="js/ui/input-coeffs.js" defer></script>
   <script src="js/ui/input-pz.js" defer></script>
   <script src="js/ui/fixpoint-panel.js" defer></script>
+  <script src="js/ui/info-panel.js" defer></script>
   <script src="js/plots/plot-manager.js" defer></script>
   <script src="js/plots/plot-hf.js" defer></script>
   <script src="js/plots/plot-grp-delay.js" defer></script>
